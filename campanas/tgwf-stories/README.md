@@ -6,6 +6,7 @@ Mini campaña de lanzamiento para stories de Instagram de **TGWF · To Go With F
 - `salida/`: lo que se publica.
   - `tgwf-stories.mp4`: vídeo de 28,7 s, 1080×1920.
   - `story-1-gancho.mp4`, `story-2-como-funciona.mp4`, `story-3-cierre.mp4`: el mismo vídeo en tres stories.
+  - `tgwf-beta-story.mp4`: story especial de beta que lleva al formulario.
   - `estaticos/`: carrusel 4:5, post 1:1, stories para encuesta y etiqueta, y banners.
 - `video/`: el proyecto de Remotion que genera todo.
   - Incluye las skills oficiales de Remotion en `.agents/skills`.

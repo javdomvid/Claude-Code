@@ -24,7 +24,7 @@ Esto es lo que la app hace hoy, sacado del repositorio `javdomvid/tgwf-app` y de
 | **Sitio al azar** con «Otro» o «Tachar» | Botón de dado en el Tour | «Y si no os ponéis de acuerdo: que decida la app» |
 | **Panel** con tachados, quedadas y **días sin quedar** | «Hola, Lola. Te quedan 7 sitios por tachar.» | El empujón: «Sí: cuenta los días que lleváis sin quedar» |
 | **Tarjeta para compartir** en Instagram o WhatsApp | «Comparte tu resumen» | Contenido de seguimiento (UGC), ver el calendario |
-| Acceso **por invitación**: tu DNI es tu Instagram | «¿No sales? Escríbele a @javdomvid» | La llamada a la acción: DM con la palabra TOUR |
+| Acceso **por invitación**: tu DNI es tu Instagram | «¿No sales? Apúntate a la lista de espera» | La llamada a la acción: el formulario de la beta (`javdomvid.com/tgwfapp/beta`), por orden de llegada |
 
 Todos los datos que salen en las piezas son los inventados del modo demo (Lola, Nico, Vera, Álex y los sitios de Barcelona). No aparece ningún dato real de nadie.
 
@@ -44,7 +44,7 @@ Todos los datos que salen en las piezas son los inventados del modo demo (Lola, 
 3. **Producto:** TGWF, «listas de sitios con tu gente».
 4. **Cómo funciona,** en tres pasos y con la app real: lista, quedada, tachado.
 5. **Empujón:** «cuenta los días que lleváis sin quedar».
-6. **Promesa y acción:** «Quedáis. Vais. Tacháis.» + demo + DM «TOUR».
+6. **Promesa y acción:** «Quedáis. Vais. Tacháis.» + «Estamos en beta: pide tu Tour» en el formulario.
 
 **Tono:** el del grupo de WhatsApp. Habla de vosotros (quedáis, vais, tacháis), con frases cortas y humor de reconocimiento, sin vender. La coletilla «…or somebody else» abre la puerta a usarla en pareja o con quien sea, sin explicarlo.
 
@@ -80,7 +80,7 @@ Todos los datos que salen en las piezas son los inventados del modo demo (Lola, 
 | 16,0–19,4 s | Paso 3: se tachan tres sitios y el contador sube de 8/18 a 11/18 | El momento satisfactorio |
 | 19,4–21,7 s | Sitio al azar: la ruleta se para en «Clip» con «Otro» y «Tachar» | Función diferencial |
 | 21,7–24,7 s | Panel: «Hola, Lola. Te quedan 7 sitios por tachar.» y «3 días sin quedar» | Empujón |
-| 24,7–28,7 s | «Quedáis. Vais. Tacháis.», demo y DM «TOUR» | Acción |
+| 24,7–28,7 s | «Quedáis. Vais. Tacháis.» y «Estamos en beta · pide tu Tour» con el enlace al formulario | Acción |
 
 **Archivos** (en `salida/`):
 - `tgwf-stories.mp4`: vídeo completo, 1080×1920, 30 fps, sin audio.
@@ -113,7 +113,7 @@ Todos los datos que salen en las piezas son los inventados del modo demo (Lola, 
 | 0 (víspera) | Story con encuesta + story para etiquetar | Stories | Encuesta: «Menos de 5» / «He perdido la cuenta». Calienta y te dice cuánta gente tiene el problema |
 | 1 | Las 3 stories del vídeo seguidas | Stories | Sticker de enlace a la demo en la tercera, en la franja libre del centro |
 | 1 (tarde) | Carrusel | Feed | Pie de foto abajo. Primera hora de la tarde o noche, según tus mejores horas |
-| 2 | Comparte respuestas de la encuesta y de los DM (con permiso) | Stories | La prueba social de que el problema es común |
+| 2 | Story de beta (`tgwf-beta-story.mp4` o `Story-beta.png`) + respuestas de la encuesta (con permiso) | Stories | Sticker de enlace al formulario. La prueba social de que el problema es común |
 | 3 | Post de la lista | Feed o story | Recordatorio corto con «¿Este finde?» |
 | 4–7 | Quedadas reales de un grupo piloto con la tarjeta «Comparte tu resumen» | Stories | Lo más creíble es ver a gente real tachando |
 | 7 | Destacada «TGWF» en el perfil con todo lo anterior | Perfil | Para quien llegue más tarde |
@@ -128,12 +128,12 @@ Todos los datos que salen en las piezas son los inventados del modo demo (Lola, 
 > ¿Cuántos «tenemos que ir» tenéis pendientes en el grupo? 🙃
 > TGWF es una lista de sitios que compartes con tus amigos. Quedáis, lo apuntáis y lo tacháis. La lista, el mapa y el historial, al día para todos (y sí, cuenta los días que lleváis sin quedar).
 > Pruébala en modo demo: javdomvid.com/tgwfapp
-> ¿Queréis el vuestro? Escribidme TOUR por DM.
+> Estamos en beta: pedid vuestro Tour en javdomvid.com/tgwfapp/beta y os lo creamos por orden de llegada.
 
-**Respuesta al DM «TOUR»:**
-> ¡Hecho! Pásame los @ de tu grupo (y la ciudad) y os creo el Tour. Mientras, podéis curiosear la demo: javdomvid.com/tgwfapp/?demo
+**Si alguien escribe por DM igualmente:**
+> ¡Gracias! Estamos en beta y vamos por orden de llegada: apúntate aquí y te escribo cuando esté tu Tour → javdomvid.com/tgwfapp/beta
 
-**Texto encima del sticker de enlace** (story 3): «Pruébala aquí».
+**Texto encima del sticker de enlace** (story 3 y story de beta): «Pide tu Tour aquí».
 
 **Nombre de la destacada:** «TGWF» o «Tacháis».
 
@@ -146,7 +146,7 @@ Todos los datos que salen en las piezas son los inventados del modo demo (Lola, 
 | Salidas en la story 1 | Estadísticas de la story | Menos del 15 % de salidas: el gancho funciona |
 | Toques en el sticker de enlace | Estadísticas de la story 3 | Más del 3 % de quien la ve |
 | Respuestas a la encuesta | Story del día 0 | Cuantas más, mejor: es audiencia que se identifica |
-| DM con «TOUR» | Bandeja de Instagram | Cada uno es un grupo potencial |
+| Solicitudes en el formulario | Lista de espera (te la resumo yo) | Cada una es un grupo; el campo «¿cómo nos has conocido?» dice qué pieza funciona mejor |
 | Tours nuevos creados | La propia app | El resultado de verdad |
 | Guardados y compartidos del carrusel | Estadísticas del post | Si se comparte entre amigos, el mensaje ha calado |
 
@@ -160,7 +160,7 @@ PENDIENTE: confirmar si la app registra de alguna forma las visitas a la demo. S
   - (C) abrir con «22 sitios pendientes».
 
   Cambiar el gancho es tocar una línea de código y volver a renderizar.
-- **Llamada a la acción:** solo la demo, solo el DM o las dos (como ahora). Voto por las dos: la demo es para curiosos y el DM, para grupos que ya quieren el suyo.
+- **Llamada a la acción:** el formulario de la beta como acción principal y la demo como secundaria, para curiosos. Lo cambiaste del DM al formulario el 23-nov: así cada petición queda ordenada, con sus datos completos, y no se pierde en la bandeja.
 - **Cuenta:** publicar desde `@javdomvid` o abrir una cuenta propia de la app. Voto por **@javdomvid** de momento, por dos razones: ahí está ya el público, y el acceso por invitación pasa por ti. Tiene vuelta atrás: más adelante se puede abrir una cuenta y reutilizar todas las piezas.
 
 ## 10. Lo que haría un equipo profesional además de esto
@@ -173,7 +173,7 @@ PENDIENTE: confirmar si la app registra de alguna forma las visitas a la demo. S
 ## 11. Pendiente de confirmar
 
 - PENDIENTE: confirmar que `javdomvid.com/tgwfapp/?demo` está abierto al público y funciona en móvil, sin entrar.
-- PENDIENTE: confirmar que quieres recibir peticiones por DM con la palabra «TOUR» (o elegir otra).
+- PENDIENTE: el formulario solo existe cuando se publique la rama `claude/beta-solicitudes` de `tgwf-app`. No subas las piezas con el enlace hasta entonces.
 - PENDIENTE: el nombre de la app es provisional según `config.js`. Si cambia, se edita `video/src/brand.ts` y los textos, y se vuelve a renderizar todo.
 - PENDIENTE: en el vídeo, el botón de la ruleta dice «Tachar», como en la app. Si cambias ese texto en la app, se cambia aquí también.
 
@@ -193,3 +193,25 @@ PENDIENTE: confirmar si la app registra de alguna forma las visitas a la demo. S
   - En un ordenador normal basta con `npx remotion render TGWFStories` y `node render-stills.mjs`.
 - **Fuentes:** están en `video/public/fonts`, descargadas de Google Fonts con licencia OFL, para que el render no dependa de internet.
 - **Licencia de Remotion:** es gratis para particulares y equipos de hasta 3 personas.
+
+## 13. Story especial: «Estamos en beta, pide tu Tour»
+
+**En una frase:** una story de 13,6 s que explica que la app está en beta y lleva al formulario, donde los Tours se crean por orden de llegada.
+
+| Tiempo | Escena |
+|---|---|
+| 0,0–3,0 s | «TGWF está en BETA». El tachón cruza el logo. |
+| 3,0–6,6 s | «¿Quieres uno con tus amigos?» y una tarjeta de Tour que se va llenando: Tú × Nico × Vera × Álex. |
+| 6,6–10,1 s | «Rellena el formulario»: Instagram, amigos y ciudad. «Y lo creamos por orden de llegada»: nº 1, nº 2, nº 3, tú. |
+| 10,1–13,6 s | «Pide tu Tour», `javdomvid.com/tgwfapp/beta` y la franja libre para el sticker de enlace. |
+
+**Archivos:**
+- `salida/tgwf-beta-story.mp4`: el vídeo.
+- `salida/estaticos/Story-beta.png`: la versión estática. La de `-guia` marca dónde va el sticker.
+- `salida/estaticos/OG-beta.png`: la imagen que se ve al compartir el enlace del formulario por WhatsApp o DM. Ya está dentro de la página.
+
+**El formulario y lo que pasa después** están en el repositorio de la app (`netlify/tgwf/SOLICITUDES.md`):
+1. Yo leo la lista y te la resumo por orden de llegada.
+2. Tú me dices a cuáles das luz verde.
+3. Preparo las altas en un PR y espero tu «publica».
+4. Tú creas las contraseñas en la app y avisas a cada persona.

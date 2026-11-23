@@ -101,11 +101,10 @@ export const CTA: React.FC = () => {
       </div>
 
       <div style={{ position: "absolute", top: 940, left: SAFE.side, right: SAFE.side, opacity: interpolate(frame, [28, 36], [0, 1], clamp) }}>
-        <Label color={C.creamDim}>Pruébala en modo demo</Label>
-        <div style={{ fontFamily: mono, fontWeight: 500, fontSize: 52, marginTop: 10 }}>javdomvid.com/tgwfapp</div>
+        <Label color={C.creamDim}>Estamos en beta · pide tu Tour</Label>
+        <div style={{ fontFamily: mono, fontWeight: 500, fontSize: 50, marginTop: 10 }}>javdomvid.com/tgwfapp/beta</div>
         <div style={{ fontFamily: text, fontSize: 40, lineHeight: 1.3, color: C.creamDim, marginTop: 34, maxWidth: 880 }}>
-          ¿Queréis el vuestro? Escribid <span style={{ color: C.cream, fontWeight: 600 }}>TOUR</span> por DM a{" "}
-          <span style={{ color: C.cream, fontWeight: 600 }}>@javdomvid</span>.
+          Rellenad el formulario y os lo creamos <span style={{ color: C.cream, fontWeight: 600 }}>por orden de llegada</span>.
         </div>
       </div>
 

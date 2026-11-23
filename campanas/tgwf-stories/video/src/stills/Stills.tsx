@@ -3,6 +3,7 @@ import { AbsoluteFill } from "remotion";
 import { C, CAT, display, mono, text } from "../brand";
 import { Avatar, Grain, Label, Phone } from "../components/Bits";
 import { Logo } from "../components/Tachon";
+import { BETA_URL } from "../scenes/Beta";
 
 // Piezas estáticas de la campaña, con el mismo sistema que el vídeo.
 
@@ -161,10 +162,10 @@ const Car5: React.FC = () => (
         <span style={{ color: C.accent }}>Tacháis.</span>
       </Big>
       <div style={{ marginTop: 70 }}>
-        <Label color={C.creamDim}>Pruébala en modo demo</Label>
-        <div style={{ fontFamily: mono, fontWeight: 500, fontSize: 50, marginTop: 10 }}>javdomvid.com/tgwfapp</div>
+        <Label color={C.creamDim}>Estamos en beta · pide tu Tour</Label>
+        <div style={{ fontFamily: mono, fontWeight: 500, fontSize: 50, marginTop: 10 }}>{BETA_URL}</div>
         <div style={{ fontFamily: text, fontSize: 38, color: C.creamDim, marginTop: 30, lineHeight: 1.35 }}>
-          ¿Queréis el vuestro? Escribid <b style={{ color: C.cream }}>TOUR</b> por DM a <b style={{ color: C.cream }}>@javdomvid</b>.
+          Los creamos por orden de llegada. ¿Solo curiosear? <b style={{ color: C.cream }}>javdomvid.com/tgwfapp/?demo</b>
         </div>
       </div>
     </div>
@@ -314,7 +315,51 @@ const BannerCabecera: React.FC = () => (
   </AbsoluteFill>
 );
 
+// ——— Beta: story estática e imagen para compartir el enlace ———
+const StoryBeta: React.FC<{ guia?: boolean }> = ({ guia = true }) => (
+  <AbsoluteFill style={{ background: C.ink, color: C.cream }}>
+    <div style={{ position: "absolute", top: 300, left: 84, right: 84 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+        <Logo size={80} font={display} progress={1} color={C.cream} />
+        <span style={{ fontFamily: mono, fontSize: 28, letterSpacing: "0.12em", textTransform: "uppercase", background: C.cream, color: C.ink, padding: "11px 21px", borderRadius: 999 }}>
+          Beta
+        </span>
+      </div>
+      <Big size={150} color={C.cream} style={{ marginTop: 60 }}>
+        Pide tu <span style={{ color: C.accent }}>Tour.</span>
+      </Big>
+      <div style={{ fontFamily: text, fontSize: 42, lineHeight: 1.32, color: C.creamDim, marginTop: 34 }}>
+        Rellena el formulario y lo creamos por orden de llegada. Te escribimos por Instagram.
+      </div>
+      <div style={{ fontFamily: mono, fontWeight: 500, fontSize: 44, marginTop: 36 }}>{BETA_URL}</div>
+    </div>
+    {guia && <StickerSlot dark top={1180} label="Aquí va el sticker de enlace al formulario" />}
+    <Grain id="sb" opacity={0.1} />
+  </AbsoluteFill>
+);
+
+const OgBeta: React.FC = () => (
+  <AbsoluteFill style={{ background: C.bg, overflow: "hidden" }}>
+    <div style={{ position: "absolute", left: 96, top: 90 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+        <Logo size={150} font={display} progress={1} />
+        <span style={{ fontFamily: mono, fontSize: 26, letterSpacing: "0.12em", textTransform: "uppercase", background: C.ink, color: C.cream, padding: "10px 20px", borderRadius: 999 }}>
+          Beta
+        </span>
+      </div>
+      <Big size={92} style={{ marginTop: 60 }}>
+        Estamos en beta. <span style={{ color: C.ink3 }}>Pide tu Tour.</span>
+      </Big>
+      <div style={{ fontFamily: text, fontSize: 32, color: C.ink2, marginTop: 26 }}>Listas de sitios con tu gente · por orden de llegada</div>
+    </div>
+    <Grain id="ogb" />
+  </AbsoluteFill>
+);
+
 export const STILLS: { id: string; component: React.FC; width: number; height: number }[] = [
+  { id: "Story-beta-guia", component: () => <StoryBeta guia />, width: 1080, height: 1920 },
+  { id: "Story-beta", component: () => <StoryBeta guia={false} />, width: 1080, height: 1920 },
+  { id: "OG-beta", component: OgBeta, width: 1200, height: 630 },
   { id: "Carrusel-1", component: Car1, width: 1080, height: 1350 },
   { id: "Carrusel-2", component: Car2, width: 1080, height: 1350 },
   { id: "Carrusel-3", component: Car3, width: 1080, height: 1350 },
