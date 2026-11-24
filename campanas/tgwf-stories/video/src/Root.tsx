@@ -5,6 +5,7 @@ import { TGWFStories, TOTAL } from "./Video";
 import { STILLS } from "./stills/Stills";
 import { BETA_TOTAL, TGWFBeta } from "./scenes/Beta";
 import { IG_STILLS } from "./stills/Instagram";
+import { IG2_STILLS } from "./stills/Instagram2";
 import { REEL2_FRAMES, REEL3_FRAMES, ReelIdeas, ReelTachar } from "./scenes/Reels";
 
 export const RemotionRoot: React.FC = () => {
@@ -14,7 +15,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="TGWFBeta" component={TGWFBeta} durationInFrames={BETA_TOTAL} fps={FPS} width={W} height={H} />
       <Composition id="ReelTachar" component={ReelTachar} durationInFrames={REEL2_FRAMES} fps={FPS} width={W} height={H} />
       <Composition id="ReelIdeas" component={ReelIdeas} durationInFrames={REEL3_FRAMES} fps={FPS} width={W} height={H} />
-      {[...STILLS, ...IG_STILLS].map((s) => (
+      {[...STILLS, ...IG_STILLS, ...IG2_STILLS].map((s) => (
         <Still key={s.id} id={s.id} component={s.component} width={s.width} height={s.height} />
       ))}
     </>

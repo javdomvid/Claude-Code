@@ -46,9 +46,10 @@ export const Logo: React.FC<{
   size: number;
   progress: number;
   color?: string;
+  strike?: string;
   font: string;
   style?: React.CSSProperties;
-}> = ({ size, progress, color = C.ink, font, style }) => {
+}> = ({ size, progress, color = C.ink, strike = C.accent, font, style }) => {
   const width = size * 2.45;
   return (
     <div style={{ position: "relative", width, height: size * 0.95, ...style }}>
@@ -69,6 +70,7 @@ export const Logo: React.FC<{
         height={size * 0.42}
         stroke={size * 0.11}
         progress={progress}
+        color={strike}
         style={{ left: -width * 0.06, top: size * 0.3 }}
       />
     </div>

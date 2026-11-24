@@ -121,3 +121,53 @@ Para medir:
 - Datos de ejemplo siempre: Lola, Nico, Vera, Álex y los sitios del modo demo. Nunca quedadas ni nombres de gente real sin su permiso.
 - Nada de personas generadas con IA. Si algún día se usan y son realistas, hay que etiquetarlas (AI Act).
 - Antes de anunciar la cuenta, comprueba que el formulario funciona y que está publicado el arreglo de seguridad (PR #7 de la app).
+
+---
+
+## 6. Segunda tanda: perfil, posts sueltos 3:4 y banners de 3
+
+**Fotos de perfil:** 8 variaciones en `5-perfil-variaciones/`.
+
+| Archivo | Cómo es |
+|---|---|
+| `perfil-v1-negro` | TGWF en una línea: fondo negro, letra crema, tachón rojo |
+| `perfil-v2-crema` | Lo mismo al revés: fondo crema, letra negra, tachón rojo |
+| `perfil-v3-rojo` | Fondo rojo, letra crema, tachón negro |
+| `perfil-v4-apilado-negro` | TG / WF en dos líneas, más grande y legible en pequeño |
+| `perfil-v5-apilado-crema` | Apilado, en crema |
+| `perfil-v6-apilado-rojo` | Apilado, en rojo |
+| `perfil-v7-icono-crema` | El icono de la app sobre crema |
+| `perfil-v8-icono-rojo` | El icono sobre rojo |
+
+**Mi voto: la apilada en negro (v4).** En el círculo pequeño del perfil se lee mejor que la de una línea y es la más reconocible. Si prefieres que coincida con el icono del móvil, la del icono (la primera tanda o la v7). Tiene vuelta atrás: se cambia cuando quieras.
+
+**Posts sueltos 3:4** (1080×1440), en `6-posts-3x4/`. Son para las semanas siguientes. Súbelos en 3:4: si Instagram te propone 4:5, elige el formato original (PENDIENTE: comprobar en tu app).
+
+| Archivo | Pie de foto propuesto |
+|---|---|
+| `logo-negro` · `logo-crema` · `logo-rojo` | TGWF · To go with friends… …or somebody else. |
+| `icono` | La t de TGWF. Y su tachón. |
+| `tus-guardados` | Tus guardados no son un plan. Una lista compartida, sí. ⏎ Pide vuestro Tour: enlace en la bio. |
+| `todo-a-la-lista` | Bravas, vermut, vinilos, brunch, salas, tiendas. Todo cabe en un Tour. Y todo se tacha. |
+| `cada-quedada` | Cada quedada, un tachón. |
+| `or-somebody-else` | TGWF también es para ir con quien tú quieras: tu pareja, tu compi de piso, tu cita del jueves. |
+
+**Banners de 3** en `7-banners-de-3/`: cuatro series, y cada una forma una fila entera del perfil.
+
+| Serie | Cómo es |
+|---|---|
+| `A-logo-crema` | El logo gigante en crema (la versión 3:4 del de la primera tanda) |
+| `B-logo-negro` | El logo gigante en negro |
+| `C-quedais-vais-tachais` | «Quedáis. · Vais. · Tacháis.», unidas por el trazo rojo |
+| `D-to-go-with-friends` | «To go · with · friends…» en rojo, con «…or somebody else.» |
+
+**Cómo publicar un banner para que quede seguido:**
+1. Sube primero el `1-derecha`, luego el `2-centro` y por último el `3-izquierda`. Instagram pone lo último arriba a la izquierda.
+2. **Solo queda alineado si, antes de subirlo, el número de publicaciones del perfil es múltiplo de 3** (sin contar las fijadas). Si no lo es, publica antes 1 o 2 posts sueltos.
+3. **Pies:** en el `3-izquierda` (el que queda a la izquierda) el pie completo; en los otros dos, uno corto, por ejemplo «TGWF».
+
+**Mi voto para ir rotando:**
+- **Mes 1:** la parrilla de lanzamiento.
+- **Mes 2:** el banner C y 3 posts sueltos.
+- **Mes 3:** el banner D.
+- **El logo negro (B):** para cuando quieras renovar la cabecera fijada.
