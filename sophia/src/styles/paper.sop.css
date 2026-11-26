@@ -122,6 +122,89 @@
     zoom: 1 !important;
   }
 }
+/* Recovered from the V74–V76 base style (A4 pages vs continuous view, floats, captions).
+ * Kept here, in their original cascade position, so pages look exactly as before. */
+.sheet {
+  height: 297mm;
+  min-height: 297mm;
+  display: flex;
+  flex-direction: column;
+}
+.pagecontent {
+  flex: 0 0 auto;
+  display: flow-root;
+}
+.pagefoot {
+  margin-top: auto;
+  padding-top: 8mm;
+}
+.continuous-view #document > .sheet {
+  height: auto;
+  min-height: 0;
+  margin-bottom: 0;
+  box-shadow: none;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.continuous-view #document > .sheet:first-child {
+  padding-top: 12mm;
+}
+.continuous-view #document > .sheet:last-child {
+  padding-bottom: 18mm;
+}
+.continuous-view .sheet:not(:first-child) > .pagehead,
+.continuous-view .sheet:not(:first-child) > .doc-classification,
+.continuous-view .pagefoot {
+  display: none;
+}
+.continuous-view .pagecontent {
+  min-height: 0;
+}
+.continuous-view .sheet .pagecontent {
+  padding-bottom: 0;
+}
+.sheet.layout-overflow {
+  outline: 2px solid #e1a644;
+}
+.pagecontent::after,
+.pagecontent figure::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.pagecontent figcaption {
+  font-size: 11px;
+  color: #536579;
+  text-align: center;
+  margin-top: 6px;
+}
+@media screen {
+  .sheet {
+    transition: box-shadow 0.2s;
+  }
+  .editing .sheet {
+    box-shadow: 0 8px 30px #0008;
+  }
+}
+@media print {
+  .sheet {
+    height: 261mm;
+    min-height: 261mm;
+    display: flex !important;
+  }
+  .continuous-view #document > .sheet {
+    height: 261mm;
+    min-height: 261mm;
+    padding: 0;
+  }
+  .continuous-view .sheet:not(:first-child) > .pagehead {
+    display: grid;
+  }
+  .continuous-view .sheet:not(:first-child) > .doc-classification,
+  .continuous-view .pagefoot {
+    display: flex;
+  }
+}
 .brand {
   height: 9mm;
   text-align: right;

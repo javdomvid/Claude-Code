@@ -148,6 +148,9 @@ SOPHIA.proposals = (() => {
       if (!chosen.length) { err('Select at least one valid operation.'); return; }
       const ok = EditorTransactions.run('Apply proposal ' + (proposal.proposalId || ''), () => {
         for (const c of chosen) {
+          /* Re-resolve by ID: an earlier operation may have replaced this block (the
+             replacement keeps the ID), so several operations can target one block. */
+          if (c.op.targetBlockId) c.target = SOPHIA.ids.find(c.op.targetBlockId) || c.target;
           if (c.op.op === 'replaceBlock') {
             const nodes = [...c.fragment.childNodes];
             const first = nodes.find((n) => n.nodeType === 1);

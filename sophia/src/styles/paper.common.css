@@ -1,0 +1,56 @@
+/* SOPHIA V77 · paper additions shared by SOP and Quick Card (appended to the profile
+ * paper sheet, so Print Studio and history snapshots get them too).
+ * I  · DM Sans is the document font (embedded in the file, see fonts.css).
+ * K  · automatic heading numbers come from data-num (engine), shown with ::before.
+ * J  · .tbc marks (To Be Confirmed); comment highlights never print.
+ * L  · nav.toc (generated contents); page-break marker on screen. */
+#document, .layout-measure-v27 { font-family: "DM Sans", Arial, sans-serif; }
+.sheet { font-family: "DM Sans", Arial, sans-serif; }
+
+/* K · automatic numbering */
+.pagecontent :is(h2, h3, h4)[data-num]::before { content: attr(data-num) "\00a0"; }
+
+/* J · To Be Confirmed marks */
+.pagecontent .tbc, .qc-hero .tbc {
+  background: #fff0c2;
+  box-shadow: inset 0 -2px 0 #d39a1d;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+::highlight(sophia-comment) { background-color: #ece1ff; }
+@media print {
+  .pagecontent .tbc, .qc-hero .tbc { background: none; box-shadow: none; text-decoration: underline dotted #9a5b00; text-underline-offset: 2px; }
+  ::highlight(sophia-comment) { background-color: transparent; }
+}
+
+/* L · generated table of contents */
+.pagecontent nav.toc { margin: 10px 0 18px; padding: 10px 12px; border: 1px solid #c9d3df; border-radius: 4px; background: #f8fafc; break-inside: avoid; }
+.pagecontent nav.toc .toc-title { margin: 0 0 6px; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: #344559; }
+.pagecontent nav.toc .toc-list { list-style: none; margin: 0; padding: 0; columns: 1; }
+.pagecontent nav.toc li { padding: 2px 0; line-height: 1.35; }
+.pagecontent nav.toc li[data-target] { cursor: pointer; }
+.pagecontent nav.toc .toc-l2 { padding-left: 16px; font-size: 0.95em; }
+@media print { .pagecontent nav.toc { background: none; } }
+
+/* L · page-break marker (screen only, while editing) */
+@media screen {
+  body.editing .pagecontent [data-layout-before="page"] { box-shadow: 0 -10px 0 -8px #8a6fc4; }
+  body.editing .pagecontent [data-layout-before="page"]::before {
+    content: "Page break";
+    display: block;
+    margin: -4px 0 6px;
+    font: 600 9px/1 "DM Sans", Arial, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a6fc4;
+  }
+  body.editing .pagecontent :is(h2, h3, h4)[data-layout-before="page"][data-num]::before { content: "Page break · " attr(data-num) "\00a0"; display: inline; }
+  /* show paragraph marks */
+  body.showmarks .pagecontent p::after { content: " \00b6"; color: #83a5bb; }
+  body.showmarks .pagecontent li::after { content: " \00b7"; color: #83a5bb; }
+  body.showmarks .pagecontent :is(h2, h3, h4)::after { content: " \00b6"; color: #83a5bb; font-weight: 400; }
+  /* editable regions: quiet indication instead of dashed boxes */
+  body.editing #document [contenteditable="true"] { outline: 1px dashed transparent; outline-offset: 4px; transition: outline-color 160ms; }
+  body.editing #document [contenteditable="true"]:hover { outline-color: #c6d3e3; }
+  body.editing #document [contenteditable="true"]:focus { outline: 1px solid #b9a6e3; }
+}

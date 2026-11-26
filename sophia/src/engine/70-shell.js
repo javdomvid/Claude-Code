@@ -373,8 +373,8 @@ SOPHIA.ui = (() => {
       const s = document.createElement('select');
       s.setAttribute('aria-label', 'Line spacing');
       s.title = 'Line spacing';
-      s.append(new Option('Spacing', ''));
-      for (const v of ['1', '1.15', '1.5', '2']) s.append(new Option(v + '×', v));
+      s.append(new Option('Line spacing', ''));
+      for (const v of ['1', '1.15', '1.5', '2']) s.append(new Option(v + ' lines', v));
       s.onchange = () => { if (s.value) EditorCommands.paragraph('lineHeight', s.value); s.value = ''; };
       wrap.append(s);
     } else {
@@ -692,7 +692,7 @@ SOPHIA.ui = (() => {
     const seen = new Set();
     const tiles = SHEET.map((t) => ({ ...t, items: t.items.slice() }));
     SHEET.forEach((t) => t.items.forEach((i) => seen.add(i)));
-    const extra = C.all().filter((c) => !seen.has(c.id) && c.label);
+    const extra = C.all().filter((c) => !seen.has(c.id) && c.label && c.group !== 'Home');
     if (extra.length) tiles.push({ name: 'More tools', tone: 'navigate', items: extra.map((c) => c.id) });
     for (const t of tiles) {
       const tile = U.el('section', 'sx-tile');
@@ -758,17 +758,19 @@ SOPHIA.ui = (() => {
     const title = SOPHIA.meta.title();
     titleEl.textContent = title;
     titleEl.title = title + ' · ' + data.id;
-    versionChip.textContent = 'V' + data.documentVersion;
-    versionChip.title = 'Document version V' + data.documentVersion + ' (application SOPHIA ' + SOPHIA.engine + '). Open versions.';
+    const shortStatus = /^publish/i.test(data.status) ? 'Published' : /^draft/i.test(data.status) ? 'Draft' : String(data.status).split(/[\s·-]/)[0];
+    versionChip.replaceChildren(U.el('b', '', 'V' + data.documentVersion), U.el('span', 'sx-chip-sub', shortStatus));
+    versionChip.dataset.status = shortStatus.toLowerCase();
+    versionChip.title = 'Document V' + data.documentVersion + ' · ' + data.status + ' (application SOPHIA ' + SOPHIA.engine + '). Open versions.';
     statusChip.replaceChildren();
     const dot = U.el('span', 'sx-dot');
     dot.setAttribute('aria-hidden', 'true');
     const state = s.pid ? (s.dirty ? 'dirty' : 'editing') : 'read';
     statusChip.dataset.state = state;
     statusChip.dataset.status = String(data.status).toLowerCase();
-    const text = data.status + ' · ' + (s.pid ? (s.dirty ? 'Unsaved · ' + s.pid : 'Editing · ' + s.pid) : SOPHIA.strings.readOnly);
+    const text = s.pid ? (s.dirty ? 'Unsaved · ' + s.pid : 'Editing · ' + s.pid) : SOPHIA.strings.readOnly;
     statusChip.append(dot, U.el('span', '', text), icon('chevron'));
-    statusChip.setAttribute('aria-label', 'Status: ' + text + '. Show details');
+    statusChip.setAttribute('aria-label', 'Status: ' + data.status + ', ' + text + '. Show details');
     editBtn.hidden = !!s.pid;
     saveSplit.hidden = !s.pid;
     saveMain.disabled = !(s.dirty || SOPHIA.migration?.pending);
@@ -813,9 +815,11 @@ SOPHIA.ui = (() => {
   }
   /* App-bar + ribbon height → CSS variable, so the page never hides under them. */
   function layout() {
-    const top = document.body.classList.contains('focusmode') ? 0 : bar.offsetHeight + (ribbon.hidden ? 0 : ribbon.offsetHeight);
+    const focus = document.body.classList.contains('focusmode');
+    const barBottom = focus ? 0 : Math.round(bar.getBoundingClientRect().bottom);
+    const top = focus ? 0 : ribbon.hidden ? barBottom : Math.round(ribbon.getBoundingClientRect().bottom);
+    document.documentElement.style.setProperty('--sx-appbar', barBottom + 'px');
     document.documentElement.style.setProperty('--sx-top', top + 'px');
-    document.documentElement.style.setProperty('--sx-appbar', bar.offsetHeight + 'px');
     document.body.dataset.side = side_.el.hidden ? 'closed' : 'open';
   }
 
@@ -856,6 +860,7 @@ SOPHIA.ui = (() => {
     renderRibbon();
     mounted = true;
     if (zoomLevel !== 1) area.style.zoom = String(zoomLevel);
+    else if (window.innerWidth < 820) requestAnimationFrame(() => { zoom('fit'); pref.set('zoom', '1'); });
     if (!side_.el.hidden) renderSide();
     refresh();
     new ResizeObserver(layout).observe(bar);

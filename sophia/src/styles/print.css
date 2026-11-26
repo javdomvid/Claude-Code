@@ -1,0 +1,12 @@
+/* SOPHIA V77 · print shell — MUST stay the last style element in the file.
+ * Browser printing (menu Print…) shows only #document; Ctrl+P opens Print Studio.
+ * The controlled footer (ID · version · status · printed date · "Uncontrolled copy")
+ * and the DRAFT watermark are injected at print time by 38-print (H). */
+@media print {
+  @page { size: A4; }
+  html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+  body > :not(#document) { display: none !important; }
+  #document { margin: 0 !important; padding: 0 !important; zoom: 1 !important; }
+  #document [data-media-ui], #document .ui-icon { display: none !important; }
+  img, tr { break-inside: avoid; }
+}

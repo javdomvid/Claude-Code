@@ -7,7 +7,7 @@
  *      Current file → only make sure every block has an ID (silent).
  *   2. Heading numbers, header, view (A4 pages / continuous), editability.
  *   3. Interface (70-shell), comment highlights, undo baseline.
- *   4. When DM Sans has loaded, recalculate A4 pages once (font metrics).
+ *   4. When DM Sans has loaded, calculate the A4 pages (font metrics matter).
  * ========================================================================== */
 (() => {
   'use strict';
@@ -34,7 +34,9 @@
 
   let view = 'pages';
   try { view = localStorage.getItem('sophia:pref:view') === 'continuous' ? 'continuous' : 'pages'; } catch {}
-  quiet(() => setDocumentView(view));
+  /* A4 pages are calculated once the embedded font is ready (step 4); until then the
+     document shows as one sheet, which is also its saved form. */
+  if (view === 'continuous') quiet(() => setDocumentView('continuous'));
   setEditable();
   SOPHIA.ui.mount();
   SOPHIA.comments.paint();
@@ -52,13 +54,16 @@
   const settle = () => {
     if (document.body.classList.contains('continuous-view')) return;
     quiet(() => paginateDocument(false));
+    SOPHIA.bus.emit('view-changed', 'pages');
     undoStates.splice(0, undoStates.length, cleanContent());
     undoPosition = 0;
     EditorSession.rebase();
     SOPHIA.bus.emit('outline-changed');
   };
-  if (document.fonts?.status === 'loading') document.fonts.ready.then(settle);
-  else requestAnimationFrame(settle);
+  const fontsReady = document.fonts
+    ? Promise.all([document.fonts.load('14px "DM Sans"'), document.fonts.load('bold 14px "DM Sans"'), document.fonts.load('italic 14px "DM Sans"')]).then(() => document.fonts.ready)
+    : Promise.resolve();
+  Promise.race([fontsReady, new Promise((r) => setTimeout(r, 3000))]).then(() => requestAnimationFrame(settle));
   document.documentElement.dataset.sophiaReady = 'true';
   SOPHIA.bus.emit('ready');
 })();

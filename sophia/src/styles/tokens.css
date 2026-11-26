@@ -1,0 +1,131 @@
+/* SOPHIA V77 · tokens — Obsidian JAOM · Material Expressive Glass.
+ * One place for every colour, radius, shadow and font of the APPLICATION.
+ * The paper (printed page) does not use these: it has its own sheet.
+ * Roles: teal = primary action · lavender = selection · amber = attention / unsaved
+ *        red = error / discard / historical · obsidian canvas by default, light option.
+ * Legacy variables (--jaom55-*, --h35-*, --wb24-*, --app-*, --sophia-*) are kept because
+ * the reused studios (dialogs.css) read them. New code uses --sx-* only. */
+:root {
+  --sx-font: "DM Sans", Arial, sans-serif;
+  /* canvas */
+  --sx-canvas: #0e0e11;
+  --sx-canvas-ink: #e8ebf5;
+  --sx-canvas-muted: #a8b0c6;
+  /* glass (app bar, menus, command sheet) */
+  --sx-glass: linear-gradient(110deg, #e2ebfff2, #eee3fff0);
+  --sx-glass-solid: #eaeefb;
+  --sx-glass-line: #ffffffb8;
+  --sx-glass-blur: blur(18px) saturate(1.25);
+  /* surfaces */
+  --sx-surface: #ffffff;
+  --sx-surface-1: #f6f8fd;
+  --sx-surface-2: #eef2fa;
+  --sx-outline: #d3ddec;
+  --sx-outline-strong: #b6c6e0;
+  --sx-scrim: #080c1c80;
+  /* ink */
+  --sx-ink: #1d2b44;
+  --sx-ink-muted: #4a5a73;
+  --sx-ink-subtle: #5f6f88;
+  /* roles */
+  --sx-primary: #104f60;
+  --sx-primary-hover: #185c70;
+  --sx-on-primary: #ffffff;
+  --sx-tonal: #dfe9f2;
+  --sx-on-tonal: #0f4555;
+  --sx-selected: #e3d5ff;
+  --sx-on-selected: #42256b;
+  --sx-attention: #9a5b00;
+  --sx-attention-container: #fff1d6;
+  --sx-danger: #a02f4c;
+  --sx-danger-container: #fbe7ec;
+  --sx-success: #1f6b4a;
+  --sx-success-container: #e3f4ec;
+  --sx-focus: #5b3fa0;
+  /* bento tones */
+  --sx-tone-navigate: #eaf0ff;
+  --sx-tone-assets: #e6f4f0;
+  --sx-tone-review: #efe8fb;
+  --sx-tone-output: #fbefe2;
+  --sx-tone-save: #e4f1ec;
+  --sx-tone-agent: #f3e7f5;
+  /* shape, depth, motion */
+  --sx-r-xs: 6px;
+  --sx-r-sm: 9px;
+  --sx-r-md: 12px;
+  --sx-r-lg: 16px;
+  --sx-r-xl: 20px;
+  --sx-r-pill: 999px;
+  --sx-elev-1: 0 1px 2px #070d2433, 0 2px 6px #070d241f;
+  --sx-elev-2: 0 6px 22px #090f284d;
+  --sx-elev-3: 0 20px 70px #112c5052;
+  --sx-ease: cubic-bezier(0.2, 0, 0, 1);
+  --sx-dur: 160ms;
+  --sx-control: 36px;
+  --sx-side-w: 300px;
+
+  /* legacy names read by dialogs.css (reused studios) */
+  --app-surface: #eef2fa;
+  --app-accent: #375caa;
+  --app-radius: 16px;
+  --wb24-ink: #193452;
+  --wb24-accent: #315ca8;
+  --wb24-line: #c9d6ec;
+  --wb24-surface: #eef3fc;
+  --h35-ink: #193047;
+  --h35-muted: #496582;
+  --h35-stroke: #c7d7e8;
+  --h35-surface: #f3f6fa;
+  --h35-active: #d5e3fa;
+  --h35-focus: #3263a0;
+  --jaom55-ink: #24354d;
+  --jaom55-line: #cbd8e9;
+  --jaom55-surface: #f5f8fe;
+  --jaom55-focus: #644792;
+  --jaom55-radius: 12px;
+  --jaom-ink: #202e46;
+  --jaom-ink-muted: #4a5a73;
+  --jaom-glass-2-bg: rgba(242, 245, 251, 0.92);
+  --jaom-glass-2-fallback: #f4f6fb;
+  --jaom-glass-border: rgba(255, 255, 255, 0.72);
+  --jaom-outline: #d6e1ee;
+  --jaom-selected: #e3d5ff;
+  --jaom-on-selected: #42256b;
+  --jaom-primary: #104f60;
+  --jaom-on-primary: #fff;
+  --jaom-danger: #a02f4c;
+  --jaom-attention-container: #fff3dc;
+  --jaom-focus: #3b5bdb;
+  --jaom-elev-2: 0 6px 22px #090f284d;
+  --jaom-elev-3: 0 20px 70px #112c5040;
+  --jaom-radius-sm: 9px;
+  --jaom-radius-md: 12px;
+  --jaom-radius-xl: 20px;
+  --jaom-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --jaom-canvas: var(--sx-canvas);
+  --sophia-glass: linear-gradient(110deg, #e2ebfff0, #eee3ffed);
+  --sophia-glass-line: #f7f4ff;
+  --sophia-workbench-dark: #111114;
+  --sophia-workbench-light: #eff1f8;
+  --sophia-selection: #e7dcfa;
+  --sophia-selection-ink: #3d265f;
+}
+body[data-jaom-light] {
+  --sx-canvas: #eef0f6;
+  --sx-canvas-ink: #1d2b44;
+  --sx-canvas-muted: #4a5a73;
+  --sx-elev-2: 0 0 0 1px #26334b20, 0 5px 16px #26334b1c;
+  --jaom-canvas: #fff;
+  --sophia-light-edge: inset 0 0 0 1px #26334b20, 0 0 0 1px #26334b1c;
+  --sophia-light-paper: 0 0 0 1px #26334b20, 0 0 18px #26334b16, 0 9px 28px #26334b25;
+  --sophia-light-panel: 0 0 0 1px #26334b20, 0 5px 16px #26334b1c;
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root { --sx-glass: var(--sx-glass-solid); --sx-glass-blur: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --sx-dur: 0ms; }
+}
+@media (pointer: coarse) {
+  :root { --sx-control: 44px; }
+}

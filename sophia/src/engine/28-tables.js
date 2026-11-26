@@ -508,14 +508,3 @@ window.TableStudio = (() => {
   }
   return Object.freeze({ open });
 })();
-(() => {
-  const toolbar = document.querySelector(".toolbar");
-  toolbar.querySelectorAll("[data-table-studio-v26]").forEach((n) => n.remove());
-  const b = document.createElement("button");
-  b.type = "button";
-  b.dataset.tableStudioV26 = "true";
-  b.dataset.commandV24 = "tables";
-  b.textContent = "Table Studio";
-  b.setAttribute("onclick", "TableStudio.open()");
-  toolbar.append(b);
-})();

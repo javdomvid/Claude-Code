@@ -109,17 +109,17 @@ SOPHIA.persist = (() => {
     packed.format = 'sophia/77';
     const title = SOPHIA.meta.title(zoneRoot);
     const styles = pristine('head > style[data-sophia]').map((s) => '<style data-sophia="' + s.dataset.sophia + '">' + s.textContent + '</style>').join('\n');
-    const docs = pristine('script[data-sophia-doc]').map((s) => '<script type="text/plain" data-sophia-doc="' + s.dataset.sophiaDoc + '" id="' + s.id + '">' + s.textContent + '</script>').join('\n');
-    const modules = pristine('script[data-sophia-module]').map((s) => '<script data-sophia-module="' + s.dataset.sophiaModule + '">' + s.textContent + '</script>').join('\n');
+    const docs = pristine('script[data-sophia-doc]').map((s) => '\x3cscript type="text/plain" data-sophia-doc="' + s.dataset.sophiaDoc + '" id="' + s.id + '">' + s.textContent + '\x3c/script>').join('\n');
+    const modules = pristine('script[data-sophia-module]').map((s) => '\x3cscript data-sophia-module="' + s.dataset.sophiaModule + '">' + s.textContent + '\x3c/script>').join('\n');
     const registry = document.getElementById('sophia-pid-registry')?.textContent || '{}';
     return (
       '<!doctype html>\n<html lang="en" data-profile="' + SOPHIA.profile + '" data-sophia="' + SOPHIA.engine + '">\n<head>\n' +
       '<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
       '<title>' + U.escapeHTML(title) + ' · V' + U.escapeHTML(record.documentVersion) + ' — ' + SOPHIA.strings.profileLabel[SOPHIA.profile] + ' Editor ' + SOPHIA.engine + '</title>\n' +
       styles + '\n</head>\n<body>\n' +
-      '<!-- ===== SOPHIA DOCUMENT ZONE (see #sophia-agent-brief before editing) ===== -->\n' + zone + '\n<!-- ===== END DOCUMENT ZONE ===== -->\n' +
-      '<script type="application/json" id="record">' + U.scriptJSON(packed) + '</script>\n' +
-      '<script type="application/json" id="sophia-pid-registry">' + registry + '</script>\n' +
+      '\x3c!-- ===== SOPHIA DOCUMENT ZONE (see #sophia-agent-brief before editing) ===== -->\n' + zone + '\n\x3c!-- ===== END DOCUMENT ZONE ===== -->\n' +
+      '\x3cscript type="application/json" id="record">' + U.scriptJSON(packed) + '\x3c/script>\n' +
+      '\x3cscript type="application/json" id="sophia-pid-registry">' + registry + '\x3c/script>\n' +
       docs + '\n' + modules + '\n</body>\n</html>\n'
     );
   }

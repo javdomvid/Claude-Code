@@ -281,14 +281,3 @@ window.LayoutStudio = (() => {
   }
   return Object.freeze({ open });
 })();
-(() => {
-  const toolbar = document.querySelector(".toolbar");
-  toolbar.querySelectorAll("[data-layout-studio-v27]").forEach((n) => n.remove());
-  const b = document.createElement("button");
-  b.type = "button";
-  b.dataset.layoutStudioV27 = "true";
-  b.dataset.commandV24 = "layout";
-  b.textContent = "Layout Studio";
-  b.setAttribute("onclick", "LayoutStudio.open()");
-  toolbar.append(b);
-})();

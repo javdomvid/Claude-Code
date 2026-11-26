@@ -1020,7 +1020,11 @@ window.SophiaFlow = (() => {
     ["/", "Insert block (in an empty paragraph)"],
     ["Shift+F10", "Document actions menu"],
     ["Alt+F10", "Quick formatting bar (with a selection)"],
-    ["Alt+↑ / Alt+↓", "Move selected image"],
+    ["Alt+↑ / Alt+↓", "Move the current block (or the selected image)"],
+    ["Ctrl+Alt+M", "Add comment to the current block"],
+    ["Ctrl+Shift+T", "Mark / unmark To Be Confirmed"],
+    ["Ctrl+= / Ctrl+− / Ctrl+0", "Zoom in / out / 100 %"],
+    ["Esc", "Leave focus reading"],
     ["F1 or Ctrl+/", "This help"],
   ];
   let help = null;

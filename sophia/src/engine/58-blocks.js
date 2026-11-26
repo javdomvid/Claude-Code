@@ -20,25 +20,47 @@ SOPHIA.blocks = (() => {
     if (!U.isEditing()) { toast(SOPHIA.strings.startEditingFirst); return; }
     const b = currentTop();
     if (!b) { toast('Place the cursor in the block you want to move.'); return; }
-    const sibling = direction < 0 ? b.previousElementSibling : b.nextElementSibling;
-    let target = sibling, where = direction < 0 ? 'before' : 'after';
+    /* Swap with the neighbour in DOCUMENT order, also across A4 sheets. */
+    let target = direction < 0 ? b.previousElementSibling : b.nextElementSibling;
     if (!target) {
-      const sheets = [...area.querySelectorAll('.sheet')], i = sheets.indexOf(b.closest('.sheet'));
-      const other = sheets[i + direction]?.querySelector('.pagecontent');
-      if (!other) { toast(direction < 0 ? 'Already the first block.' : 'Already the last block.'); return; }
-      target = other;
-      where = direction < 0 ? 'append' : 'prepend';
+      const pcs = [...area.querySelectorAll('.pagecontent')];
+      for (let k = pcs.indexOf(b.parentElement) + direction; !target && k >= 0 && k < pcs.length; k += direction)
+        target = direction < 0 ? pcs[k].lastElementChild : pcs[k].firstElementChild;
+      if (!target) { toast(direction < 0 ? 'Already the first block.' : 'Already the last block.'); return; }
     }
-    const caret = getSelection().rangeCount ? getSelection().getRangeAt(0).cloneRange() : null;
+    const caret = textOffset(b);
     const ok = EditorTransactions.run(direction < 0 ? 'Move block up' : 'Move block down', () => {
-      if (where === 'before') target.before(b);
-      else if (where === 'after') target.after(b);
-      else target[where](b);
+      if (direction < 0) target.before(b);
+      else target.after(b);
     });
     if (ok) {
       b.scrollIntoView({ block: 'nearest' });
-      if (caret) { try { getSelection().removeAllRanges(); getSelection().addRange(caret); } catch {} }
+      placeCaret(b, caret);
     }
+  }
+  /* The caret stays at the same character inside the moved block (DOM moves collapse ranges). */
+  function textOffset(block) {
+    const s = getSelection();
+    if (!s.rangeCount || !block.contains(s.anchorNode)) return 0;
+    const r = document.createRange();
+    r.selectNodeContents(block);
+    r.setEnd(s.anchorNode, s.anchorOffset);
+    return r.toString().length;
+  }
+  function placeCaret(block, offset) {
+    const w = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+    let left = offset, node = null;
+    while ((node = w.nextNode())) {
+      if (left <= node.nodeValue.length) break;
+      left -= node.nodeValue.length;
+    }
+    const r = document.createRange();
+    if (node) r.setStart(node, Math.min(left, node.nodeValue.length));
+    else { r.selectNodeContents(block); r.collapse(true); }
+    r.collapse(true);
+    const s = getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
   }
   /* ---------- style gallery ---------- */
   const STYLES = [
