@@ -51,7 +51,7 @@
     const parsed = new DOMParser().parseFromString(typeof html === "string" ? html : "", "text/html");
     const out = document.createElement("div");
     const allowed = new Set(
-      "ARTICLE SECTION DIV P H1 H2 H3 H4 H5 H6 UL OL LI TABLE THEAD TBODY TFOOT TR TD TH CAPTION COLGROUP COL FIGURE FIGCAPTION IMG SPAN STRONG B EM I U S DEL INS MARK SMALL SUP SUB BR HR BLOCKQUOTE ASIDE A".split(
+      "ARTICLE SECTION DIV P H1 H2 H3 H4 H5 H6 UL OL LI TABLE THEAD TBODY TFOOT TR TD TH CAPTION COLGROUP COL FIGURE FIGCAPTION IMG SPAN STRONG B EM I U S DEL INS MARK SMALL SUP SUB BR HR BLOCKQUOTE ASIDE A NAV".split(
         " ",
       ),
     );
@@ -89,6 +89,11 @@
         "start",
         "data-history-id",
         "data-block-id",
+        /* V77: automatic heading numbers, contents block, page breaks (rendered by paper CSS) */
+        "data-num",
+        "data-sophia-toc",
+        "data-target",
+        "data-layout-before",
       ]) {
         if (node.hasAttribute(name)) n.setAttribute(name, node.getAttribute(name));
       }
@@ -454,7 +459,7 @@
     );
   }
   function fit37() {
-    if (!shell?.isConnected || zoom || view !== "document") return;
+    if (!shell?.isConnected || zoom || view === "text") return;
     const canvas = rootView?.querySelector(".h20-canvas");
     if (canvas) {
       const frame = shell.querySelector(".h20-view");
@@ -511,7 +516,8 @@
       shell.querySelector("[data-watermark]").hidden = !old;
       const historyHost = shell.querySelector("[data-document-host]");
       historyHost.dataset.historical = String(old);
-      historyHost.dataset.labels = String(shell.querySelector("[data-labels]").checked);
+      historyHost.dataset.labels = String(view === "document" && shell.querySelector("[data-labels]").checked);
+      historyHost.dataset.view = view;
       shell.querySelector("[data-heading]").textContent =
         selected < 0
           ? "Latest saved content · cumulative attribution"
@@ -653,7 +659,9 @@
         }
 
       const count = canvas.querySelectorAll(".sheet").length;
-      shell.querySelector("[data-document-host]").hidden = view !== "document";
+      /* "clean": the saved document exactly as it reads and prints — no highlights,
+         no PID/date labels. Historical red and watermark stay (they are on the host). */
+      shell.querySelector("[data-document-host]").hidden = view === "text";
       plain.hidden = view !== "text";
       shell
         .querySelectorAll("[data-view]")
@@ -728,7 +736,7 @@
     shell.dataset.sidebar = "true";
     shell.setAttribute("aria-label", "History Studio");
     shell.innerHTML =
-      '<header aria-label="History controls"><div class="h41-rev"><div class="h37-island h37-ident"><span class="h37-kicker">HISTORY VIEW</span><h2 data-heading>Loading saved history...</h2></div><div class="h37-island h38-revision" role="group" aria-label="Saved revision"><button type="button" data-prev aria-label="Previous revision" title="Previous revision">‹</button><select data-version aria-label="Saved revision"><option value="-1">Latest · all history</option></select><button type="button" data-next aria-label="Next revision" title="Next revision">›</button></div></div><div class="h37-island h38-modes h41-modes" role="group" aria-label="Display mode"><button type="button" data-view="document" aria-pressed="true">Changes view</button><button type="button" data-view="text" aria-pressed="false">Clean text</button></div><div class="h37-island h38-tools h41-tools" role="group" aria-label="View tools"><button type="button" data-sidebar aria-controls="h37-aside" aria-expanded="false">Sidebar</button><select data-zoom aria-label="Document zoom" title="Document zoom"><option value="0" selected>Fit</option><option value="65">65%</option><option value="85">85%</option><option value="100">100%</option><option value="125">125%</option></select><button type="button" data-print42>Print revision</button><button type="button" data-close>Close history</button></div></header><div class="h20-notice" data-warning role="status"></div><div class="h20-body"><aside id="h37-aside" aria-label="Change details" hidden><div class="h20-aside-head"><div class="h41-aside-title"><h3 data-count>Changes</h3><button type="button" data-close-sidebar41 aria-label="Close changes sidebar" title="Close changes sidebar">×</button></div><div class="h37-options"><label>Find a change<input type="search" data-query placeholder="Text, section or PID"></label><label>Recorded author<select data-pid><option value="">All authors</option></select></label><label class="h20-check"><input type="checkbox" data-deleted>Include previous / deleted text</label></div><label class="h20-check"><input type="checkbox" data-labels checked>Show PID labels</label><p data-reason></p></div><ul data-changes></ul></aside><section class="h20-view" aria-label="Saved snapshot"><div class="h20-document-scroll" tabindex="0" aria-label="Scroll saved snapshot"><div data-document-host></div><div data-plain hidden></div></div><div class="h37-watermark" data-watermark aria-hidden="true" hidden><span>HISTORICAL VERSION</span></div></section></div><div data-status role="status"></div>';
+      '<header aria-label="History controls"><div class="h41-rev"><div class="h37-island h37-ident"><span class="h37-kicker">HISTORY VIEW</span><h2 data-heading>Loading saved history...</h2></div><div class="h37-island h38-revision" role="group" aria-label="Saved revision"><button type="button" data-prev aria-label="Previous revision" title="Previous revision">‹</button><select data-version aria-label="Saved revision"><option value="-1">Latest · all history</option></select><button type="button" data-next aria-label="Next revision" title="Next revision">›</button></div></div><div class="h37-island h38-modes h41-modes" role="group" aria-label="Display mode"><button type="button" data-view="document" aria-pressed="true">Highlight changes</button><button type="button" data-view="clean" aria-pressed="false">Clean text</button></div><div class="h37-island h38-tools h41-tools" role="group" aria-label="View tools"><button type="button" data-sidebar aria-controls="h37-aside" aria-expanded="false">Sidebar</button><select data-zoom aria-label="Document zoom" title="Document zoom"><option value="0" selected>Fit</option><option value="65">65%</option><option value="85">85%</option><option value="100">100%</option><option value="125">125%</option></select><button type="button" data-print42>Print revision</button><button type="button" data-close>Close history</button></div></header><div class="h20-notice" data-warning role="status"></div><div class="h20-body"><aside id="h37-aside" aria-label="Change details" hidden><div class="h20-aside-head"><div class="h41-aside-title"><h3 data-count>Changes</h3><button type="button" data-close-sidebar41 aria-label="Close changes sidebar" title="Close changes sidebar">×</button></div><div class="h37-options"><label>Find a change<input type="search" data-query placeholder="Text, section or PID"></label><label>Recorded author<select data-pid><option value="">All authors</option></select></label><label class="h20-check"><input type="checkbox" data-deleted>Include previous / deleted text</label></div><label class="h20-check"><input type="checkbox" data-labels checked>Show PID labels</label><p data-reason></p></div><ul data-changes></ul></aside><section class="h20-view" aria-label="Saved snapshot"><div class="h20-document-scroll" tabindex="0" aria-label="Scroll saved snapshot"><div data-document-host></div><div data-plain hidden></div></div><div class="h37-watermark" data-watermark aria-hidden="true" hidden><span>HISTORICAL VERSION</span></div></section></div><div data-status role="status"></div>';
     data.revisions.forEach((r, i) => {
       const o = el(
         "option",
@@ -839,8 +847,17 @@
       query = e.target.value;
       draw();
     });
+    let sidebarBeforeClean = null;
     for (const b of shell.querySelectorAll("[data-view]"))
       listen(b, "click", () => {
+        /* Clean text = only the document: the changes sidebar closes, and reopens on return. */
+        if (b.dataset.view === "clean" && view !== "clean") {
+          sidebarBeforeClean = shell.dataset.sidebar;
+          shell.dataset.sidebar = "false";
+        } else if (b.dataset.view !== "clean" && view === "clean" && sidebarBeforeClean !== null) {
+          shell.dataset.sidebar = sidebarBeforeClean;
+          sidebarBeforeClean = null;
+        }
         view = b.dataset.view;
         draw();
       });

@@ -41,6 +41,7 @@ window.EditorTransactions = (() => {
       }
       a.capture();
       EditorSession.changed();
+      window.SOPHIA?.bus.emit("transaction", String(label));
       log.push(
         Object.freeze({
           label: String(label),

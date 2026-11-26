@@ -10,7 +10,7 @@ The SOPHIA HTML documents themselves (V74 base, V75/V76/V77 deliveries) are **de
 
 ## Layout
 
-- `sophia/` — **V77 source** (current): `build.py` (source + any V74–V77 document → single HTML), `tools/finalize.cjs` (deliver already upgraded), `tests/v77-functional.cjs` (33 Chromium checks), `src/engine/NN-*.js` (modules in load order), `src/styles/` (tokens · app · paper.sop/qc + paper.common · dialogs · print), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
+- `sophia/` — **V77 source** (current): `build.py` (source + any V74–V77 document → single HTML), `tools/finalize.cjs` (deliver already upgraded), `tests/v77-functional.cjs` (38 Chromium checks), `src/engine/NN-*.js` (modules in load order), `src/styles/` (tokens · app · paper.sop/qc + paper.common · dialogs · print), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
 - `docs/sophia-audit/` — audit of SOPHIA V74 and the V75 hand-off (Spanish):
   - `01_INFORME_AUDITORIA.md` findings by severity, with V75 status
   - `02_ARQUITECTURA_OBJETIVO.md` target architecture (engine + data, block model, integrity, agent proposals)

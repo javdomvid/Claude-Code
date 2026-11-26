@@ -1,6 +1,7 @@
 # Traspaso V77 «super» → Copilot
 
-**Base vigente: SOPHIA V77** (`SOP_Editor_V77_SOPHIA.html`, `Quick_Card_Editor_V77_SOPHIA.html`).
+**Base vigente: SOPHIA V77.1** (`SOP_Editor_V77.1_SOPHIA.html`, `Quick_Card_Editor_V77.1_SOPHIA.html`).
+V77.1 = V77 + revisión del responsable (sección 5). El formato de archivo es el mismo (`sophia/77`).
 V77 ya no es V76 con parches: se ha **reconstruido desde código fuente legible** (`sophia/src`).
 Lo bueno de V74–V76 se ha reutilizado módulo a módulo y se han eliminado las capas acumuladas.
 
@@ -25,8 +26,8 @@ Reglas: edita el módulo responsable EN SU SITIO; nunca añadas scripts o estilo
 a otros; nunca toques la zona del documento de un documento real; toda mutación del documento
 pasa por EditorTransactions.run; lo que crea la interfaz lleva data-runtime; el estilo
 data-sophia="print" sigue siendo el último; sin red ni dependencias externas.
-Para añadir una herramienta: regístrala en SOPHIA.commands y pon su id en RIBBON y/o SHEET
-(70-shell). El modo Mini muestra automáticamente todas las herramientas.
+Para añadir una herramienta: regístrala en SOPHIA.commands y pon su id en MAIN (panel principal),
+RIBBON (panel de edición) y/o SHEET (omnibox) en 70-shell. Los modos Mini muestran todas.
 Al terminar: python3 sophia/build.py <doc.html> <out.html> y
 node sophia/tests/v77-functional.cjs <out.html> → debe decir ALL PASS. Entrega el diff por módulo.
 Tarea: <describe aquí el cambio>.
@@ -43,7 +44,7 @@ en los títulos (se numeran solos). Lo que no sepas: <span class="tbc">TO BE CON
 No inventes datos, versiones, fechas de aprobación ni aprobadores.
 Tarea: <describe aquí el contenido>.
 ```
-La persona carga la propuesta con **Comandos → Apply agent proposal…**: ve cada operación con antes/después, marca o desmarca, y se aplica todo en **un solo paso de deshacer**. Queda registrado como evento `proposal-applied`, y después se guarda como siempre.
+La persona carga la propuesta con **Commands (omnibox) → Apply agent proposal…** o el panel principal → Agent → Proposal: ve cada operación con antes/después, marca o desmarca, y se aplica todo en **un solo paso de deshacer**. Queda registrado como evento `proposal-applied`, y después se guarda como siempre.
 
 ## 2. Qué cambió (por letra)
 
@@ -68,9 +69,9 @@ La persona carga la propuesta con **Comandos → Apply agent proposal…**: ve c
 | **F** (hash) | Huella de integridad de revisiones: **pendiente** | — |
 
 ## 3. Pruebas realizadas (Chromium sin red)
-- `sophia/tests/v77-functional.cjs`: **33/33 PASS** en SOP y Quick Card (interfaz, Full/Mini/Hide, escribir, deshacer, comentario, TBC, mover, índice, numeración, propuesta, Save draft → recibo → verificación byte a byte → reabrir, Publish +0.01, Big Validation → 2.00, publicar sin cambios → 2.01, `.docx` ida y vuelta, impresión y PDF).
+- `sophia/tests/v77-functional.cjs`: **38/38 PASS** en SOP y Quick Card (interfaz, panel principal y panel de edición Full/Mini/Hide, omnibox con búsqueda en el documento, panel View, History «Clean text», A4 sin desbordes al escribir, escribir, deshacer, comentario, TBC, mover, índice, numeración, propuesta, Save draft → recibo → verificación byte a byte → reabrir, Publish +0.01, Big Validation → 2.00, publicar sin cambios → 2.01, `.docx` ida y vuelta, impresión y PDF).
 - Paginación A4 idéntica a V76 (SOP 2 páginas, Quick Card 3).
-- axe-core (WCAG A/AA) sobre la interfaz en lectura, edición y hoja de comandos: **0 infracciones**.
+- axe-core (WCAG A/AA) sobre la interfaz en lectura, edición, omnibox (con y sin búsqueda) y panel View: **0 infracciones**.
 - Reconstruir un V77 desde sí mismo deja la zona del documento **idéntica**.
 
 ## 4. Zonas de cuidado
@@ -78,3 +79,14 @@ La persona carga la propuesta con **Comandos → Apply agent proposal…**: ve c
 - No escribas en código en línea la secuencia de cierre de script ni la apertura de comentario HTML: `build.py` lo rechaza.
 - `paper.*.css` es también la plantilla de Print Studio y de las instantáneas del historial: nada de interfaz ahí.
 - El `.docx` importa texto, títulos, listas, tablas e imágenes PNG/JPEG; no importa estilos de Word a propósito.
+
+## 5. V77.1 — revisión del responsable (26 nov 2026)
+| Pedido | Hecho |
+|---|---|
+| Recuperar el **Main panel** siempre visible con Full / Mini / Hide | Vuelve como en V76 (teselas tonales Navigate · Review · Assets · Save & publish · Output · Agent). Botón «Main panel: Full/Mini/Hide» siempre en la barra; «Edit panel: …» aparte al editar. Muestra lo que se puede hacer ahora. |
+| **Commands** como barra de búsqueda | Campo en la barra (Ctrl+K): al pulsar, cursor para escribir y panel con todos los comandos por área; al escribir filtra comandos **y busca en el texto del documento** (salta y resalta, o abre Find). |
+| **View** con el estilo de tarjetas | Panel «Document layout»: tarjetas A4 pages / Continuous con ✓, Fit width, zoom, Layout Studio, Reflow, marcas ¶. |
+| Más **glassmorphism** y tonos **Material Expressive** | Cristal más transparente (barra, paneles, menús, lateral) y tonos de V76 por área en teselas, grupos del panel de edición y omnibox. |
+| History: **Clean text** sin resaltados | «Highlight changes» / «Clean text». Clean = documento formateado tal cual, sin resaltados, PIDs ni fechas; se cierra la barra de cambios; rojo y marca de agua se mantienen en versiones antiguas. |
+| Guardado sin tener que **subir el HTML** | Basta con descargar y «Confirm saved». La comprobación byte a byte es opcional. «Save HTML as…» escribe, relee y confirma solo. |
+| Texto que se salía del folio (A4) al editar | La página crece en vez de desbordarse y, al parar de escribir, se repagina conservando el cursor. |

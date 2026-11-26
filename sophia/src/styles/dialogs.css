@@ -4223,3 +4223,10 @@ dialog[open] ~ #v425-table-ui,
     font: inherit;
   }
 }
+/* History: the «Show PID labels» checkbox sits on one line with its label (V77.1). */
+#historyStudio .h20-aside-head > label.h20-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  grid-template-columns: none;
+}

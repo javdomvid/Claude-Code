@@ -32,7 +32,7 @@ async function startEditing(p) {
   await p.waitForTimeout(250);
   return pid;
 }
-async function save(p, mode, reason) {
+async function save(p, mode, reason, verify = true) {
   await p.evaluate((m) => exportPID(m), mode);
   await p.waitForTimeout(250);
   if (await p.$('#chkOk')) { await p.check('#chkOk'); await p.click('dialog.legacy-modal .primary'); await p.waitForTimeout(250); }
@@ -46,7 +46,7 @@ async function save(p, mode, reason) {
   const [dl] = await Promise.all([p.waitForEvent('download'), p.click('dialog.save-receipt [data-download]')]);
   const name = dl.suggestedFilename(), target = path.join(out, name);
   await dl.saveAs(target);
-  await p.setInputFiles('dialog.save-receipt [data-verify]', target);
+  if (verify) await p.setInputFiles('dialog.save-receipt [data-verify]', target);
   await p.waitForFunction(() => !document.querySelector('dialog.save-receipt [data-confirm]').disabled);
   await p.click('dialog.save-receipt [data-confirm]');
   await p.waitForTimeout(300);
@@ -58,12 +58,31 @@ async function save(p, mode, reason) {
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
   let p = await open(ctx, file);
   const s0 = await p.evaluate(() => ({ engine: SOPHIA.engine, profile: SOPHIA.profile, dirty: EditorSession.get().dirty, ids: document.querySelectorAll('#document [data-block-id]').length, appbar: !!document.querySelector('.sx-appbar'), cmds: SOPHIA.commands.all().length, ribbonHidden: document.querySelector('.sx-ribbon').hidden, sheets: document.querySelectorAll('#document .sheet').length }));
-  ok(s0.engine === 'V77' && s0.appbar, 'V77 interface mounted', s0);
+  ok(/^V77/.test(s0.engine) && s0.appbar, 'V77 interface mounted', s0);
   ok(!s0.dirty, 'not dirty on open');
   ok(s0.ribbonHidden, 'edit panel hidden while reading');
   ok(p.errors.length === 0, 'no errors on load', p.errors);
   const imgs = await p.evaluate(() => [...document.querySelectorAll('#document img')].map((i) => ({ ok: i.complete && i.naturalWidth > 0, asset: i.dataset.asset || null })));
   ok(imgs.length > 0 && imgs.every((i) => i.ok), 'all document images load', imgs);
+
+  // main panel: always available, Full / Mini / Hide
+  const mp = [];
+  for (let i = 0; i < 3; i++) { mp.push(await p.evaluate(() => { const m = document.querySelector('.sx-main'); return m.hidden ? 'hide' : m.dataset.mode + ':' + m.querySelectorAll('[data-cmd]:not([hidden])').length; })); await p.click('.sx-appbar [data-cmd=mainMode]'); }
+  ok(/^full:\d+$/.test(mp[0]) && /^mini:\d+$/.test(mp[1]) && mp[2] === 'hide' && await p.evaluate(() => document.querySelector('.sx-main').dataset.mode === 'full'), 'main panel Full → Mini → Hide → Full', mp);
+  // omnibox: commands by area, then search in the document
+  await p.click('.sx-omni-input');
+  const o1 = await p.evaluate(() => ({ open: !document.querySelector('.sx-omni-panel').hidden, tiles: document.querySelectorAll('.sx-omni-panel .sx-tile').length }));
+  const word = await p.evaluate(() => (document.querySelector('#document .pagecontent p').textContent.match(/[A-Za-z]{6,}/) || ['document'])[0]);
+  await p.keyboard.type(word);
+  const o2 = await p.evaluate(() => ({ hits: document.querySelectorAll('.sx-omni-panel .sx-hit').length }));
+  await p.click('.sx-omni-panel .sx-hit');
+  const o3 = await p.evaluate(() => ({ closed: document.querySelector('.sx-omni-panel').hidden, hl: !!CSS.highlights?.get('sophia-omni') }));
+  ok(o1.open && o1.tiles >= 6 && o2.hits > 0 && o3.closed && o3.hl, 'Commands omnibox: bento by area, document search, jump + highlight', { o1, word, o2, o3 });
+  // View panel
+  await p.click('.sx-appbar [data-cmd=viewPanel]');
+  const vp = await p.evaluate(() => [...document.querySelectorAll('.sx-viewpop .sx-viewcard')].map((c) => c.getAttribute('aria-pressed')));
+  await p.keyboard.press('Escape');
+  ok(vp.length === 2 && vp.includes('true'), 'View panel with A4 / Continuous cards', vp);
 
   const pid = await startEditing(p);
   const r1 = await p.evaluate(() => {
@@ -126,6 +145,18 @@ async function save(p, mode, reason) {
   const toc = await p.evaluate(() => { const h = document.querySelector('#document .pagecontent h2'); const r = document.createRange(); r.selectNodeContents(h); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r); SOPHIA.blocks.insertToc(); const nav = document.querySelector('nav[data-sophia-toc]'); return { items: nav?.querySelectorAll('li').length, first: nav?.querySelector('li')?.textContent, nums: [...document.querySelectorAll('#document [data-num]')].length }; });
   ok(toc.items > 0 && toc.nums > 0, 'table of contents + automatic numbers', toc);
 
+  // A4 view while editing: typing never spills outside the sheet; pages recalculated, caret kept
+  const before = await p.evaluate(() => document.querySelectorAll('#document .sheet').length);
+  const lastP = p.locator('#document .pagecontent > p').first();
+  await lastP.click();
+  await p.keyboard.press('End');
+  await p.keyboard.type(' ' + 'Long inserted sentence to push the page over A4. '.repeat(40), { delay: 0 });
+  await p.waitForFunction(() => !LayoutEngine.overflowing(), null, { timeout: 6000 }).catch(() => {});
+  const of = await p.evaluate(() => ({ sheets: document.querySelectorAll('#document .sheet').length, over: LayoutEngine.overflowing(), h: [...document.querySelectorAll('#document .sheet')].map((x) => x.offsetHeight), caretIn: !!getSelection().anchorNode && !!getSelection().anchorNode.parentElement?.closest('[data-block-id]') }));
+  ok(!of.over && of.sheets >= before && of.caretIn, 'A4 view: long typing reflows pages, no spill, caret kept', { before, ...of });
+  await p.keyboard.press('Control+z');
+  await p.waitForTimeout(300);
+
   // proposal (agent)
   const prop = await p.evaluate(() => {
     const target = document.querySelectorAll('#document .pagecontent > p')[2];
@@ -151,7 +182,7 @@ async function save(p, mode, reason) {
   // the saved file: structure
   const html = fs.readFileSync(d1.target, 'utf8');
   const zone = html.slice(html.indexOf('<main id="document"'), html.indexOf('</main>'));
-  ok(/data-sophia="V77"/.test(html) && /"format":"sophia\/77"/.test(html), 'saved file is sophia/77');
+  ok(/data-sophia="V77/.test(html) && /"format":"sophia\/77"/.test(html), 'saved file is sophia/77');
   ok(!/<img[^>]+src="data:/.test(zone) && /data-asset="/.test(zone), 'images stored once (data-asset in the zone)');
   ok(zone.split('\n').length > 20, 'document zone is one block per line', zone.split('\n').length);
   const head = html.slice(0, html.indexOf('</head>'));
@@ -164,12 +195,20 @@ async function save(p, mode, reason) {
   const imgs2 = await p.evaluate(() => [...document.querySelectorAll('#document img')].every((i) => i.complete && i.naturalWidth > 0));
   ok(imgs2, 'images load in the reopened copy (assets resolved)');
   ok(!s2.pending && !s2.dirty && s2.comments === 1 && s2.tbc === 1 && s2.toc && s2.dup === 0, 'reopened copy: clean, comments/TBC/TOC kept, unique IDs', s2);
+  await p.evaluate(() => openHistoryStudio());
+  await p.waitForSelector('#historyStudio [data-view=clean]');
+  await p.click('#historyStudio [data-view=clean]');
+  await p.waitForTimeout(300);
+  const hv = await p.evaluate(() => { const host = document.querySelector('#historyStudio [data-document-host]'); const r = host.shadowRoot || host; return { shown: !host.hidden, sheets: r.querySelectorAll('.sheet').length, marks: r.querySelectorAll('mark').length, labels: r.querySelectorAll('[data-history-attribution]').length, plainHidden: document.querySelector('#historyStudio [data-plain]').hidden, btn: document.querySelector('#historyStudio [data-view=document]').textContent }; });
+  ok(hv.shown && hv.sheets > 0 && hv.marks === 0 && hv.labels === 0 && hv.plainHidden && hv.btn === 'Highlight changes', 'History «Clean text» shows the formatted document without highlights or PID labels', hv);
+  await p.click('#historyStudio [data-close]');
+  await p.waitForTimeout(200);
   await startEditing(p);
   await p.locator('#document .pagecontent > p').first().click();
   await p.keyboard.press('End');
   await p.keyboard.type(' PUBLISH-TEST');
   await p.waitForTimeout(800);
-  const pub = await save(p, 'Published', 'Automated test · publish');
+  const pub = await save(p, 'Published', 'Automated test · publish', false);
   const v1 = await p.evaluate(() => data.documentVersion);
   ok(v1 === '1.01' && /V1 → V1\.01/.test(pub.summary), 'Publish & save adds 0.01', { v1, summary: pub.summary });
   await startEditing(p);

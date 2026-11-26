@@ -13,7 +13,7 @@ and `build.py` assembles a complete offline HTML from them plus a document's con
 sophia/
   build.py                 source + document → single HTML (content taken from any V74–V77 file)
   tools/finalize.cjs       opens a build headless and writes it already upgraded (Migration revision)
-  tests/v77-functional.cjs 33 end-to-end checks (Chromium): UI, ribbon modes, edit, comments, TBC,
+  tests/v77-functional.cjs 38 end-to-end checks (Chromium): UI, ribbon modes, edit, comments, TBC,
                            moves, TOC, numbering, proposals, save/verify/reopen, versions, .docx, print
   src/
     engine/NN-name.js      modules in load order (see src/docs/ui-contract.md §2)

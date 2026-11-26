@@ -11,7 +11,7 @@
  *                         Mini = EVERY tool, icon-only, all groups in one compact strip
  *                         Hide = nothing (the app-bar button brings it back)
  *   aside.sx-side         Outline · Comments · Versions · Images · Checks
- *   dialog.sx-sheet       command sheet (bento tiles + search), Ctrl+K
+ *   div.sx-omni-panel     omnibox panel: bento of commands, or results (commands + document)
  *
  * ONE registry drives the ribbon, the sheet and the app bar: SOPHIA.commands.
  * To add a tool: register it here (or from its module) and list its id in
@@ -158,7 +158,8 @@ SOPHIA.ui = (() => {
   R('focus', 'Focus reading', 'View', 'focus', () => setFocus(true));
   R('canvas', 'Light / obsidian canvas', 'View', 'canvas', () => setCanvas(!document.body.hasAttribute('data-jaom-light')), false, { pressed: () => document.body.hasAttribute('data-jaom-light') });
   R('sidebar', 'Show / hide side panel', 'View', 'sidebar', () => toggleSide(), false, { pressed: () => !side_.el.hidden });
-  R('ribbonMode', 'Edit panel: Full / Mini / Hide', 'View', 'ribbon', () => cycleRibbon());
+  R('ribbonMode', 'Edit panel: Full / Mini / Hide', 'View', 'edit', () => cycleRibbon(), true);
+  R('mainMode', 'Main panel: Full / Mini / Hide', 'View', 'ribbon', () => cycleMain());
   R('reflow', 'Reflow A4 pages', 'Layout', 'reflow', () => { setDocumentView('pages'); toast('Pages recalculated.'); });
   R('layoutStudio', 'Layout Studio…', 'Layout', 'layout', () => LayoutStudio.open());
   R('autoNumber', 'Automatic heading numbers', 'Layout', 'autonum', () => SOPHIA.numbering.toggle(), true, { pressed: () => SOPHIA.numbering.enabled() });
@@ -277,10 +278,26 @@ SOPHIA.ui = (() => {
   const ident = U.el('div', 'sx-ident');
   ident.append(brand, titleEl, versionChip, statusChip);
 
+  /* Commands omnibox (owner, V77.1): one field for every command, grouped by area, and for
+     searching the document. Click or Ctrl+K puts the caret in it and opens the panel. */
+  const omni = U.el('div', 'sx-omni');
+  omni.setAttribute('role', 'search');
+  const omniInput = document.createElement('input');
+  omniInput.type = 'search';
+  omniInput.className = 'sx-omni-input';
+  omniInput.placeholder = 'Commands & search';
+  omniInput.autocomplete = 'off';
+  omniInput.spellcheck = false;
+  omniInput.setAttribute('aria-label', 'Commands and search in the document');
+  omniInput.setAttribute('role', 'combobox');
+  omniInput.setAttribute('aria-expanded', 'false');
+  omniInput.setAttribute('aria-controls', 'sx-omni-panel');
+  omni.append(icon('commands'), omniInput, U.el('kbd', 'sx-kbd', 'Ctrl K'));
+
   const actions = U.el('nav', 'sx-actions');
   actions.setAttribute('aria-label', 'Document actions');
   const historyBtn = button('history', { short: 'History', cls: 'sx-btn-text' });
-  const editBtn = button('edit', { short: 'Edit', cls: 'sx-btn-filled' });
+  const editBtn = button('edit', { short: 'Edit mode', cls: 'sx-btn-filled' });
   const saveSplit = U.el('div', 'sx-split');
   const saveMain = button('saveDraft', { short: 'Save draft', cls: 'sx-btn-filled' });
   const saveMore = U.el('button', 'sx-btn sx-btn-filled sx-split-more');
@@ -293,25 +310,67 @@ SOPHIA.ui = (() => {
   const focusBtn = button('focus', { short: 'Focus', cls: 'sx-btn-text' });
   const viewBtn = U.el('button', 'sx-btn sx-btn-text');
   viewBtn.type = 'button';
-  viewBtn.setAttribute('aria-haspopup', 'menu');
-  viewBtn.append(icon('view'), U.el('span', 'sx-label', 'View'), icon('chevron'));
-  viewBtn.onclick = () => menu(viewBtn, ['viewA4', 'viewContinuous', '-', 'zoomFit', 'zoomOut', 'zoomIn', 'zoomReset', '-', 'reflow', 'layoutStudio', 'showMarks']);
-  const canvasBtn = button('canvas', { text: false, cls: 'sx-btn-icon' });
+  viewBtn.dataset.cmd = 'viewPanel';
+  viewBtn.setAttribute('aria-haspopup', 'dialog');
+  viewBtn.onclick = () => viewPanel(viewBtn);
+  const canvasBtn = button('canvas', { short: 'Canvas', cls: 'sx-btn-text' });
   const sep = U.el('span', 'sx-sep');
   sep.setAttribute('aria-hidden', 'true');
-  const cmdBtn = U.el('button', 'sx-btn sx-btn-tonal');
-  cmdBtn.type = 'button';
-  cmdBtn.dataset.cmd = 'commands';
-  cmdBtn.title = 'Commands (Ctrl+K)';
-  cmdBtn.append(icon('commands'), U.el('span', 'sx-label', 'Commands'), U.el('kbd', 'sx-kbd', 'Ctrl K'));
-  cmdBtn.onclick = () => openSheet();
-  const sideBtn = button('sidebar', { text: false, cls: 'sx-btn-icon' });
-  const ribbonBtn = U.el('button', 'sx-btn sx-btn-text sx-ribbon-toggle');
+  const mainBtn = U.el('button', 'sx-btn sx-btn-tonal sx-panel-toggle');
+  mainBtn.type = 'button';
+  mainBtn.dataset.cmd = 'mainMode';
+  mainBtn.onclick = () => cycleMain();
+  const sideBtn = button('sidebar', { short: 'Sidebar', cls: 'sx-btn-tonal sx-btn-blue' });
+  const ribbonBtn = U.el('button', 'sx-btn sx-btn-tonal sx-panel-toggle sx-ribbon-toggle');
   ribbonBtn.type = 'button';
   ribbonBtn.dataset.cmd = 'ribbonMode';
   ribbonBtn.onclick = () => cycleRibbon();
-  actions.append(historyBtn, editBtn, saveSplit, focusBtn, viewBtn, canvasBtn, sep, cmdBtn, sideBtn, ribbonBtn);
-  bar.append(ident, actions);
+  actions.append(historyBtn, editBtn, saveSplit, focusBtn, viewBtn, canvasBtn, sep, mainBtn, sideBtn, ribbonBtn);
+  bar.append(ident, omni, actions);
+
+  /* ---------- main panel (owner, V77.1: always available, Full / Mini / Hide) ----------
+     Bento tiles by purpose, tonal like V76: Navigate · Review · Assets · Save & publish ·
+     Output · Agent. Mini = the same buttons, icon-only, in compact tonal chips. */
+  const MAIN = [
+    { name: 'Navigate', tone: 'navigate', items: ['outline', 'find', 'structure', 'layoutStudio'] },
+    { name: 'Review', tone: 'review', items: ['versions', 'compare', 'comments', 'checks'] },
+    { name: 'Assets', tone: 'assets', items: ['imageLibrary', 'tableStudio', 'importDocx'] },
+    { name: 'Save & publish', tone: 'save', items: ['edit', 'saveDraft', 'publish', 'bigValidation', 'discard'] },
+    { name: 'Output', tone: 'output', items: ['print', 'downloadCopy', 'exportDocx'] },
+    { name: 'Agent', tone: 'agent', items: ['brief', 'exportMap', 'applyProposal'] }
+  ];
+  const MAIN_SHORT = { outline: 'Outline', find: 'Find', structure: 'Structure', layoutStudio: 'Layout', versions: 'Changes', compare: 'Compare', comments: 'Comments', checks: 'Checks', imageLibrary: 'Images', tableStudio: 'Tables', importDocx: 'Import .docx', edit: 'Edit mode', saveDraft: 'Save draft', publish: 'Publish & save', bigValidation: 'Big Validation', discard: 'Discard', print: 'Print', downloadCopy: 'Download', exportDocx: 'Word copy', brief: 'Brief', exportMap: 'Map', applyProposal: 'Proposal' };
+  const mainEl = runtime(U.el('div', 'sx-main'));
+  mainEl.setAttribute('role', 'toolbar');
+  mainEl.setAttribute('aria-label', 'Main panel');
+  let mainMode = ['full', 'mini', 'hide'].includes(pref.get('mainpanel', 'full')) ? pref.get('mainpanel', 'full') : 'full';
+  function renderMain() {
+    mainEl.replaceChildren();
+    mainEl.dataset.mode = mainMode;
+    mainEl.hidden = mainMode === 'hide';
+    if (mainMode === 'hide') return;
+    for (const t of MAIN) {
+      const tile = U.el('section', 'sx-tile-main');
+      tile.dataset.tone = t.tone;
+      tile.setAttribute('aria-label', t.name);
+      if (mainMode === 'full') tile.append(U.el('span', 'sx-tile-cap', t.name));
+      const row = U.el('div', 'sx-tile-row');
+      for (const id of t.items) {
+        const c = C.get(id);
+        if (!c || (c.profile && c.profile !== SOPHIA.profile)) continue;
+        row.append(button(id, { text: mainMode === 'full', short: MAIN_SHORT[id], cls: mainMode === 'mini' ? 'sx-btn-icon sx-chip-btn' : 'sx-chip-btn' }));
+      }
+      tile.append(row);
+      mainEl.append(tile);
+    }
+  }
+  function cycleMain() {
+    mainMode = { full: 'mini', mini: 'hide', hide: 'full' }[mainMode];
+    pref.set('mainpanel', mainMode);
+    renderMain();
+    refresh();
+    toast('Main panel: ' + { full: 'Full', mini: 'Mini', hide: 'Hidden' }[mainMode]);
+  }
 
   /* ---------- edit panel (ribbon) ---------- */
   const RIBBON = [
@@ -426,6 +485,7 @@ SOPHIA.ui = (() => {
         const items = g.items.filter(visible);
         if (!items.length) continue;
         const group = U.el('div', 'sx-group');
+        group.dataset.tone = { Home: 'navigate', Insert: 'assets', Layout: 'output', Review: 'review' }[t.tab];
         group.setAttribute('role', 'group');
         group.setAttribute('aria-label', g.name);
         group.dataset.group = g.name;
@@ -450,7 +510,7 @@ SOPHIA.ui = (() => {
     renderRibbon();
     refresh();
     layout();
-    toast('Edit panel: ' + { full: 'Full', mini: 'Mini (all tools, compact)', hide: 'Hidden' }[ribbonMode]);
+    toast('Edit panel: ' + { full: 'Full', mini: 'Mini (every tool, compact)', hide: 'Hidden' }[ribbonMode]);
   }
 
   /* ---------- side panel ---------- */
@@ -657,7 +717,7 @@ SOPHIA.ui = (() => {
   document.addEventListener('pointerdown', (e) => { if (openMenuEl && !openMenuEl.contains(e.target) && !openMenuEl._anchor.contains(e.target)) closeMenus(); }, true);
   addEventListener('resize', () => { closeMenus(); layout(); });
 
-  /* ---------- command sheet (bento) ---------- */
+  /* ---------- commands omnibox panel (commands by area + matches in the document) ---------- */
   const SHEET = [
     { name: 'Save & publish', tone: 'save', items: ['edit', 'saveDraft', 'publish', 'bigValidation', 'recover', 'discard'] },
     { name: 'Review', tone: 'review', items: ['history', 'versions', 'compare', 'comments', 'addComment', 'markTbc', 'checks', 'structure'] },
@@ -665,85 +725,213 @@ SOPHIA.ui = (() => {
     { name: 'Insert', tone: 'assets', items: ['insertTable', 'insertImage', 'insertLink', 'insertToc', 'insertCard', 'importDocx', 'imageLibrary', 'tableStudio', 'tableFlow', 'imageStudio'] },
     { name: 'Output', tone: 'output', items: ['print', 'downloadCopy', 'exportDocx', 'upgrade'] },
     { name: 'Agent (SOPHIA)', tone: 'agent', items: ['brief', 'exportMap', 'applyProposal'] },
-    { name: 'View', tone: 'navigate', items: ['viewA4', 'viewContinuous', 'zoomFit', 'focus', 'canvas', 'sidebar', 'ribbonMode', 'layoutStudio', 'autoNumber', 'showMarks'] },
+    { name: 'View', tone: 'navigate', items: ['viewA4', 'viewContinuous', 'zoomFit', 'focus', 'canvas', 'sidebar', 'mainMode', 'ribbonMode', 'layoutStudio', 'autoNumber', 'showMarks'] },
     { name: 'Help', tone: 'output', items: ['shortcuts', 'about'] }
   ];
-  let sheet = null;
-  function openSheet() {
-    if (sheet?.open) { sheet.close(); return; }
-    if (U.dialogOpen()) { toast(SOPHIA.strings.finishDialogFirst); return; }
-    closeMenus();
-    const origin = document.activeElement;
-    const range = getSelection().rangeCount && area.contains(getSelection().anchorNode) ? getSelection().getRangeAt(0).cloneRange() : null;
-    sheet = runtime(U.el('dialog', 'sx-sheet'));
-    sheet.setAttribute('aria-label', 'Commands');
-    const head = U.el('div', 'sx-sheet-head');
-    const search = document.createElement('input');
-    search.type = 'search';
-    search.placeholder = 'Search commands…';
-    search.setAttribute('aria-label', 'Search commands');
-    const close = U.el('button', 'sx-btn sx-btn-icon');
-    close.type = 'button';
-    close.setAttribute('aria-label', 'Close');
-    close.append(icon('close'));
-    close.onclick = () => sheet.close();
-    head.append(icon('commands'), search, close);
-    const grid = U.el('div', 'sx-bento');
-    const seen = new Set();
-    const tiles = SHEET.map((t) => ({ ...t, items: t.items.slice() }));
-    SHEET.forEach((t) => t.items.forEach((i) => seen.add(i)));
-    const extra = C.all().filter((c) => !seen.has(c.id) && c.label && c.group !== 'Home');
-    if (extra.length) tiles.push({ name: 'More tools', tone: 'navigate', items: extra.map((c) => c.id) });
-    for (const t of tiles) {
-      const tile = U.el('section', 'sx-tile');
-      tile.dataset.tone = t.tone;
-      tile.append(U.el('h3', '', t.name));
-      const list = U.el('div', 'sx-tile-list');
-      for (const id of t.items) {
-        const c = C.get(id);
-        if (!c || (c.profile && c.profile !== SOPHIA.profile)) continue;
-        const b = U.el('button', 'sx-cmd');
-        b.type = 'button';
-        b.dataset.cmd = id;
-        b.dataset.search = (c.label + ' ' + c.group + ' ' + id + ' ' + t.name).toLowerCase();
-        b.append(icon(c.icon || 'more'), U.el('span', '', c.label));
-        if (c.keys) b.append(U.el('kbd', '', c.keys));
-        if (!C.available(c)) { b.setAttribute('aria-disabled', 'true'); b.title = c.editing && !U.isEditing() ? 'Start editing first' : c.why || ''; }
-        b.onclick = () => {
-          if (b.getAttribute('aria-disabled') === 'true') { toast(b.title || 'Not available right now.'); return; }
-          sheet.close();
-          if (range) { try { getSelection().removeAllRanges(); getSelection().addRange(range); } catch {} }
-          C.run(id);
-          refreshSoon();
-        };
-        list.append(b);
-      }
-      tile.append(list);
-      grid.append(tile);
+  const omniPanel = runtime(U.el('div', 'sx-omni-panel'));
+  omniPanel.id = 'sx-omni-panel';
+  omniPanel.hidden = true;
+  let omniRange = null;
+  const HL_OMNI = 'sophia-omni';
+  function cmdItem(id, tone) {
+    const c = C.get(id);
+    if (!c || (c.profile && c.profile !== SOPHIA.profile)) return null;
+    const b = U.el('button', 'sx-cmd');
+    b.type = 'button';
+    b.dataset.cmd = id;
+    if (tone) b.dataset.tone = tone;
+    b.dataset.search = (c.label + ' ' + c.group + ' ' + id).toLowerCase();
+    b.append(icon(c.icon || 'more'), U.el('span', '', c.label));
+    if (c.keys) b.append(U.el('kbd', '', c.keys));
+    if (!C.available(c)) { b.setAttribute('aria-disabled', 'true'); b.title = c.editing && !U.isEditing() ? 'Start editing first' : c.why || ''; }
+    b.onclick = () => {
+      if (b.getAttribute('aria-disabled') === 'true') { toast(b.title || 'Not available right now.'); return; }
+      closeOmni(true);
+      C.run(id);
+      refreshSoon();
+    };
+    return b;
+  }
+  function docMatches(q) {
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length || q.trim().length < 2) return [];
+    const out = [];
+    const blocks = [...area.querySelectorAll('.pagecontent :is(h2,h3,h4,p,li,td,th,figcaption,aside,blockquote), .qc-hero :is(h1,p), .identity .value')]
+      .filter((n) => !n.querySelector('p,li,h2,h3,h4,table') && n.textContent.trim());
+    let heading = '';
+    for (const n of blocks) {
+      if (/^H[2-4]$/.test(n.tagName)) heading = SOPHIA.numbering.label(n);
+      const text = n.textContent, low = text.toLowerCase(), flat = low.replace(/\s+/g, ' ');
+      if (!words.every((w) => flat.includes(w)) || low.indexOf(words[0]) < 0) continue;
+      const at = low.indexOf(words[0]);
+      out.push({ node: n, heading: n.closest('.identity') ? 'Document information' : /^H[2-4]$/.test(n.tagName) ? 'Heading' + (n.dataset.num ? ' ' + n.dataset.num : '') : heading || 'Document', text, at, len: words[0].length });
+      if (out.length >= 40) break;
     }
-    const filter = () => {
-      const q = search.value.trim().toLowerCase();
-      grid.querySelectorAll('.sx-cmd').forEach((b) => (b.hidden = !!q && !q.split(/\s+/).every((w) => b.dataset.search.includes(w))));
-      grid.querySelectorAll('.sx-tile').forEach((t) => (t.hidden = !t.querySelector('.sx-cmd:not([hidden])')));
+    return out;
+  }
+  function jumpTo(m) {
+    closeOmni(false);
+    const n = m.node;
+    n.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
+    let left = m.at, node, range = null;
+    while ((node = w.nextNode())) {
+      if (left <= node.nodeValue.length) { range = document.createRange(); range.setStart(node, Math.min(left, node.nodeValue.length)); range.setEnd(node, Math.min(left + m.len, node.nodeValue.length)); break; }
+      left -= node.nodeValue.length;
+    }
+    if (range && window.CSS?.highlights) {
+      CSS.highlights.set(HL_OMNI, new Highlight(range));
+      setTimeout(() => CSS.highlights.delete(HL_OMNI), 2600);
+    }
+    if (range && U.isEditing() && n.closest('[contenteditable=true]')) {
+      n.closest('[contenteditable=true]').focus({ preventScroll: true });
+      getSelection().removeAllRanges();
+      getSelection().addRange(range);
+    }
+  }
+  function renderOmni() {
+    const q = omniInput.value.trim();
+    omniPanel.replaceChildren();
+    if (!q) {
+      const grid = U.el('div', 'sx-bento');
+      for (const t of SHEET) {
+        const tile = U.el('section', 'sx-tile');
+        tile.dataset.tone = t.tone;
+        tile.append(U.el('h3', '', t.name));
+        const list = U.el('div', 'sx-tile-list');
+        for (const id of t.items) { const b = cmdItem(id, t.tone); if (b) list.append(b); }
+        tile.append(list);
+        grid.append(tile);
+      }
+      omniPanel.append(grid);
+      omniPanel.append(U.el('p', 'sx-omni-foot', 'Type to filter commands and search the text of this document · ↑↓ to move · Enter to run · Esc to close'));
+      return;
+    }
+    const words = q.toLowerCase().split(/\s+/);
+    const cmds = C.all().filter((c) => c.label && words.every((w) => (c.label + ' ' + c.group + ' ' + c.id).toLowerCase().includes(w))).slice(0, 12);
+    const wrap = U.el('div', 'sx-omni-results');
+    const colA = U.el('section', 'sx-omni-col');
+    colA.append(U.el('h3', '', 'Commands'));
+    if (!cmds.length) colA.append(U.el('p', 'sx-empty', 'No command matches.'));
+    for (const c of cmds) { const b = cmdItem(c.id); if (b) colA.append(b); }
+    const colB = U.el('section', 'sx-omni-col sx-omni-doc');
+    const hits = docMatches(q);
+    colB.append(U.el('h3', '', 'In this document · ' + (hits.length >= 40 ? '40+' : hits.length)));
+    if (!hits.length) colB.append(U.el('p', 'sx-empty', q.length < 2 ? 'Type at least 2 characters.' : 'No text in the document matches “' + q + '”.'));
+    for (const m of hits) {
+      const b = U.el('button', 'sx-hit');
+      b.type = 'button';
+      b.append(U.el('small', '', m.heading));
+      const line = U.el('span');
+      const start = Math.max(0, m.at - 48);
+      line.append((start ? '…' : '') + m.text.slice(start, m.at), U.el('mark', '', m.text.slice(m.at, m.at + m.len)), m.text.slice(m.at + m.len, m.at + m.len + 90) + (m.at + m.len + 90 < m.text.length ? '…' : ''));
+      b.append(line);
+      b.onclick = () => jumpTo(m);
+      colB.append(b);
+    }
+    if (hits.length) {
+      const all = U.el('button', 'sx-cmd');
+      all.type = 'button';
+      all.append(icon('find'), U.el('span', '', 'Open Find for all matches'), U.el('kbd', '', 'Ctrl+F'));
+      all.onclick = () => { closeOmni(false); openDocumentFind(); setTimeout(() => { const f = document.querySelector('.document-navigator-v19 input'); if (f) { f.value = q; f.dispatchEvent(new Event('input', { bubbles: true })); } }, 60); };
+      colB.append(all);
+    }
+    wrap.append(colA, colB);
+    omniPanel.append(wrap);
+  }
+  function openOmni() {
+    if (U.dialogOpen()) return;
+    closeMenus();
+    const s = getSelection();
+    if (s.rangeCount && area.contains(s.anchorNode)) omniRange = s.getRangeAt(0).cloneRange();
+    if (omniPanel.hidden) { omniPanel.hidden = false; omniInput.setAttribute('aria-expanded', 'true'); renderOmni(); placeOmni(); }
+  }
+  function closeOmni(restoreSel) {
+    if (omniPanel.hidden) return;
+    omniPanel.hidden = true;
+    omniInput.setAttribute('aria-expanded', 'false');
+    omniInput.value = '';
+    omniInput.blur();
+    if (restoreSel && omniRange) { try { getSelection().removeAllRanges(); getSelection().addRange(omniRange); } catch {} }
+    omniRange = null;
+  }
+  function placeOmni() {
+    const r = omni.getBoundingClientRect();
+    const w = Math.min(980, window.innerWidth - 16);
+    omniPanel.style.width = w + 'px';
+    omniPanel.style.top = Math.round(r.bottom + 8) + 'px';
+    omniPanel.style.left = Math.round(Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2))) + 'px';
+  }
+  function focusOmni() { omniInput.focus(); openOmni(); }
+  omniInput.addEventListener('focus', openOmni);
+  omniInput.addEventListener('click', openOmni);
+  omniInput.addEventListener('input', () => { openOmni(); renderOmni(); });
+  omniInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeOmni(true); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); omniPanel.querySelector('button:not([aria-disabled=true])')?.focus(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); omniPanel.querySelector('.sx-cmd:not([aria-disabled=true]), .sx-hit')?.click(); }
+  });
+  omniPanel.addEventListener('keydown', (e) => {
+    const all = [...omniPanel.querySelectorAll('button:not([aria-disabled=true])')], i = all.indexOf(document.activeElement);
+    if (e.key === 'Escape') { e.preventDefault(); closeOmni(true); return; }
+    if (!['ArrowDown', 'ArrowUp'].includes(e.key)) return;
+    e.preventDefault();
+    if (e.key === 'ArrowUp' && i <= 0) omniInput.focus();
+    else all[Math.min(all.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1))]?.focus();
+  });
+  document.addEventListener('pointerdown', (e) => { if (!omniPanel.hidden && !omniPanel.contains(e.target) && !omni.contains(e.target)) closeOmni(false); }, true);
+  const openSheet = focusOmni;
+
+  /* ---------- View panel (V76 style: visual cards for A4 pages / Continuous) ---------- */
+  function viewPanel(anchor) {
+    if (openMenuEl?._anchor === anchor) { closeMenus(); return; }
+    closeMenus();
+    const p = runtime(U.el('div', 'sx-menu sx-viewpop'));
+    p.setAttribute('role', 'dialog');
+    p.setAttribute('aria-label', 'Document layout');
+    p._anchor = anchor;
+    const head = U.el('div', 'sx-viewpop-head');
+    const close = U.el('button', 'sx-btn sx-btn-text');
+    close.type = 'button';
+    close.append(icon('sidebar'), U.el('span', 'sx-label', 'Close'));
+    close.onclick = () => { closeMenus(); anchor.focus(); };
+    head.append(U.el('h3', '', 'Document layout'), close);
+    p.append(head, U.el('span', 'sx-cap', 'Document views'));
+    const cards = U.el('div', 'sx-viewcards');
+    const card = (mode, ic, title, sub) => {
+      const b = U.el('button', 'sx-viewcard');
+      b.type = 'button';
+      const on = (mode === 'continuous') === document.body.classList.contains('continuous-view');
+      b.setAttribute('aria-pressed', String(on));
+      const art = U.el('span', 'sx-viewcard-art');
+      art.append(icon(ic));
+      b.append(art, U.el('b', '', title), U.el('small', '', sub), U.el('span', 'sx-check', '✓'));
+      b.onclick = () => { setDocumentView(mode); cards.querySelectorAll('.sx-viewcard').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); refreshSoon(); };
+      return b;
     };
-    search.oninput = filter;
-    search.onkeydown = (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); grid.querySelector('.sx-cmd:not([hidden]):not([aria-disabled=true])')?.click(); }
-      else if (e.key === 'ArrowDown') { e.preventDefault(); grid.querySelector('.sx-cmd:not([hidden])')?.focus(); }
-    };
-    grid.addEventListener('keydown', (e) => {
-      if (!['ArrowDown', 'ArrowUp'].includes(e.key)) return;
-      const all = [...grid.querySelectorAll('.sx-cmd:not([hidden])')], i = all.indexOf(document.activeElement);
-      e.preventDefault();
-      if (e.key === 'ArrowUp' && i <= 0) search.focus();
-      else all[Math.min(all.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1))]?.focus();
-    });
-    sheet.append(head, grid);
-    sheet.addEventListener('close', () => { sheet.remove(); if (!range && origin?.isConnected) origin.focus({ preventScroll: true }); }, { once: true });
-    sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
-    document.body.append(sheet);
-    sheet.showModal();
-    search.focus();
+    cards.append(card('pages', 'a4', 'A4 pages', 'Separate pages'), card('continuous', 'continuous', 'Continuous', 'One scrolling surface'));
+    p.append(cards);
+    const zoomRow = U.el('div', 'sx-viewrow');
+    const zbtn = (label, ic, fn, title) => { const b = U.el('button', 'sx-btn sx-btn-text'); b.type = 'button'; if (ic) b.append(icon(ic)); b.append(U.el('span', 'sx-label', label)); b.title = title || label; b.onclick = () => { fn(); zval.textContent = Math.round(zoomLevel * 100) + ' %'; }; return b; };
+    const zval = U.el('span', 'sx-zoomval', Math.round(zoomLevel * 100) + ' %');
+    zoomRow.append(zbtn('Fit width', 'fit', () => zoom('fit')), U.el('span', 'sx-flex'), zbtn('', 'zoomOut', () => zoom(-0.1), 'Zoom out (Ctrl+−)'), zval, zbtn('', 'zoomIn', () => zoom(0.1), 'Zoom in (Ctrl+=)'), zbtn('Reset', null, () => zoom(1), 'Zoom 100 % (Ctrl+0)'));
+    p.append(zoomRow);
+    p.append(U.el('span', 'sx-cap', 'Pages & layout'));
+    const tools = U.el('div', 'sx-viewrow sx-viewtools');
+    for (const id of ['layoutStudio', 'reflow', 'autoNumber', 'showMarks']) {
+      const c = C.get(id);
+      if (!c) continue;
+      const b = button(id, { short: { layoutStudio: 'Layout Studio', reflow: 'Reflow pages', autoNumber: 'Auto numbers', showMarks: 'Marks ¶' }[id], cls: 'sx-chip-btn' });
+      b.onclick = () => { closeMenus(); C.run(id); refreshSoon(); };
+      b.disabled = !C.available(c);
+      tools.append(b);
+    }
+    p.append(tools, U.el('p', 'sx-viewpop-foot', 'Esc to close'));
+    p.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeMenus(); anchor.focus(); } });
+    place(p, anchor);
+    openMenuEl = p;
+    anchor.setAttribute('aria-expanded', 'true');
+    p.querySelector('.sx-viewcard[aria-pressed=true]')?.focus();
   }
 
   /* ---------- focus exit pill ---------- */
@@ -775,12 +963,23 @@ SOPHIA.ui = (() => {
     saveSplit.hidden = !s.pid;
     saveMain.disabled = !(s.dirty || SOPHIA.migration?.pending);
     saveMain.title = saveMain.disabled ? 'No changes to save as a draft' : 'Save draft (Ctrl+S) — keeps V' + data.documentVersion;
-    ribbonBtn.replaceChildren(icon('ribbon'), U.el('span', 'sx-label', 'Panel: ' + { full: 'Full', mini: 'Mini', hide: 'Hidden' }[ribbonMode]));
-    ribbonBtn.title = 'Edit panel: Full → Mini → Hide';
+    const modeName = (m) => ({ full: 'Full', mini: 'Mini', hide: 'Hide' })[m];
+    const lbl = (text, short) => { const l = U.el('span', 'sx-label', text); l.dataset.short = short; return l; };
+    ribbonBtn.replaceChildren(icon('edit'), lbl('Edit panel: ' + modeName(ribbonMode), modeName(ribbonMode)));
+    ribbonBtn.title = 'Edit panel · next: ' + modeName({ full: 'mini', mini: 'hide', hide: 'full' }[ribbonMode]);
     ribbonBtn.hidden = !s.pid;
+    mainBtn.replaceChildren(icon('ribbon'), lbl('Main panel: ' + modeName(mainMode), modeName(mainMode)));
+    mainBtn.title = 'Main panel · next: ' + modeName({ full: 'mini', mini: 'hide', hide: 'full' }[mainMode]);
+    const cont = document.body.classList.contains('continuous-view');
+    viewBtn.replaceChildren(icon(cont ? 'continuous' : 'a4'), U.el('span', 'sx-label', 'View: ' + (cont ? 'Continuous' : 'A4 pages')));
+    viewBtn.title = 'Document layout: A4 pages, Continuous, zoom, Layout Studio';
+    canvasBtn.querySelector('.sx-label').textContent = 'Canvas: ' + (document.body.hasAttribute('data-jaom-light') ? 'Light' : 'Dark');
+    /* Main panel shows what can be done now: edit-only tools appear while editing. */
+    mainEl.querySelectorAll('[data-cmd]').forEach((b) => { const c = C.get(b.dataset.cmd); b.hidden = c?.id === 'edit' ? !!s.pid : !!(c?.editing && !s.pid); });
+    mainEl.querySelectorAll('.sx-tile-main').forEach((t) => (t.hidden = !t.querySelector('[data-cmd]:not([hidden])')));
     document.body.classList.toggle('sx-has-ribbon', editing && ribbonMode !== 'hide');
     ribbon.hidden = !editing || ribbonMode === 'hide';
-    for (const b of document.querySelectorAll('.sx-appbar [data-cmd], .sx-ribbon [data-cmd], .sx-side [data-cmd]')) {
+    for (const b of document.querySelectorAll('.sx-appbar [data-cmd], .sx-main [data-cmd], .sx-ribbon [data-cmd], .sx-side [data-cmd]')) {
       const c = C.get(b.dataset.cmd);
       if (!c) continue;
       if (b !== saveMain) b.disabled = !C.available(c);
@@ -813,20 +1012,25 @@ SOPHIA.ui = (() => {
       styleSel.value = v;
     }
   }
-  /* App-bar + ribbon height → CSS variable, so the page never hides under them. */
+  /* App bar → main panel → edit panel are stacked; their bottoms become CSS variables so the
+     page and the side panel never hide under them. */
   function layout() {
     const focus = document.body.classList.contains('focusmode');
+    const root = document.documentElement.style;
     const barBottom = focus ? 0 : Math.round(bar.getBoundingClientRect().bottom);
-    const top = focus ? 0 : ribbon.hidden ? barBottom : Math.round(ribbon.getBoundingClientRect().bottom);
-    document.documentElement.style.setProperty('--sx-appbar', barBottom + 'px');
-    document.documentElement.style.setProperty('--sx-top', top + 'px');
+    root.setProperty('--sx-appbar', barBottom + 'px');
+    const mainBottom = focus || mainEl.hidden ? barBottom : Math.round(mainEl.getBoundingClientRect().bottom);
+    root.setProperty('--sx-main', mainBottom + 'px');
+    const top = focus ? 0 : ribbon.hidden ? mainBottom : Math.round(ribbon.getBoundingClientRect().bottom);
+    root.setProperty('--sx-top', top + 'px');
     document.body.dataset.side = side_.el.hidden ? 'closed' : 'open';
+    if (!omniPanel.hidden) placeOmni();
   }
 
   /* ---------- keyboard ---------- */
   document.addEventListener('keydown', (e) => {
     const k = (e.key || '').toLowerCase(), mod = e.ctrlKey || e.metaKey;
-    if (mod && !e.shiftKey && !e.altKey && k === 'k') { e.preventDefault(); openSheet(); return; }
+    if (mod && !e.shiftKey && !e.altKey && k === 'k') { e.preventDefault(); if (omniPanel.hidden || document.activeElement !== omniInput) focusOmni(); else closeOmni(true); return; }
     if (U.dialogOpen()) return;
     if (e.key === 'Escape' && document.body.classList.contains('focusmode')) { setFocus(false); return; }
     if (e.key === 'Escape' && openMenuEl) { closeMenus(); return; }
@@ -848,13 +1052,16 @@ SOPHIA.ui = (() => {
   SOPHIA.bus.on('outline-changed', sideSoon);
   SOPHIA.bus.on('content-changed', sideSoon);
   SOPHIA.bus.on('view-changed', refreshSoon);
-  SOPHIA.bus.on('commands-changed', () => { if (mounted) { renderRibbon(); refreshSoon(); } });
+  SOPHIA.bus.on('commands-changed', () => { if (mounted) { renderRibbon(); renderMain(); refreshSoon(); } });
 
   let mounted = false;
   function mount() {
     if (pref.get('canvas', 'obsidian') === 'light') document.body.setAttribute('data-jaom-light', '');
     document.body.prepend(bar);
-    bar.after(ribbon);
+    bar.after(mainEl);
+    mainEl.after(ribbon);
+    document.body.append(omniPanel);
+    renderMain();
     area.before(side_.el);
     document.body.append(focusExit);
     renderRibbon();
@@ -865,8 +1072,9 @@ SOPHIA.ui = (() => {
     refresh();
     new ResizeObserver(layout).observe(bar);
     new ResizeObserver(layout).observe(ribbon);
+    new ResizeObserver(layout).observe(mainEl);
   }
-  return { mount, refresh, side, setFocus, setCanvas, openSheet, menu, zoom, renderRibbon, ribbonMode: () => ribbonMode, icon };
+  return { mount, refresh, side, setFocus, setCanvas, openSheet, focusOmni, menu, zoom, renderRibbon, renderMain, ribbonMode: () => ribbonMode, mainMode: () => mainMode, icon };
 })();
 
 /* ---------- legacy contract ---------- */

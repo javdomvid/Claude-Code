@@ -148,13 +148,15 @@ SOPHIA.persist = (() => {
       '<section><div class="receipt-file"><span class="receipt-file-icon" aria-hidden="true">HTML</span><div><strong data-file-name></strong><small data-file-info></small></div></div>' +
       '<p class="receipt-state" data-state role="status" aria-live="polite">Ready to request download</p><div class="receipt-actions"><a data-download>Download HTML</a><button type="button" data-save-as>Save HTML as…</button></div>' +
       '<p class="receipt-help">If the download does not start, use “Save HTML as”. Previews inside SharePoint, Teams or Copilot may block downloads: open the file directly in Edge or Chrome.</p>' +
-      '<label class="receipt-check">Verify saved HTML<input type="file" data-verify accept=".html,.htm,text/html"></label><p>Select the saved copy to check it against this export. The file stays on this device.</p><p class="receipt-error" data-error role="alert"></p></section>' +
+      '<details class="receipt-verify"><summary>Check a saved copy (optional)</summary><label class="receipt-check">Saved HTML<input type="file" data-verify accept=".html,.htm,text/html"></label><p>The copy is compared byte by byte with this export. It stays on this device.</p></details><p class="receipt-error" data-error role="alert"></p></section>' +
       '<footer><button type="button" data-cancel>Back to editing</button><button type="button" data-confirm>Confirm saved</button></footer></form>';
     const q = (k) => dialog.querySelector('[data-' + k + ']');
     const ui = { name: q('file-name'), info: q('file-info'), state: q('state'), download: q('download'), saveAs: q('save-as'), verify: q('verify'), error: q('error'), confirm: q('confirm'), cancel: q('cancel') };
-    let disposed = false, writing = false, verified = false, checkId = 0;
+    let disposed = false, writing = false, verified = false, requested = false, checkId = 0;
     const origin = document.activeElement;
-    const reset = () => { verified = false; checkId++; ui.verify.value = ''; ui.confirm.disabled = true; };
+    /* V77.1 (owner): confirming after the download is enough; the byte check is optional.
+       "Save HTML as…" writes, reads the file back and confirms by itself. */
+    const reset = () => { verified = false; checkId++; ui.verify.value = ''; ui.confirm.disabled = !requested; };
     const phase = (v, m) => { dialog.dataset.phase = v; ui.state.textContent = m; ui.error.textContent = ''; };
     reset();
     function dispose() {
@@ -177,8 +179,9 @@ SOPHIA.persist = (() => {
     ui.download.download = name;
     ui.download.addEventListener('click', (e) => {
       if (writing) { e.preventDefault(); return; }
+      requested = true;
       reset();
-      phase('requested', 'Download requested. Select the saved HTML to verify it.');
+      phase('requested', 'Download requested. When the file is in your Downloads folder, confirm.');
       ui.download.textContent = 'Download again';
     });
     ui.verify.addEventListener('change', async () => {
@@ -193,10 +196,12 @@ SOPHIA.persist = (() => {
         if (!same) {
           phase('mismatch', 'This file does not match the current export.');
           ui.error.textContent = 'Choose the exact HTML just downloaded or saved. Nothing has been recorded yet.';
+          ui.confirm.disabled = true;
           return;
         }
         verified = true;
-        phase('verified', 'Saved copy verified. You can confirm now.');
+        requested = true;
+        phase('verified', 'Saved copy verified byte by byte. Confirm to record the revision.');
         ui.confirm.disabled = false;
       } catch {
         if (!disposed && id === checkId) { phase('failed', 'Could not read the selected file.'); ui.error.textContent = 'Choose the saved copy again.'; }
@@ -222,7 +227,11 @@ SOPHIA.persist = (() => {
         try { await stream.write(blob); await stream.close(); } catch (e) { try { await stream.abort(); } catch {} throw e; }
         if (!(await matches(await handle.getFile()))) throw Error('The written file did not match this export.');
         verified = true;
-        phase('verified', 'File written and verified. You can confirm now.');
+        requested = true;
+        phase('verified', 'File written and verified.');
+        writing = false;
+        confirm();
+        return;
       } catch (e) {
         phase('failed', e.name === 'AbortError' ? 'Save cancelled · changes remain in this tab' : 'Save failed · changes remain in this tab');
         ui.error.textContent = e.name === 'AbortError' ? 'You can retry or download the file instead.' : e.message;
@@ -232,9 +241,9 @@ SOPHIA.persist = (() => {
         ui.confirm.disabled = !verified;
       }
     });
-    ui.confirm.addEventListener('click', () => {
+    function confirm() {
       if (writing) return;
-      if (!verified) { ui.error.textContent = 'Verify the exact saved HTML before confirming.'; ui.verify.focus(); return; }
+      if (!verified && !requested) { ui.error.textContent = 'Download or save the HTML first.'; ui.download.focus(); return; }
       if (commit && SOPHIA.canonical() !== canonicalAtRequest) {
         ui.error.textContent = 'The document changed after this export was prepared. Close and save again; nothing was recorded.';
         return;
@@ -248,8 +257,9 @@ SOPHIA.persist = (() => {
         SOPHIA.bus.emit('record-changed');
       }
       dispose();
-      toast(commit ? 'Saved copy verified and revision recorded. This is not corporate approval.' : 'Copy confirmed. Document version and history unchanged.');
-    });
+      toast(commit ? (verified ? 'Saved and verified. Revision recorded — this is not corporate approval.' : 'Revision recorded. Keep the downloaded file — it is the saved version.') : 'Copy confirmed. Document version and history unchanged.');
+    }
+    ui.confirm.addEventListener('click', confirm);
     document.body.append(dialog);
     dialog.showModal();
     ui.download.focus();

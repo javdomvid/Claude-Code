@@ -11,11 +11,47 @@
   --sx-canvas: #0e0e11;
   --sx-canvas-ink: #e8ebf5;
   --sx-canvas-muted: #a8b0c6;
-  /* glass (app bar, menus, command sheet) */
-  --sx-glass: linear-gradient(110deg, #e2ebfff2, #eee3fff0);
+  /* glass — Obsidian JAOM (V77.1: transparency back to V76 or more).
+     L1 app bar · L2 main/edit panels · L3 menus, popovers, omnibox · side panel lavender */
+  --sx-glass: linear-gradient(110deg, rgba(226, 235, 255, 0.8), rgba(238, 227, 255, 0.76));
+  --sx-glass-2: rgba(228, 235, 255, 0.62);
+  --sx-glass-3: rgba(246, 244, 255, 0.84);
+  --sx-glass-side: rgba(240, 238, 252, 0.8);
   --sx-glass-solid: #eaeefb;
-  --sx-glass-line: #ffffffb8;
-  --sx-glass-blur: blur(18px) saturate(1.25);
+  --sx-glass-line: rgba(250, 248, 255, 0.72);
+  --sx-glass-shine: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --sx-glass-blur: blur(20px) saturate(1.45);
+  /* Material Expressive tones (V76 values): tile, top strip, tonal button, ink, caption */
+  --sx-nav-tile: rgba(248, 250, 255, 0.9);
+  --sx-nav-strip: #7aa0ce;
+  --sx-nav-btn: #d5e3fa;
+  --sx-nav-ink: #173762;
+  --sx-nav-cap: #3467a2;
+  --sx-assets-tile: rgba(232, 245, 242, 0.92);
+  --sx-assets-strip: #4a9eaa;
+  --sx-assets-btn: #cde9eb;
+  --sx-assets-ink: #16454c;
+  --sx-assets-cap: #28747b;
+  --sx-review-tile: rgba(238, 232, 249, 0.92);
+  --sx-review-strip: #9084c5;
+  --sx-review-btn: #e6d9f6;
+  --sx-review-ink: #43275f;
+  --sx-review-cap: #704994;
+  --sx-save-tile: rgba(240, 248, 244, 0.92);
+  --sx-save-strip: #51a589;
+  --sx-save-btn: #d8eee4;
+  --sx-save-ink: #1d4f3b;
+  --sx-save-cap: #28684d;
+  --sx-output-tile: rgba(250, 240, 229, 0.92);
+  --sx-output-strip: #ca9c50;
+  --sx-output-btn: #f3e2c2;
+  --sx-output-ink: #4f3512;
+  --sx-output-cap: #805a25;
+  --sx-agent-tile: rgba(246, 236, 247, 0.92);
+  --sx-agent-strip: #b07cc0;
+  --sx-agent-btn: #ecdaf0;
+  --sx-agent-ink: #4d2459;
+  --sx-agent-cap: #7a3f8c;
   /* surfaces */
   --sx-surface: #ffffff;
   --sx-surface-1: #f6f8fd;
@@ -121,7 +157,7 @@ body[data-jaom-light] {
   --sophia-light-panel: 0 0 0 1px #26334b20, 0 5px 16px #26334b1c;
 }
 @media (prefers-reduced-transparency: reduce) {
-  :root { --sx-glass: var(--sx-glass-solid); --sx-glass-blur: none; }
+  :root { --sx-glass: var(--sx-glass-solid); --sx-glass-2: #e6ecfb; --sx-glass-3: #f6f4ff; --sx-glass-side: #f1effb; --sx-glass-blur: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   :root { --sx-dur: 0ms; }

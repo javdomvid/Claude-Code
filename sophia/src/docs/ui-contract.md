@@ -52,7 +52,7 @@ every saved copy carries.
 | 58-blocks | move block, style gallery, table of contents | `SOPHIA.blocks` |
 | 60-compare-proposals | compare two revisions; agent proposals; document map | `SOPHIA.compare`, `SOPHIA.proposals` |
 | 62-docx | offline .docx import (DecompressionStream) / export (stored ZIP) | `SOPHIA.docx` |
-| 70-shell | app bar, edit panel Full/Mini/Hide, side panel, menus, command sheet, status | `SOPHIA.commands`, `SOPHIA.ui`, `side(name)`, `Workbench` |
+| 70-shell | app bar, commands omnibox (commands + document search), main panel and edit panel (each Full/Mini/Hide), View panel, side panel, menus, status | `SOPHIA.commands`, `SOPHIA.ui`, `side(name)`, `Workbench` |
 | 75-flow | selection bar, context menu, "/" menu, structured paste, changes card, shortcuts help | `SophiaFlow`, `SophiaPaste` |
 | 80-profile-qc | Quick Card information cards | `SOPHIA.qc` |
 | 99-boot | start-up order | — |
@@ -62,15 +62,16 @@ Legacy globals kept on purpose (reused modules read them): `data`, `area`, `toas
 `localPIDKeys`, `setDocumentView`, `continuationTemplate`, `stepUndo`, `modal`, `pidSession`, `side`.
 
 ## 3. Events (`SOPHIA.bus`)
-`session` (EditorSession snapshot) · `content-changed` · `outline-changed` · `view-changed` ·
+`session` (EditorSession snapshot) · `transaction` (label, after a committed EditorTransactions.run) · `content-changed` · `outline-changed` · `view-changed` ·
 `record-changed` (after a confirmed save) · `comments-changed` · `commands-changed` · `ready`.
 
 ## 4. Adding a tool (the only correct way)
 1. Implement it in the module that owns the concern (or a new `NN-name.js` if it is a new concern).
 2. Register it: `SOPHIA.commands.register(id, 'Label', 'Group', run, needsEditing, { icon, keys, when, why, profile })`
    (70-shell registers the core list; a module may register its own at load time).
-3. Place its id in `RIBBON` (tab + group) and/or `SHEET` (bento tile) in 70-shell. Mini mode shows
-   every ribbon tool automatically; Full shows the selected tab.
+3. Place its id in 70-shell: `MAIN` (main panel tile), `RIBBON` (edit panel tab + group) and/or
+   `SHEET` (omnibox bento by area). Mini modes show every tool of their panel automatically;
+   Full shows labels (and, in the edit panel, the selected tab).
 4. Add a check to `sophia/tests/v77-functional.cjs`.
 
 ## 5. Styles

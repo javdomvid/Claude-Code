@@ -230,7 +230,13 @@ window.LayoutEngine = (() => {
   function calculate(root, overrides) {
     nodePage = new Map();
     for (const p of pages(root)) for (const n of direct(p, ".pagecontent").childNodes) nodePage.set(n, p);
-    return measuredLayout(root, overrides);
+    /* While editing, sheets may grow past A4 (paper.common.css); measure at true A4 height. */
+    document.body.classList.add("sx-measuring");
+    try {
+      return measuredLayout(root, overrides);
+    } finally {
+      document.body.classList.remove("sx-measuring");
+    }
   }
   function reflow(notify = false) {
     if (document.body.classList.contains("continuous-view")) {
@@ -276,5 +282,71 @@ window.LayoutEngine = (() => {
       muted = old;
     }
   }
-  return Object.freeze({ calculate, reflow, merge, elements, signature });
+  /* V77.1 · A4 view while editing: a sheet grows instead of spilling its text onto the
+     canvas; when typing pauses and a sheet is longer than A4, the pages are recalculated
+     and the caret is put back at the same character of the same block. */
+  function caretMark() {
+    const s = getSelection();
+    if (!s.rangeCount || !area.contains(s.anchorNode)) return null;
+    const host = (s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement)?.closest("[data-block-id]");
+    if (!host) return null;
+    const r = document.createRange();
+    r.selectNodeContents(host);
+    r.setEnd(s.anchorNode, s.anchorOffset);
+    return { id: host.dataset.blockId, off: r.toString().length, top: host.getBoundingClientRect().top };
+  }
+  function caretBack(m) {
+    const host = m && area.querySelector('[data-block-id="' + CSS.escape(m.id) + '"]');
+    if (!host) return;
+    const w = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+    let left = m.off, node = null;
+    while ((node = w.nextNode())) {
+      if (left <= node.nodeValue.length) break;
+      left -= node.nodeValue.length;
+    }
+    const r = document.createRange();
+    if (node) r.setStart(node, left);
+    else { r.selectNodeContents(host); r.collapse(false); }
+    r.collapse(true);
+    host.closest("[contenteditable=true]")?.focus({ preventScroll: true });
+    getSelection().removeAllRanges();
+    getSelection().addRange(r);
+    window.scrollBy(0, host.getBoundingClientRect().top - m.top);
+  }
+  /* Measured at true A4 height (like the paginator), not at the grown editing height. */
+  function overflowing() {
+    document.body.classList.add("sx-measuring");
+    try {
+      return pages(area).some((p) => {
+        const pc = direct(p, ".pagecontent"), foot = direct(p, ".pagefoot");
+        return p.scrollHeight > p.clientHeight + 2 || (!!pc && !!foot && pc.getBoundingClientRect().bottom > foot.getBoundingClientRect().top + 1);
+      });
+    } finally {
+      document.body.classList.remove("sx-measuring");
+    }
+  }
+  let composing = false, autoTimer = 0;
+  function autoReflow() {
+    if (!document.body.classList.contains("editing") || document.body.classList.contains("continuous-view")) return;
+    if (composing || document.querySelector("dialog[open]") || !overflowing()) return;
+    const m = caretMark(), oldMuted = muted;
+    muted = true;
+    try {
+      calculate(area);
+      setEditable();
+    } catch {
+      return;
+    } finally {
+      observer.takeRecords();
+      muted = oldMuted;
+    }
+    caretBack(m);
+    refreshOutline();
+  }
+  const scheduleAuto = () => { clearTimeout(autoTimer); autoTimer = setTimeout(autoReflow, 1200); };
+  area.addEventListener("compositionstart", () => (composing = true));
+  area.addEventListener("compositionend", () => { composing = false; scheduleAuto(); });
+  area.addEventListener("input", scheduleAuto);
+  SOPHIA.bus.on("transaction", scheduleAuto); /* not "session": recovery writes would keep postponing it */
+  return Object.freeze({ calculate, reflow, merge, elements, signature, autoReflow, overflowing });
 })();
