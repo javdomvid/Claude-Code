@@ -1,6 +1,6 @@
 # SOPHIA · Auditoría V74 → entrega V75 y propuestas
 
-Auditoría completa de los editores **SOP** y **Quick Card** V74 (estilo *Obsidian JAOM Material Expressive Glass*), entrega de la **V75 · Lote 1 · Fiabilidad y salida** y propuestas para seguir con Copilot.
+Auditoría completa de los editores **SOP** y **Quick Card** V74 (estilo *Obsidian JAOM Material Expressive Glass*), entregas **V75 · Lote 1 · Fiabilidad y salida** y **V76 · Lote 2 · Edición fluida**, y propuestas para seguir con Copilot.
 
 > Los HTML (V74 y V75) **no están en este repositorio a propósito**. Contienen contenido corporativo, logos y claves PID de prueba. Se entregan como adjuntos en la conversación. Aquí solo hay documentación, esquemas, tokens, el script que genera V75 a partir de V74 y la prueba de regresión.
 
@@ -8,7 +8,8 @@ Auditoría completa de los editores **SOP** y **Quick Card** V74 (estilo *Obsidi
 
 | Archivo | Para qué |
 |---|---|
-| [`HANDOFF_V75_PARA_COPILOT.md`](HANDOFF_V75_PARA_COPILOT.md) | **Pegar a Copilot** junto con el prompt maestro y los dos HTML V75. Incluye huellas, qué cambió, qué se probó, zonas de cuidado y decisiones abiertas. |
+| [`HANDOFF_V76_PARA_COPILOT.md`](HANDOFF_V76_PARA_COPILOT.md) | **Pegar a Copilot** (base vigente V76) junto con el prompt maestro, el traspaso V75 y los dos HTML V76. |
+| [`HANDOFF_V75_PARA_COPILOT.md`](HANDOFF_V75_PARA_COPILOT.md) | Traspaso del Lote 1: huellas, qué cambió, qué se probó, zonas de cuidado y decisiones abiertas (D1–D4). |
 | [`01_INFORME_AUDITORIA.md`](01_INFORME_AUDITORIA.md) | Hallazgos por gravedad (🔴 C · 🟠 A · 🟡 M · 🔵 B) con ubicación, evidencia, arreglo y aceptación, y el estado de cada uno en V75. |
 | [`02_ARQUITECTURA_OBJETIVO.md`](02_ARQUITECTURA_OBJETIVO.md) | Destino de la Fase 4 (núcleo compartido sin big bang): formato motor + datos, modelo de bloques, huellas y firmas, activos, build, encaje del agente (`Proposal`). |
 | [`03_DISENO_OBSIDIAN_JAOM.md`](03_DISENO_OBSIDIAN_JAOM.md) | Diagnóstico del estilo (métricas, D-01…D-16) y especificación con tokens, respetando la disposición aprobada. |
@@ -18,6 +19,8 @@ Auditoría completa de los editores **SOP** y **Quick Card** V74 (estilo *Obsidi
 | [`schemas/`](schemas/) | Esquema JSON del contenido por bloques más ejemplos válidos de SOP y Quick Card (validados con jsonschema 2020‑12). |
 | [`tokens/jaom-tokens.css`](tokens/jaom-tokens.css) | Tokens de diseño JAOM normalizados desde V74. |
 | [`tools/make_v75.py`](tools/make_v75.py) | Genera V75 desde V74 con parches anclados y comprobación de huellas (reproduce V75 byte a byte). |
+| [`tools/v76/`](tools/v76/) | Código legible del Lote 2 (`sophia-v76.js`, `sophia-v76.css`) y `make_v76.py`, que genera V76 desde V75. |
+| [`tests/v76-tools-check.cjs`](tests/v76-tools-check.cjs) | 34 comprobaciones por perfil de las herramientas de V76 (`SOPHIA_DIR=<carpeta con los V76> node tests/v76-tools-check.cjs`). |
 | [`tests/sophia-regression.mjs`](tests/sophia-regression.mjs) | Prueba de regresión en Chromium (Playwright): PASS, FAIL o KNOWN por comprobación. |
 
 ## Resultado de la prueba de regresión
@@ -28,8 +31,10 @@ Auditoría completa de los editores **SOP** y **Quick Card** V74 (estilo *Obsidi
 | Quick Card V74 | 9 | 4 |
 | **SOP V75** | **0** | 4 |
 | **Quick Card V75** | **0** | 4 |
+| **SOP V76** | **0** (+ 34/34 herramientas) | 4 |
+| **Quick Card V76** | **0** (+ 34/34 herramientas) | 4 |
 
-En modo lectura, la pantalla de V75 es idéntica a la de V74 píxel a píxel a 1440, 1024, 390 y 320 px.
+En modo lectura, la pantalla de V75 es idéntica a la de V74, y la de V76 a la de V75, píxel a píxel a 1440, 1024, 390 y 320 px.
 
 ## Cómo ejecutar
 

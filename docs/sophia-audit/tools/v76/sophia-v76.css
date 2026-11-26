@@ -1,0 +1,50 @@
+/* SOPHIA V76 · Lote 2 · superficies de edición fluida. Solo pantalla. Tokens JAOM. */
+@media screen{
+:root{--jaom-ink:#202e46;--jaom-ink-muted:#4a5a73;--jaom-glass-2-bg:rgba(242,245,251,.92);--jaom-glass-2-fallback:#f4f6fb;--jaom-glass-border:rgba(255,255,255,.72);--jaom-outline:#d6e1ee;--jaom-selected:#e3d5ff;--jaom-on-selected:#42256b;--jaom-primary:#104f60;--jaom-on-primary:#fff;--jaom-danger:#a02f4c;--jaom-attention-container:#fff3dc;--jaom-focus:#3b5bdb;--jaom-elev-2:0 6px 22px #090f284d;--jaom-elev-3:0 20px 70px #112c5040;--jaom-radius-sm:9px;--jaom-radius-md:12px;--jaom-radius-xl:20px;--jaom-ease-standard:cubic-bezier(.2,0,0,1)}
+.sv76-selbar,.sv76-menu{position:fixed;z-index:9000;box-sizing:border-box;color:var(--jaom-ink);font:500 13px/1.2 'DM Sans',Arial,sans-serif;background:var(--jaom-glass-2-bg);border:1px solid var(--jaom-glass-border);box-shadow:var(--jaom-elev-2);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2)}
+.sv76-selbar{display:flex;align-items:center;gap:2px;padding:4px;border-radius:var(--jaom-radius-md)}
+.sv76-selbar[hidden]{display:none}
+.sv76-selbar button{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:14px;cursor:pointer}
+.sv76-selbar button:hover{background:#20304614}
+.sv76-selbar button:active{transform:scale(.97)}
+.sv76-selbar .sv76-b{font-weight:800}.sv76-selbar .sv76-i{font-style:italic;font-family:Georgia,serif}.sv76-selbar .sv76-u{text-decoration:underline}.sv76-selbar .sv76-s{text-decoration:line-through}
+.sv76-icon{width:18px;height:18px}
+.sv76-menu{min-width:232px;max-width:min(330px,calc(100vw - 16px));max-height:min(72vh,540px);overflow:auto;padding:6px;border-radius:var(--jaom-radius-md)}
+.sv76-menu input[type=search]{box-sizing:border-box;width:100%;height:34px;margin:0 0 6px;padding:0 10px;border:1px solid var(--jaom-outline);border-radius:8px;background:#fff;color:var(--jaom-ink);font:inherit}
+.sv76-menu [role=menuitem]{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:34px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.sv76-menu [role=menuitem]:hover,.sv76-menu [role=menuitem]:focus-visible{background:var(--jaom-selected);color:var(--jaom-on-selected);outline:none}
+.sv76-menu [role=menuitem][aria-disabled=true]{opacity:.42;cursor:not-allowed;background:transparent;color:inherit}
+.sv76-menu [role=menuitem] small{flex:none;font-size:11px;font-weight:500;opacity:.62}
+.sv76-menu .sv76-danger{color:var(--jaom-danger)}
+.sv76-menu hr{border:0;border-top:1px solid var(--jaom-outline);margin:4px 2px}
+.sv76-menu .sv76-empty{margin:8px 10px;color:var(--jaom-ink-muted)}
+.sv76-selbar button:focus-visible,.sv76-changes button:focus-visible,.sv76-dialog button:focus-visible{outline:2px solid var(--jaom-focus);outline-offset:2px}
+::highlight(sophia-added){background-color:#d3efdc}
+::highlight(sophia-modified){background-color:#ffeeb8}
+::highlight(sophia-moved){background-color:#e6dcf9}
+.sv76-changes{margin:0 0 12px;padding:12px;border:1px solid var(--jaom-outline);border-radius:var(--jaom-radius-md);background:#fff;color:var(--jaom-ink);font:13px/1.4 'DM Sans',Arial,sans-serif}
+.sv76-changes>strong{display:block;margin:0 0 6px;font-size:11px;letter-spacing:.08em;color:#405470}
+.sv76-changes p{margin:6px 0;color:var(--jaom-ink-muted)}
+.sv76-changes .sv76-toggle{display:flex;align-items:center;gap:8px;margin:4px 0 8px;font-size:12px}
+.sv76-changes .sv76-toggle input{width:auto!important;min-width:0;flex:none;margin:0}
+.sv76-changes ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.sv76-chg{padding:8px 8px 8px 10px;border-radius:8px;border-left:4px solid #c9b46a;background:#fbf8ee}
+.sv76-chg.sv76-added{border-left-color:#3f9a64;background:#eef8f2}.sv76-chg.sv76-deleted{border-left-color:var(--jaom-danger);background:#fbeef1}.sv76-chg.sv76-moved{border-left-color:#8a6fc4;background:#f4effc}
+.sv76-chg b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.sv76-chg span{display:block;overflow-wrap:anywhere}
+.sv76-chg div{display:flex;gap:6px;margin-top:6px}
+.sv76-chg button{width:auto!important;flex:none;min-height:28px;padding:0 10px;border:1px solid var(--jaom-outline);border-radius:8px;background:#fff;color:var(--jaom-ink);font:500 12px 'DM Sans',Arial,sans-serif;cursor:pointer}
+.sv76-chg button:hover{background:var(--jaom-selected);color:var(--jaom-on-selected)}
+.sv76-dialog{width:min(560px,94vw);max-height:86dvh;padding:0;border:1px solid var(--jaom-outline);border-radius:var(--jaom-radius-xl);background:#fff;color:var(--jaom-ink);box-shadow:var(--jaom-elev-3);font:14px/1.45 'DM Sans',Arial,sans-serif}
+.sv76-dialog::backdrop{background:rgba(8,12,28,.45)}
+.sv76-dialog header{padding:20px 24px 8px}.sv76-dialog header small{font-size:11px;letter-spacing:.08em;color:#405470}.sv76-dialog h2{margin:4px 0 0;font-size:20px}
+.sv76-dialog table{width:calc(100% - 48px);margin:8px 24px;border-collapse:collapse}
+.sv76-dialog th,.sv76-dialog td{padding:7px 8px;border-bottom:1px solid #edf1f7;text-align:left;vertical-align:top}
+.sv76-dialog th{white-space:nowrap;font:600 12px/1.4 ui-monospace,Consolas,monospace;color:var(--jaom-on-selected)}
+.sv76-dialog footer{display:flex;justify-content:flex-end;padding:12px 24px 20px}
+.sv76-dialog footer button{min-height:40px;padding:0 18px;border:0;border-radius:var(--jaom-radius-sm);background:var(--jaom-primary);color:var(--jaom-on-primary);font:600 14px 'DM Sans',Arial,sans-serif;cursor:pointer}
+@media (prefers-reduced-transparency:reduce){.sv76-selbar,.sv76-menu{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--jaom-glass-2-fallback)}}
+@media (prefers-reduced-motion:no-preference){.sv76-selbar:not([hidden]),.sv76-menu{animation:sv76-in .12s var(--jaom-ease-standard)}}
+@keyframes sv76-in{from{opacity:0;transform:translateY(4px) scale(.985)}}
+@media (pointer:coarse){.sv76-selbar button,.sv76-menu [role=menuitem]{min-height:44px}}
+}

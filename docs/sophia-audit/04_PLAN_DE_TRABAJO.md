@@ -16,7 +16,7 @@
 |---|---|---|---|---|
 | 1 · Fiabilidad y salida | **V75 ✅** | C-01, A-01, A-02, A-03, A-10, M-02, M-03, M-04, receptor del recibo | — | No |
 | D · Decisiones | — | D1 versiones · D2 claves · D3 IDs · D4 huellas | **Sí** | — |
-| 2 · Edición fluida | V76 | W-10, W-04, W-01, W-02, W-03, W-06, W-12 (+ `Workbench.register`) | No (W-05 sí) | Contenido normal |
+| 2 · Edición fluida | **V76 ✅** | W-10, W-04, W-01, W-02, W-03, W-06, W-12 (+ `Workbench.register`, deshacer que conserva el cursor, Intro crea `<p>`) | No (W-05 sí, no incluido) | Contenido normal |
 | 3 · Control documental | V77 | D1 (versiones únicas y esquema), D4 (huellas SHA‑256 + aviso al abrir), D2 (sin claves) | Tras D1, D2, D4 | **Registro** |
 | 4 · Identidad y revisión | V78 | D3 (IDs automáticos), W-07 (mover bloques), W-11 (comentarios), W-13 (TBC), W-23 (puerta de calidad) | Tras D3 | Contenido + registro |
 | 5 · Impresión controlada | V79 | M-10 (pie de copia controlada, marca de BORRADOR), la impresión del navegador usa el CSS de Print Studio, M-11 (CSS del folio con `id`) | Formato del pie | No |
@@ -30,7 +30,7 @@
 
 ## Prompts por lote
 
-### Lote 2 · Edición fluida (V76)
+### Lote 2 · Edición fluida (V76) — ✅ entregado; ver `HANDOFF_V76_PARA_COPILOT.md`
 
 > Partiendo de V75 (verifica las huellas), prepara **V76 · Lote 2 · Edición fluida** en ambos perfiles, siguiendo `05_HERRAMIENTAS_TIPO_WORD.md`: W-10, W-04 (sin cambiar Ctrl+K todavía), W-01, W-02, W-03, W-06 y W-12.
 >
