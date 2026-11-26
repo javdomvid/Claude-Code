@@ -1,0 +1,380 @@
+/* SOPHIA V77 · paper (SOP) — the printed page. Copied from V76 unchanged except:
+ * the old toolbar offsets for .workspace were removed (the shell owns the canvas). Print Studio
+ * uses this sheet as its template, so keep it free of app/chrome selectors. Edit in place. */
+.sheet {
+  background: white;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto 26px;
+  padding: 19mm 20mm 18mm;
+  box-sizing: border-box;
+  box-shadow: 0 4px 18px #0007;
+  position: relative;
+}
+.pagehead {
+  font-size: 11px;
+  border-bottom: 1px solid #777;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+}
+.identity {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 11px;
+  margin: 18px 0 25px;
+}
+.identity td {
+  border: 1px solid #aaa;
+  padding: 9px;
+}
+.identity .label {
+  background: #e2e2e2;
+  font-weight: bold;
+  width: 19%;
+}
+.identity .value {
+  width: 31%;
+}
+.sheet h1 {
+  font-size: 19px;
+}
+.sheet h2 {
+  font-size: 15px;
+  color: #111;
+  margin-top: 25px;
+}
+.sheet h3 {
+  font-size: 13px;
+}
+.sheet p,
+.sheet li {
+  line-height: 1.45;
+}
+.sheet table:not(.identity) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+}
+.sheet th,
+.sheet td {
+  border: 1px solid #aaa;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.sheet th {
+  background: #e7e7e7;
+}
+.warning {
+  border-left: 3px solid #c49832;
+  background: #fff8e8;
+  padding: 10px;
+  font-size: 12px;
+  margin: 16px 0;
+}
+.pagefoot {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #aaa;
+  padding-top: 8px;
+  margin-top: 25px;
+  font-size: 10px;
+  color: #555;
+}
+.sheet img {
+  max-width: 100%;
+  height: auto;
+}
+.sheet img.selected {
+  outline: 3px solid #1687ba;
+}
+.editing [contenteditable="true"] {
+  outline: 1px dashed #b8c9d6;
+  outline-offset: 5px;
+}
+.brand {
+  font-size: 11px;
+  color: #777;
+  text-align: right;
+}
+.pagecontent {
+  min-height: 40px;
+}
+#document {
+  transform-origin: top center;
+}
+@media print {
+  .workspace {
+    padding: 0;
+  }
+  .sheet {
+    margin: 0;
+    box-shadow: none;
+    width: auto;
+    min-height: 0;
+    break-after: page;
+    padding: 0;
+  }
+  .sheet:last-child {
+    break-after: auto;
+  }
+  #document {
+    zoom: 1 !important;
+  }
+}
+.brand {
+  height: 9mm;
+  text-align: right;
+  margin: 0 0 2mm;
+  line-height: 1;
+}
+.brand .corporate-logo {
+  width: 72mm;
+  height: auto;
+  max-width: 72mm;
+  display: inline-block;
+  object-fit: contain;
+  outline: none !important;
+}
+.doc-classification {
+  text-align: right;
+  font-size: 9px;
+  color: #555;
+  margin: 0 0 7mm;
+}
+.doc-classification.continuation {
+  text-align: left;
+  margin: 3mm 0 7mm;
+}
+.sheet {
+  padding: 12mm 25mm 18mm;
+  position: relative;
+}
+.identity {
+  font-size: 10.5px;
+  margin: 0 0 9mm;
+  table-layout: fixed;
+  border: 1px solid #777;
+}
+.identity td {
+  padding: 5px 6px;
+  border: 1px solid #999;
+  line-height: 1.3;
+}
+.identity .label {
+  background: #d9d9d9;
+  font-weight: 400;
+  width: 19%;
+}
+.identity .value {
+  width: 31%;
+}
+.pagehead {
+  display: grid;
+  grid-template-columns: 18% 82%;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #999;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+.header-label {
+  background: #d9d9d9;
+  padding: 5px 7px;
+  border-right: 1px solid #999;
+}
+.header-title {
+  padding: 5px 7px;
+}
+.pagefoot {
+  border: 0;
+  justify-content: center;
+  font-size: 10px;
+  margin-top: 12mm;
+  color: #333;
+}
+.sheet h2 {
+  font-size: 14px;
+  letter-spacing: 0;
+  margin-top: 23px;
+}
+.sheet h3 {
+  font-size: 12px;
+}
+.sheet .pagecontent {
+  font-size: 12px;
+}
+.sheet .pagecontent p,
+.sheet .pagecontent li {
+  line-height: 1.45;
+}
+.page-number {
+  display: block;
+  text-align: center;
+}
+@media print {
+  .sheet {
+    padding: 0;
+  }
+  .brand .corporate-logo {
+    width: 72mm;
+  }
+  .doc-classification {
+    color: #555;
+  }
+}
+.brand .corporate-logo {
+  background: #fff !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+}
+.layout-measure-v27 {
+  position: fixed !important;
+  left: -20000px !important;
+  top: 0 !important;
+  width: 210mm !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  zoom: 1 !important;
+  transform: none !important;
+}
+.layout-measure-v27 > .sheet {
+  height: 297mm !important;
+  min-height: 297mm !important;
+  max-height: none !important;
+  width: 210mm !important;
+  max-width: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 0 26px !important;
+  padding: 12mm 25mm 18mm !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+.layout-measure-v27 > .sheet .pagefoot {
+  display: flex !important;
+  margin-top: auto !important;
+  flex: 0 0 auto !important;
+}
+.layout-measure-v27 > .sheet .pagehead {
+  display: grid !important;
+}
+.layout-measure-v27 > .sheet .doc-classification {
+  display: block !important;
+}
+#document > .sheet > .pagefoot {
+  flex-shrink: 0;
+}
+#document .pagecontent figure {
+  break-inside: avoid;
+}
+#document .pagecontent [data-layout-before="page"] {
+  break-before: page;
+}
+#document .pagecontent [data-layout-keep="next"] {
+  break-after: avoid;
+}
+@media print {
+  .layout-measure-v27 {
+    display: none !important;
+  }
+}
+.sheet > .qc-hero,
+.sheet > .brand,
+.sheet > .identity,
+.sheet > .pagehead,
+.sheet > .doc-classification {
+  flex-shrink: 0 !important;
+}
+@media print {
+  .workspace {
+    padding-top: 0 !important;
+  }
+}
+:is(#document, .layout-measure-v27) .pagecontent table:not(.identity) {
+  box-sizing: border-box;
+  inline-size: 100% !important;
+  max-inline-size: 100% !important;
+  min-inline-size: 0 !important;
+  table-layout: fixed !important;
+  margin-inline: 0 !important;
+}
+:is(#document, .layout-measure-v27) .pagecontent table:not(.identity) :is(td, th) {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+}
+:is(#document, .layout-measure-v27) .pagecontent table:not(.identity) :is(p, span, code, pre, a) {
+  overflow-wrap: anywhere !important;
+  white-space: pre-wrap !important;
+}
+:is(#document, .layout-measure-v27) .pagecontent table:not(.identity) :is(img, svg, figure) {
+  max-inline-size: 100% !important;
+}
+:is(#document, .layout-measure-v27) .pagecontent table:has(> colgroup[data-v425-cols]) :is(td, th) {
+  width: auto !important;
+}
+#document .sheet .pagehead {
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  flex: none;
+  break-inside: avoid;
+  break-after: avoid;
+}
+#document .sheet table.pagehead {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+}
+#document .sheet table.pagehead td:first-child {
+  width: 18%;
+}
+body.continuous-view #document > .sheet:not(:first-child) > .pagehead {
+  display: none;
+}
+@media print {
+  body.continuous-view #document > .sheet:not(:first-child) > table.pagehead {
+    display: table !important;
+  }
+  #document .sheet > .pagehead {
+    margin-block-end: 4mm !important;
+  }
+}
+@media screen {
+  :is(body:not(.continuous-view) #document, .layout-measure-v27) > .sheet + .sheet:has(> .pagehead) {
+    padding-top: 12mm !important;
+  }
+}
+@media screen {
+  body[data-jaom-light]:not(.continuous-view) #document > .sheet {
+    box-shadow: var(--sophia-light-paper) !important;
+  }
+  body[data-jaom-light].continuous-view #document > .sheet::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: var(--sophia-light-paper);
+    clip-path: inset(var(--sophia-paper-top, -48px) -48px var(--sophia-paper-bottom, -48px) -48px);
+  }
+  body[data-jaom-light].continuous-view #document > .sheet ~ .sheet {
+    --sophia-paper-top: 1px;
+  }
+  body[data-jaom-light].continuous-view #document > .sheet:has(~ .sheet) {
+    --sophia-paper-bottom: 1px;
+  }
+}
+@media print {
+  body > :not(#document) {
+    display: none !important;
+  }
+  #document [data-media-ui] {
+    display: none !important;
+  }
+}
