@@ -2,7 +2,7 @@
 
 Auditoría completa de los editores **SOP** y **Quick Card** V74 (estilo *Obsidian JAOM Material Expressive Glass*), entregas **V75 · Lote 1 · Fiabilidad y salida** y **V76 · Lote 2 · Edición fluida**, y propuestas para seguir con Copilot.
 
-> Los HTML (V74 y V75) **no están en este repositorio a propósito**. Contienen contenido corporativo, logos y claves PID de prueba. Se entregan como adjuntos en la conversación. Aquí solo hay documentación, esquemas, tokens, el script que genera V75 a partir de V74 y la prueba de regresión.
+> Los HTML (V74, V75 y V76) **no están en este repositorio a propósito**. Contienen contenido corporativo, logos y claves PID de prueba. Se entregan como adjuntos en la conversación. Aquí solo hay documentación, esquemas, tokens, el script que genera V75 a partir de V74 y la prueba de regresión.
 
 ## Por dónde empezar
 
