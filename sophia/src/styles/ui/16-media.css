@@ -1,0 +1,268 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/16-media.css
+ * What:  images: side-panel image tools, Image Layout Studio, selection frame, drop guide, placement
+ * Owner: engine/16-media.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+#imageTools .media-summary {
+  padding: 12px;
+  background: #e9f2f3;
+  border-left: 3px solid #0b747c;
+  margin: 12px 0;
+}
+#imageTools .media-summary strong {
+  font-size: 11px;
+  letter-spacing: 0.8px;
+}
+#imageTools .media-summary p {
+  margin: 5px 0 0;
+  font-size: 10px;
+}
+#imageTools .media-preview {
+  width: 100%;
+  height: 110px;
+  object-fit: contain;
+  background: #edf2f4;
+  border: 1px solid #c5d6df;
+  margin: 12px 0 0;
+}
+#imageTools .media-properties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: 12px 0;
+}
+#imageTools .media-properties label {
+  display: grid;
+  gap: 4px;
+  font-size: 10px;
+  margin: 0;
+}
+#imageTools .media-properties label:first-child,
+#imageTools .media-properties label:nth-child(3),
+#imageTools .media-properties label:nth-child(7),
+#imageTools .media-primary {
+  grid-column: 1/-1;
+}
+#imageTools .media-primary {
+  background: #0b747c !important;
+  color: white !important;
+  border-color: #0b747c !important;
+  padding: 10px;
+}
+#imageTools .media-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+#imageTools .media-buttons button {
+  margin: 0;
+  padding: 8px 5px;
+  font-size: 10px;
+}
+#imageTools .media-buttons button:nth-last-child(-n + 3) {
+  grid-column: 1/-1;
+}
+.media-dialog .media-asset {
+  border: 1px solid #c9dbe1;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  background: #f8fbfc;
+}
+.media-dialog .media-asset > img {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  background: #e9f0f2;
+}
+.media-dialog .media-asset > p {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.media-dialog [data-error] {
+  padding: 0 26px;
+}
+.media-dialog [data-assets]:empty {
+  display: none;
+}
+.media-dialog [data-apply]:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+#media-selection {
+  position: fixed;
+  z-index: 8000;
+  pointer-events: none;
+  outline: 2px solid #087d8b;
+  box-shadow: 0 0 0 4px #fff9;
+  box-sizing: border-box;
+}
+#media-selection[hidden],
+#media-drop-guide[hidden],
+#media-resize-preview[hidden] {
+  display: none !important;
+}
+#media-selection [data-media-bar] {
+  position: absolute;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  white-space: nowrap;
+  background: #143d51;
+  padding: 4px;
+  border-radius: 7px;
+  box-shadow: 3px 3px 0 #08253633;
+  pointer-events: auto;
+}
+#media-selection button {
+  font:
+    600 11px/1.2 "DM Sans",
+    Arial,
+    sans-serif;
+  border: 0;
+  border-radius: 4px;
+  padding: 7px 9px;
+  background: #244f63;
+  color: white;
+  cursor: pointer;
+}
+#media-selection button:hover {
+  background: #0c8490;
+}
+#media-selection [data-drag] {
+  cursor: grab;
+  background: #0b7b85;
+  touch-action: none;
+}
+#media-selection [data-resize] {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  padding: 3px;
+  width: 23px;
+  height: 23px;
+  border: 2px solid white;
+  background: #087d8b;
+  cursor: nwse-resize;
+  pointer-events: auto;
+  touch-action: none;
+}
+#media-selection [data-media-dimensions] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: #143d51;
+  color: white;
+  font:
+    10px "DM Sans",
+    Arial,
+    sans-serif;
+  padding: 4px 7px;
+}
+#media-selection button:focus-visible {
+  outline: 3px solid #e9f58b;
+  outline-offset: 2px;
+}
+#media-drop-guide {
+  position: fixed;
+  z-index: 8100;
+  border-top: 4px solid #0a8e99;
+  pointer-events: none;
+  color: #075d66;
+  background: #e6f8f4;
+  font:
+    600 11px "DM Sans",
+    Arial,
+    sans-serif;
+  line-height: 24px;
+  box-shadow: 0 2px 8px #0002;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#media-resize-preview {
+  position: fixed;
+  z-index: 8100;
+  pointer-events: none;
+  border: 2px dashed #0a8e99;
+  background: #a3e3dd44;
+  color: #064b55;
+  font:
+    600 12px "DM Sans",
+    Arial,
+    sans-serif;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.media-placing {
+  user-select: none;
+  cursor: crosshair;
+}
+.media-placement {
+  margin: 15px 0;
+  padding: 12px;
+  background: #edf5f5;
+  border: 1px solid #c4d9de;
+  border-radius: 8px;
+}
+.media-placement > strong {
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.media-placement > p {
+  font-size: 10px;
+  line-height: 1.6;
+}
+.media-placement-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.media-placement-grid button,
+.media-presets button {
+  font-size: 10px !important;
+  margin: 0 !important;
+  padding: 8px 4px !important;
+}
+.media-presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+}
+.media-spacing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  #media-selection [data-media-bar] {
+      max-width: calc(100vw - 20px);
+      gap: 1px;
+    }
+  #media-selection button {
+      font-size: 10px;
+      padding: 8px 5px;
+    }
+}
+.import-tools-v22 {
+  margin: 12px 0;
+  padding: 14px;
+  background: #eef3fc;
+  border-radius: 12px;
+}
+.import-tools-v22 button {
+  margin: 6px;
+  border-radius: 18px;
+  padding: 8px 12px;
+}
+.import-tools-v22 input {
+  max-width: 130px;
+}
+.import-tools-v22 p {
+  font-size: 11px;
+  color: #425e83;
+}

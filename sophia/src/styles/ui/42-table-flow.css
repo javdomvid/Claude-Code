@@ -1,0 +1,129 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/42-table-flow.css
+ * What:  Table Flow studio, Quick Card (dialog.table-flow-v28)
+ * Owner: engine/42-table-flow.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.table-flow-v28 {
+  width: min(1120px, 95vw);
+  max-height: 92dvh;
+  padding: 0;
+  border: 1px solid #bdcce1;
+  border-radius: 18px;
+  color: #18324e;
+  background: #f5f8fc;
+  font:
+    13px "DM Sans",
+    Arial,
+    sans-serif;
+}
+.table-flow-v28::backdrop {
+  background: #102038aa;
+}
+.table-flow-v28 header {
+  padding: 24px 28px;
+  background: white;
+  border-bottom: 1px solid #d5deeb;
+}
+.table-flow-v28 h2 {
+  font-size: 30px;
+  margin: 8px 0;
+}
+.table-flow-v28 small {
+  letter-spacing: 1px;
+  color: #506c95;
+}
+.table-flow-v28 section {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  max-height: 62dvh;
+  overflow: auto;
+}
+.table-flow-v28 aside {
+  padding: 24px;
+  background: #edf2fa;
+}
+.table-flow-v28 label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+.table-flow-v28 input[type="number"],
+.table-flow-v28 select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+}
+.table-flow-v28 aside p {
+  line-height: 1.55;
+  font-size: 12px;
+}
+.table-flow-v28 .tf-check {
+  font-size: 12px;
+}
+.table-flow-v28 main {
+  padding: 22px;
+  min-width: 0;
+}
+.table-flow-v28 article {
+  background: white;
+  border: 1px solid #d3deec;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  overflow: auto;
+}
+.table-flow-v28 table {
+  border-collapse: collapse;
+  max-width: 100%;
+  width: 100%;
+  font-size: 12px;
+}
+.table-flow-v28 td,
+.table-flow-v28 th {
+  border: 1px solid #b7c5d6;
+  padding: 8px;
+  text-align: left;
+}
+.table-flow-v28 th {
+  background: #e8eef8;
+}
+.table-flow-v28 footer {
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  border-top: 1px solid #d5deeb;
+}
+.table-flow-v28 button {
+  border-radius: 18px;
+  padding: 10px 20px;
+}
+.table-flow-v28 [data-apply] {
+  background: #315c9e;
+  color: white;
+}
+.table-flow-v28 button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.table-flow-v28 [data-error] {
+  color: #a12743;
+}
+.table-flow-v28 :focus-visible {
+  outline: 3px solid #6b90da;
+  outline-offset: 3px;
+}
+@media (max-width: 750px) {
+  .table-flow-v28 section {
+      grid-template-columns: 1fr;
+    }
+}
+@media print {
+  .table-flow-v28 {
+      display: none !important;
+    }
+}

@@ -1,0 +1,277 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/28-tables.css
+ * What:  Table Studio (dialog.table-studio-v26)
+ * Owner: engine/28-tables.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.table-studio-v26 {
+  box-sizing: border-box;
+  width: min(1240px, 96vw);
+  height: min(960px, 94dvh);
+  max-height: 94dvh;
+  padding: 0;
+  border: 1px solid #c5d3eb;
+  border-radius: 22px;
+  background: #f7f9ff;
+  color: #213b60;
+  box-shadow: 0 20px 70px #112c5040;
+  font:
+    13px/1.6 "DM Sans",
+    Arial,
+    sans-serif;
+  overflow: hidden;
+}
+.table-studio-v26[open] {
+  display: flex;
+  flex-direction: column;
+}
+.table-studio-v26::backdrop {
+  background: #102e48a8;
+  backdrop-filter: blur(3px);
+}
+.table-studio-v26 header {
+  padding: 20px 26px;
+  background: #eaf0ff;
+  border-bottom: 1px solid #d5e0f3;
+  flex: none;
+}
+.table-studio-v26 header small {
+  font-size: 10px;
+  letter-spacing: 1.6px;
+}
+.table-studio-v26 h2 {
+  margin: 5px 0;
+  font-size: 29px;
+  letter-spacing: -0.7px;
+}
+.table-studio-v26 header p {
+  margin: 0;
+  color: #526c91;
+}
+.table-studio-v26 nav {
+  display: flex;
+  gap: 18px;
+  align-items: end;
+  flex-wrap: wrap;
+  padding: 12px 26px;
+  background: white;
+  border-bottom: 1px solid #d5e0f3;
+  flex: none;
+}
+.table-studio-v26 nav label {
+  flex: 1;
+}
+.table-studio-v26 [data-mode] {
+  font-size: 11px;
+  color: #526c91;
+}
+.table-studio-v26 section {
+  display: grid;
+  grid-template-columns: 350px minmax(0, 1fr);
+  gap: 22px;
+  padding: 20px 26px;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+.table-studio-v26 label {
+  display: grid;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.table-studio-v26 select,
+.table-studio-v26 input:not([type="checkbox"]) {
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #bacbe7;
+  border-radius: 9px;
+  color: #254d91;
+  background: #fff;
+  font:
+    12px/1.5 "DM Sans",
+    Arial,
+    sans-serif;
+  width: 100%;
+  min-width: 0;
+}
+.table-studio-v26 fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.table-studio-v26 legend {
+  font-weight: bold;
+  font-size: 14px;
+  padding: 0;
+  margin: 0 0 12px;
+}
+.table-studio-v26 .ts26-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.table-studio-v26 .ts26-fields label:last-child:nth-child(odd) {
+  grid-column: 1/-1;
+}
+.table-studio-v26 .ts26-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.table-studio-v26 button {
+  padding: 9px 13px;
+  border: 1px solid #bacbe7;
+  border-radius: 20px;
+  background: #f3f6ff;
+  color: #254d91;
+  font:
+    600 11px "DM Sans",
+    Arial,
+    sans-serif;
+  cursor: pointer;
+}
+.table-studio-v26 button:disabled,
+.table-studio-v26 fieldset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.table-studio-v26 [data-stage-layout],
+.table-studio-v26 [data-stage-cells] {
+  margin-bottom: 20px;
+}
+.table-studio-v26 .ts26-preview-column {
+  min-width: 0;
+}
+.table-studio-v26 h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+.table-studio-v26 .ts26-note {
+  font-size: 11px;
+  color: #617594;
+  margin: 8px 0 15px;
+}
+.table-studio-v26 .ts26-preview {
+  background: #fff;
+  border: 1px solid #d7e1f3;
+  border-radius: 14px;
+  padding: 20px;
+  overflow: auto;
+  max-height: 44dvh;
+  margin-bottom: 18px;
+}
+.table-studio-v26 .ts26-preview table {
+  border-collapse: collapse;
+  width: 100%;
+  font:
+    12px/1.5 "DM Sans",
+    Arial,
+    sans-serif;
+  table-layout: auto;
+}
+.table-studio-v26 .ts26-preview td,
+.table-studio-v26 .ts26-preview th {
+  border: 1px solid #c1cfe5;
+  padding: 10px;
+  min-width: 40px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.table-studio-v26 .ts26-preview th {
+  background: #e8effb;
+  font-weight: bold;
+}
+.table-studio-v26 .ts26-preview [data-selected="true"] {
+  outline: 3px solid #315ca8;
+  outline-offset: -3px;
+}
+.table-studio-v26 .ts26-preview caption {
+  font-weight: bold;
+  padding: 10px;
+}
+.table-studio-v26 [data-operations] {
+  font-size: 11px;
+  max-height: 140px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  padding-left: 22px;
+}
+.table-studio-v26 [data-error] {
+  color: #a02f4c;
+  background: #fff0f3;
+  padding: 10px;
+  border-radius: 10px;
+}
+.table-studio-v26 [data-error]:empty {
+  display: none;
+}
+.table-studio-v26 [data-delete-confirm] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #95394f;
+}
+.table-studio-v26 footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 26px;
+  border-top: 1px solid #d7e1f3;
+  background: #fff;
+  flex: none;
+}
+.table-studio-v26 footer > div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.table-studio-v26 [data-apply] {
+  background: #375caa;
+  color: white;
+}
+.table-studio-v26 [data-discard] {
+  color: #a02f4c;
+  border-color: #e1b4c0;
+}
+.table-studio-v26 [hidden] {
+  display: none !important;
+}
+.table-studio-v26 :focus-visible {
+  outline: 3px solid #6a8ee0;
+  outline-offset: 3px;
+}
+@media (max-width: 850px) {
+  .table-studio-v26 section {
+      grid-template-columns: 1fr;
+    }
+  .table-studio-v26 header,
+    .table-studio-v26 nav,
+    .table-studio-v26 section {
+      padding: 14px;
+    }
+  .table-studio-v26 h2 {
+      font-size: 25px;
+    }
+  .table-studio-v26 footer {
+      padding: 12px;
+      flex-wrap: wrap;
+    }
+  .table-studio-v26 .ts26-preview {
+      max-height: 40dvh;
+    }
+  .table-studio-v26 nav {
+      max-height: 20dvh;
+      overflow: auto;
+    }
+}
+@media print {
+  .table-studio-v26 {
+      display: none !important;
+    }
+}

@@ -1,0 +1,223 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/50-persist.css
+ * What:  save receipt (dialog.save-receipt): download, confirm, optional byte check
+ * Owner: engine/50-persist.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.save-receipt {
+  --sr-ink: #12384d;
+  --sr-line: #c7d8df;
+  --sr-accent: #0b7079;
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  padding: 0;
+  border: 2px solid var(--sr-ink);
+  border-radius: 16px 16px 5px 16px;
+  background: #fff;
+  color: var(--sr-ink);
+  width: min(620px, calc(100vw - 28px));
+  max-height: 90dvh;
+  box-shadow: 7px 7px 0 #071f3450;
+  overflow: auto;
+  font:
+    14px/1.6 "DM Sans",
+    Arial,
+    sans-serif;
+  z-index: 15000;
+}
+.save-receipt:not([open]) {
+  display: none;
+}
+.save-receipt::backdrop {
+  background: #071f3499;
+  backdrop-filter: blur(2px);
+}
+.receipt-card {
+  margin: 0;
+}
+.receipt-card header {
+  padding: 25px 28px 20px;
+  background: #eef4f5;
+  border-bottom: 1px solid var(--sr-line);
+}
+.receipt-eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.8px;
+  font-weight: 700;
+  color: #54727e;
+}
+.receipt-card h2 {
+  font-size: clamp(23px, 3vw, 30px);
+  letter-spacing: -0.8px;
+  line-height: 1.2;
+  margin: 10px 0;
+}
+.receipt-card header p {
+  font-size: 12px;
+  color: #56717d;
+  margin: 0;
+}
+.receipt-card section {
+  padding: 23px 28px;
+}
+.receipt-file {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 15px;
+  background: #f7fafb;
+  border: 1px solid var(--sr-line);
+  border-radius: 8px;
+}
+.receipt-file-icon {
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  background: #12384d;
+  color: #e8efac;
+  padding: 15px 8px;
+  border-radius: 5px;
+}
+.receipt-file strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  display: block;
+}
+.receipt-file small {
+  display: block;
+  color: #68808c;
+  font-size: 10px;
+  margin-top: 4px;
+}
+.receipt-state {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 0;
+  margin: 8px 0;
+}
+.receipt-actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.save-receipt button,
+.save-receipt a[data-download] {
+  font:
+    600 12px "DM Sans",
+    Arial,
+    sans-serif;
+  padding: 11px 15px;
+  border: 1px solid var(--sr-ink);
+  border-radius: 6px;
+  background: white;
+  color: var(--sr-ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+.save-receipt a[data-download],
+.save-receipt button[data-confirm] {
+  background: var(--sr-accent);
+  border-color: var(--sr-accent);
+  color: white;
+}
+.save-receipt button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.receipt-help {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #607c89;
+  margin: 16px 0;
+}
+.receipt-check {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 12px;
+  padding: 13px;
+  background: #f3f5dc;
+  border-radius: 6px;
+}
+.receipt-check input {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin: 2px 0;
+}
+.receipt-error {
+  font-size: 12px;
+  color: #a22a40;
+  margin: 10px 0 0;
+}
+.receipt-error:empty {
+  display: none;
+}
+.receipt-card footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--sr-line);
+  padding: 16px 28px;
+  background: #fafcfd;
+}
+.save-receipt :focus-visible {
+  outline: 3px solid #49a7bc;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .receipt-card header,
+    .receipt-card section {
+      padding: 20px;
+    }
+  .receipt-card footer {
+      padding: 15px 20px;
+      flex-wrap: wrap;
+    }
+}
+@media print {
+  .save-receipt {
+      display: none !important;
+    }
+}
+@media screen {
+  .save-receipt :focus-visible,
+    .modalveil :focus-visible {
+      outline: 2px solid #245b9d !important;
+      outline-offset: 2px;
+    }
+  .save-receipt .receipt-card > header {
+      background: #eef4fb;
+      border-bottom-color: #cad9ea;
+    }
+  .save-receipt .receipt-card .receipt-eyebrow {
+      color: #395d82;
+    }
+}
+@media screen {
+  .save-receipt .receipt-check {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  .save-receipt .receipt-check input[type="file"] {
+      width: 100%;
+      height: auto;
+      min-height: 36px;
+      flex: 1 1 auto;
+      margin: 6px 0 0;
+      font: inherit;
+    }
+}
+.save-receipt { --tone-cap: var(--sx-save-cap); --tone-strip: var(--sx-save-strip); --tone-btn: var(--sx-save-btn); --tone-ink: var(--sx-save-ink); --tone-tile: var(--sx-save-tile); }
+/* receipt details (moved from app.css) */
+.save-receipt[data-phase="failed"] .receipt-state { color: #a22a40; }
+.save-receipt[data-phase="written"] .receipt-state,
+.save-receipt[data-phase="verified"] .receipt-state { color: #1c6b4d; }
+.session-read-note { padding: 11px; background: #f5f0d7; border-left: 3px solid #b8a54c; font-size: 11px; }
+.save-receipt .receipt-check { flex-direction: column; align-items: stretch; }
+.save-receipt .receipt-verify { margin: 10px 0 4px; padding: 8px 12px; border-radius: 12px; background: rgba(234, 240, 255, 0.7); font-size: 12px; }
+.save-receipt .receipt-verify summary { cursor: pointer; font-weight: 700; color: #3467a2; }
+.save-receipt .receipt-check input[type="file"] { width: 100%; height: auto; min-height: 36px; flex: 1 1 auto; margin: 6px 0 0; font: inherit; }

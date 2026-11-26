@@ -1,0 +1,129 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/98-studio-family.css
+ * What:  ONE look for every studio window: glass frame, tonal header, × close (.sx-x, added by engine/79-shell.js), tonal buttons, filled primary action. Loaded after every studio sheet so it wins; a studio opts in by being listed in the :is(…) selectors here AND in STUDIOS in engine/79-shell.js
+ * Owner: engine/79-shell.js (× close)
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+/* ===================================================================================
+ * STUDIO FAMILY (V78 · owner decision U) — one look for every studio window:
+ * glass frame, tonal header with kicker, × close (added by 70-shell), tonal buttons,
+ * filled primary action on the right, the same inputs everywhere. Tone per studio:
+ *   Print / Layout → output (peach) · Table / Image / Library → assets (mint)
+ *   Checks / Structure / Compare → review (lavender) · Save receipt → save (green)
+ *   Paragraph / Insert table / Help → navigate (blue)
+ * Edit this section in place; the per-studio rules above only position their content.
+ * =================================================================================== */
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23) { --tone-cap: var(--sx-assets-cap); --tone-strip: var(--sx-assets-strip); --tone-btn: var(--sx-assets-btn); --tone-ink: var(--sx-assets-ink); --tone-tile: var(--sx-assets-tile); }
+:is(#p42-print, .layout-studio-v27) { --tone-cap: var(--sx-output-cap); --tone-strip: var(--sx-output-strip); --tone-btn: var(--sx-output-btn); --tone-ink: var(--sx-output-ink); --tone-tile: var(--sx-output-tile); }
+:is(.review-workspace-v22, .structure-v25) { --tone-cap: var(--sx-review-cap); --tone-strip: var(--sx-review-strip); --tone-btn: var(--sx-review-btn); --tone-ink: var(--sx-review-ink); --tone-tile: var(--sx-review-tile); }
+:is(.command-dialog, .sv76-dialog) { --tone-cap: var(--sx-nav-cap); --tone-strip: var(--sx-nav-strip); --tone-btn: var(--sx-nav-btn); --tone-ink: var(--sx-nav-ink); --tone-tile: var(--sx-nav-tile); }
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .save-receipt, .command-dialog, .sv76-dialog) {
+  font-family: "DM Sans", Arial, sans-serif !important;
+  color: #1d2b44 !important;
+  background: rgba(246, 244, 255, 0.92) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
+  border: 1px solid rgba(197, 185, 223, 0.85) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 26px 80px rgba(20, 13, 54, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .save-receipt, .command-dialog, .sv76-dialog)::backdrop {
+  background: rgba(8, 12, 28, 0.5) !important;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog) > :is(header, form > header),
+.save-receipt .receipt-card > header {
+  position: relative;
+  background: linear-gradient(110deg, rgba(226, 235, 255, 0.92), rgba(238, 227, 255, 0.88)) !important;
+  border-bottom: 1px solid rgba(197, 185, 223, 0.6) !important;
+  box-shadow: inset 0 -2px 0 var(--tone-strip);
+  padding-right: 64px !important;
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog) > :is(header, form > header) :is(small, .receipt-eyebrow),
+.save-receipt .receipt-eyebrow {
+  color: var(--tone-cap) !important;
+  font: 800 10px/1.2 "DM Sans", Arial, sans-serif !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase;
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) h2 {
+  font: 700 22px/1.2 "DM Sans", Arial, sans-serif !important;
+  letter-spacing: -0.3px !important;
+  color: #1d2b44 !important;
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) :is(footer, .actions) {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border-top: 1px solid rgba(197, 185, 223, 0.55) !important;
+}
+/* buttons: tonal by default, filled primary for the main action, quiet text for cancel */
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) :is(button, a[data-download]):not(.sx-x):not([role="tab"]):not(.sx-ls-block) {
+  min-height: 34px;
+  padding: 0 14px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: var(--tone-btn) !important;
+  color: var(--tone-ink) !important;
+  font: 600 12.5px/1 "DM Sans", Arial, sans-serif !important;
+  box-shadow: 0 1px 2px rgba(23, 43, 64, 0.08) !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) :is(button, a[data-download]):not(.sx-x):not([role="tab"]):not(.sx-ls-block):hover:not(:disabled) { filter: brightness(0.96); }
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) :is(.primary, [data-apply], [data-commit], [data-confirm], [data-p42-print], a[data-download], [data-place], [data-size-apply], [data-remove]):not(:disabled) {
+  background: var(--sx-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(16, 79, 96, 0.32) !important;
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) :is([data-close], [data-cancel], [value="cancel"], [data-p42-close], [data-discard]) {
+  background: rgba(255, 255, 255, 0.75) !important;
+  color: #33405a !important;
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) button:disabled { opacity: 0.42 !important; cursor: default; }
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]), select, textarea) {
+  border: 1px solid rgba(160, 175, 205, 0.7) !important;
+  border-radius: 9px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #1d2b44 !important;
+  font: 500 13px/1.3 "DM Sans", Arial, sans-serif !important;
+  min-height: 34px;
+  box-sizing: border-box;
+}
+:is(#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog, .save-receipt) :focus-visible { outline: 2px solid var(--sx-focus) !important; outline-offset: 2px; }
+/* cards inside studios */
+:is(.review-workspace-v22, .structure-v25, .image-library-v23, .table-studio-v26, .layout-studio-v27) :is(article, fieldset) {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border: 1px solid rgba(199, 215, 232, 0.9) !important;
+  border-radius: 14px !important;
+}
+/* × close added by the shell to every studio header */
+.sx-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75);
+  color: #33405a;
+  font: 600 20px/1 "DM Sans", Arial, sans-serif;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(23, 43, 64, 0.12);
+}
+.sx-x:hover { background: #fff; }
+@media screen {
+  :is(.layout-studio-v27, .image-library-v23, .table-studio-v26, .table-flow-v28, .structure-v25, .save-receipt, .review-workspace-v22) :is(header, nav, footer, [role="group"]) {
+      min-inline-size: 0;
+      max-inline-size: 100%;
+      flex-wrap: wrap;
+      box-sizing: border-box;
+    }
+}

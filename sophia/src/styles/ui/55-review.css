@@ -1,0 +1,21 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/55-review.css
+ * What:  comments in the side panel and the comment highlight
+ * Owner: engine/55-review.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.sx-comment {
+  border: 1px solid rgba(199, 215, 232, 0.9);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-left: 4px solid #8a6fc4;
+}
+.sx-comment.is-resolved { opacity: 0.66; border-left-color: var(--sx-success); }
+.sx-comment-meta { display: flex; justify-content: space-between; gap: 6px; font-size: 11px; color: var(--sx-ink-muted); }
+.sx-comment-excerpt { display: block; margin: 6px 0; padding-left: 8px; border-left: 2px solid var(--sx-outline); color: var(--sx-ink-muted); font-size: 12px; quotes: none; }
+.sx-comment p { margin: 4px 0; line-height: 1.45; overflow-wrap: anywhere; }
+.sx-comment-reply { font-size: 12px; padding-left: 10px; color: var(--sx-ink-muted); }

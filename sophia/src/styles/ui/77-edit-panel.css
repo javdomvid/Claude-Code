@@ -1,0 +1,110 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/77-edit-panel.css
+ * What:  edit panel (ribbon): tabs, groups, style gallery, colour and size controls, contextual Table tab
+ * Owner: engine/77-edit-panel.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.sx-ribbon { z-index: 38; top: calc(var(--sx-main, 58px) + 6px); }
+.sx-tabs { display: flex; gap: 4px; padding: 7px 10px 0; }
+.sx-tab {
+  border: 0;
+  background: none;
+  padding: 7px 13px;
+  font: 700 12.5px/1 var(--sx-font);
+  color: #1f2c44;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.sx-tab:hover { background: rgba(255, 255, 255, 0.8); }
+.sx-tab[aria-selected="true"] { background: var(--sx-selected); color: var(--sx-on-selected); box-shadow: inset 0 0 0 1px rgba(123, 85, 196, 0.3); }
+.sx-strip { display: flex; align-items: stretch; flex-wrap: wrap; gap: 6px; padding: 7px 8px 8px; }
+.sx-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: 4px 6px 3px;
+  border-radius: 12px;
+  background: var(--tone-tile, rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 2px 0 var(--tone-strip, transparent), 0 1px 2px rgba(23, 43, 64, 0.06);
+}
+.sx-group-body { display: flex; align-items: center; gap: 4px; flex: 1; }
+.sx-big { display: flex; align-items: center; gap: 2px; }
+.sx-small { display: grid; grid-auto-flow: column; grid-template-rows: repeat(2, 28px); gap: 2px; }
+.sx-small .sx-btn { min-height: 28px; width: 30px; }
+.sx-group .sx-btn { color: var(--tone-ink, var(--sx-ink)); }
+.sx-group .sx-btn:hover:not(:disabled) { background: var(--tone-btn, rgba(32, 46, 70, 0.08)); }
+.sx-group .sx-btn[aria-pressed="true"] { background: var(--sx-selected); color: var(--sx-on-selected); }
+.sx-group-name {
+  font: 800 9px/1.2 var(--sx-font);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tone-cap, var(--sx-ink-subtle));
+  text-align: center;
+  padding-top: 1px;
+}
+.sx-btn-stack { flex-direction: column; gap: 3px; min-height: 56px; min-width: 50px; padding: 5px 6px 4px; }
+.sx-btn-stack .sx-ico { width: 20px; height: 20px; }
+.sx-btn-stack .sx-label { font: 600 11px/1.15 var(--sx-font); white-space: normal; text-align: center; max-width: 76px; }
+.sx-field select {
+  height: 30px;
+  padding: 0 24px 0 10px;
+  border: 1px solid rgba(160, 175, 205, 0.55);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--sx-ink);
+  font: 600 12.5px/1 var(--sx-font);
+}
+.sx-field-style select { width: 160px; }
+.sx-field-size select, .sx-field-spacing select { width: auto; }
+.sx-color { display: inline-flex; flex-direction: column; gap: 2px; width: 30px; min-height: 28px; padding: 0; cursor: pointer; }
+.sx-color .sx-glyph { font-size: 13px; line-height: 1; }
+.sx-swatch { width: 16px; height: 4px; border-radius: 2px; box-shadow: inset 0 0 0 1px #0002; }
+.sx-color input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; border: 0; padding: 0; }
+/* Style gallery (only the established styles of the profile) */
+.sx-gallery { display: flex; gap: 4px; max-width: min(36vw, 440px); overflow-x: auto; padding: 2px; scrollbar-width: thin; }
+.sx-style {
+  flex: none;
+  display: grid;
+  gap: 3px;
+  justify-items: start;
+  width: 84px;
+  padding: 6px 7px 5px;
+  border: 1px solid rgba(160, 175, 205, 0.45);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #1d2b44;
+  cursor: pointer;
+  text-align: left;
+}
+.sx-style:hover { border-color: #8fa6c8; background: #fff; }
+.sx-style[aria-selected="true"] { border-color: #7b55c4; box-shadow: inset 0 0 0 1px #7b55c4; background: #f6f1ff; }
+.sx-style-name { font: 600 10px/1.15 var(--sx-font); color: #4a5a73; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.sx-style-prev { font: 400 12px/1.2 "DM Sans", Arial, sans-serif; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; min-height: 16px; }
+.sx-style-h2 { font-weight: 700; font-size: 12px; text-transform: uppercase; }
+.sx-style-h3 { font-weight: 700; font-size: 11.5px; }
+.sx-style-h4 { font-weight: 700; font-size: 11px; color: #33405a; }
+.sx-style-steps, .sx-style-bullets { font-size: 11.5px; }
+.sx-style-warning, .sx-style-confirmation { font-size: 10.5px; font-weight: 700; padding: 1px 5px; border-left: 3px solid #c49832; background: #fff8e8; width: 100%; box-sizing: border-box; }
+.sx-style-source { font-size: 9.5px; color: #70828c; border-top: 1px solid #dce5e9; width: 100%; padding-top: 2px; }
+.sx-style-card, .sx-style-pending { font-size: 10.5px; font-weight: 700; padding: 1px 5px; border-top: 2px solid #4a90c2; background: #eef6fb; width: 100%; box-sizing: border-box; }
+.sx-style-pending { border-top-color: #c9a24a; background: #fdf7e6; }
+.sx-style-decision { font-size: 10px; font-weight: 700; padding: 1px 4px; background: #e7e7e7; width: 100%; box-sizing: border-box; }
+html[data-profile="quick-card"] .sx-style-h2 { color: #0f4555; font-size: 12.5px; }
+/* contextual Table tab */
+.sx-tab-context { color: var(--sx-save-ink); background: rgba(216, 238, 228, 0.75); }
+.sx-tab-context[aria-selected="true"] { background: var(--sx-save-btn); color: var(--sx-save-ink); box-shadow: inset 0 0 0 1px rgba(81, 165, 137, 0.6); }
+/* Mini edit panel: every tool, icon-only, tonal chips per area in one compact strip */
+.sx-ribbon[data-mode="mini"] .sx-strip { gap: 5px; padding: 5px 6px; }
+.sx-ribbon[data-mode="mini"] .sx-group { flex-direction: row; padding: 2px 3px; gap: 0; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 1px 2px rgba(23, 43, 64, 0.06); }
+.sx-ribbon[data-mode="mini"] .sx-btn { min-height: 28px; width: 28px; }
+.sx-ribbon[data-mode="mini"] .sx-btn .sx-ico { width: 17px; height: 17px; }
+.sx-ribbon[data-mode="mini"] .sx-field select { height: 28px; font-size: 12px; }
+.sx-ribbon[data-mode="mini"] .sx-field-style select { width: 124px; }
+.sx-ribbon[data-mode="mini"] .sx-field-size select, .sx-ribbon[data-mode="mini"] .sx-field-spacing select { width: auto; padding-right: 20px; }
+@media (max-width: 760px) {
+  .sx-strip { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; }
+}

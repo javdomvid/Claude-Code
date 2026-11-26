@@ -1,0 +1,49 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/00-core.css
+ * What:  base interface rules: page body, form controls, tone mapping ([data-tone] → --tone-*), generic <dialog>, toasts
+ * Owner: engine/00-core.js (toast) · every module (tones)
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.toast {
+  max-width: min(700px, 90vw);
+  box-sizing: border-box;
+  border-radius: 16px;
+  font-size: 12px;
+  line-height: 1.6;
+  z-index: 18000;
+  pointer-events: none;
+}
+:where(dialog) button.primary:not(:disabled) { background: var(--sx-primary); border-color: var(--sx-primary); color: var(--sx-on-primary); }
+[data-tone="navigate"] { --tone-tile: var(--sx-nav-tile); --tone-strip: var(--sx-nav-strip); --tone-btn: var(--sx-nav-btn); --tone-ink: var(--sx-nav-ink); --tone-cap: var(--sx-nav-cap); }
+[data-tone="assets"] { --tone-tile: var(--sx-assets-tile); --tone-strip: var(--sx-assets-strip); --tone-btn: var(--sx-assets-btn); --tone-ink: var(--sx-assets-ink); --tone-cap: var(--sx-assets-cap); }
+[data-tone="review"] { --tone-tile: var(--sx-review-tile); --tone-strip: var(--sx-review-strip); --tone-btn: var(--sx-review-btn); --tone-ink: var(--sx-review-ink); --tone-cap: var(--sx-review-cap); }
+[data-tone="save"] { --tone-tile: var(--sx-save-tile); --tone-strip: var(--sx-save-strip); --tone-btn: var(--sx-save-btn); --tone-ink: var(--sx-save-ink); --tone-cap: var(--sx-save-cap); }
+[data-tone="output"] { --tone-tile: var(--sx-output-tile); --tone-strip: var(--sx-output-strip); --tone-btn: var(--sx-output-btn); --tone-ink: var(--sx-output-ink); --tone-cap: var(--sx-output-cap); }
+[data-tone="agent"] { --tone-tile: var(--sx-agent-tile); --tone-strip: var(--sx-agent-strip); --tone-btn: var(--sx-agent-btn); --tone-ink: var(--sx-agent-ink); --tone-cap: var(--sx-agent-cap); }
+/* ---------- toasts ---------- */
+.sophia-toasts {
+  position: fixed;
+  z-index: 70;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  pointer-events: none;
+  width: min(640px, calc(100vw - 24px));
+}
+.sophia-toasts .toast {
+  position: static;
+  max-width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--sx-r-md);
+  background: #1c2436f2;
+  color: #f2f4fa;
+  font: 500 13px/1.45 var(--sx-font);
+  box-shadow: var(--sx-elev-2);
+  animation: sx-in var(--sx-dur) var(--sx-ease);
+}
+.sophia-toasts .toast-error { background: #6c1f33f2; }

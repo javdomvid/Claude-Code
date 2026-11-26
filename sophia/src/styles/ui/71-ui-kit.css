@@ -1,0 +1,129 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/71-ui-kit.css
+ * What:  shared interface building blocks: buttons (.sx-btn*), icons, labels, menus and popovers (.sx-menu), definition lists, rows, empty/hint text
+ * Owner: engine/71-ui-kit.js · used by every shell module
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+/* ---------- base & canvas ---------- */
+html { background: var(--sx-canvas); }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--sx-canvas);
+  color: var(--sx-canvas-ink);
+  font: 14px/1.4 var(--sx-font);
+  padding-top: calc(var(--sx-top, 60px) + 4px);
+  transition: padding-top var(--sx-dur) var(--sx-ease);
+}
+button, select, input, textarea { font: inherit; }
+.sx-ico { display: inline-flex; flex: none; width: 18px; height: 18px; }
+.sx-ico svg { display: block; width: 100%; height: 100%; }
+kbd, .sx-kbd {
+  font: 600 10.5px/1 var(--sx-font);
+  padding: 3px 6px;
+  border-radius: var(--sx-r-xs);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(160, 175, 205, 0.5);
+  color: var(--sx-ink-muted);
+  white-space: nowrap;
+}
+/* ---------- buttons (Material Expressive: filled · tonal · text · chip) ---------- */
+.sx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: var(--sx-r-sm);
+  background: transparent;
+  color: var(--sx-ink);
+  font: 600 12px/1 var(--sx-font);
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: background var(--sx-dur) var(--sx-ease), box-shadow var(--sx-dur) var(--sx-ease), color var(--sx-dur), transform var(--sx-dur) var(--sx-ease);
+}
+.sx-btn:hover:not(:disabled) { background: rgba(32, 46, 70, 0.08); }
+.sx-btn:active:not(:disabled) { background: rgba(32, 46, 70, 0.14); transform: scale(0.98); }
+.sx-btn:disabled { cursor: default; opacity: 0.4; }
+.sx-btn[aria-pressed="true"] { background: var(--sx-selected); color: var(--sx-on-selected); box-shadow: inset 0 0 0 1px rgba(123, 85, 196, 0.35); }
+.sx-btn-filled { background: var(--sx-primary); color: var(--sx-on-primary); box-shadow: 0 2px 8px rgba(16, 79, 96, 0.35); }
+.sx-btn-filled:hover:not(:disabled) { background: var(--sx-primary-hover); }
+.sx-btn-filled:active:not(:disabled) { background: #0b3c4a; }
+.sx-btn-tonal { background: rgba(248, 250, 255, 0.82); color: var(--sx-nav-ink); box-shadow: 0 1px 2px rgba(23, 43, 64, 0.08); }
+.sx-btn-tonal:hover:not(:disabled) { background: #ffffff; }
+.sx-btn-blue { background: var(--sx-nav-btn); color: var(--sx-nav-ink); }
+.sx-btn-blue:hover:not(:disabled) { background: #c7d9f7; }
+.sx-btn-blue[aria-pressed="true"] { background: var(--sx-nav-btn); color: var(--sx-nav-ink); box-shadow: inset 0 0 0 1.5px rgba(52, 103, 162, 0.45); }
+.sx-btn-text { color: var(--sx-ink); }
+.sx-btn-icon { width: 34px; padding: 0; }
+.sx-glyph { font: 700 15px/1 var(--sx-font); min-width: 16px; text-align: center; }
+/* tonal chip buttons inside toned tiles (main panel, view popover, ribbon) */
+.sx-chip-btn { min-height: 28px; padding: 0 9px; border-radius: 8px; background: var(--tone-btn, var(--sx-nav-btn)); color: var(--tone-ink, var(--sx-nav-ink)); font: 600 11.5px/1 var(--sx-font); gap: 5px; }
+.sx-chip-btn .sx-ico { width: 16px; height: 16px; }
+.sx-chip-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--tone-btn, var(--sx-nav-btn)) 82%, #233a5a); color: var(--tone-ink, var(--sx-nav-ink)); filter: brightness(1.02); }
+.sx-chip-btn.sx-btn-icon { width: 30px; min-height: 28px; padding: 0; }
+.sx-badge:not(:empty) {
+  margin-left: auto;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: var(--sx-attention);
+  color: #fff;
+  font: 700 10px/16px var(--sx-font);
+  text-align: center;
+}
+.sx-empty { color: var(--sx-ink-muted); line-height: 1.5; }
+.sx-hint { color: var(--sx-ink-muted); font-size: 12px; line-height: 1.45; margin: 0 0 10px; }
+.sx-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.sx-row .sx-btn { min-height: 30px; padding: 0 8px; font-size: 12px; }
+/* ---------- menus & popovers (glass L3) ---------- */
+.sx-menu {
+  position: fixed;
+  z-index: 60;
+  min-width: 220px;
+  max-width: min(400px, calc(100vw - 16px));
+  max-height: calc(100vh - 80px);
+  overflow: auto;
+  padding: 6px;
+  box-sizing: border-box;
+  border-radius: 17px;
+  background: var(--sx-glass-3);
+  -webkit-backdrop-filter: var(--sx-glass-blur);
+  backdrop-filter: var(--sx-glass-blur);
+  border: 1px solid rgba(197, 185, 223, 0.8);
+  box-shadow: 0 14px 40px rgba(20, 13, 54, 0.3), var(--sx-glass-shine);
+  color: var(--sx-ink);
+}
+.sx-menu hr { border: 0; border-top: 1px solid rgba(197, 185, 223, 0.6); margin: 4px 6px; }
+.sx-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  background: none;
+  border-radius: 10px;
+  text-align: left;
+  color: var(--sx-ink);
+  font: 600 12.5px/1.2 var(--sx-font);
+  cursor: pointer;
+}
+.sx-menu-item > span:not(.sx-ico) { flex: 1; }
+.sx-menu-item:hover:not(:disabled), .sx-menu-item:focus-visible { background: rgba(123, 85, 196, 0.1); }
+.sx-menu-item:disabled { opacity: 0.42; cursor: default; }
+.sx-menu-item[aria-checked="true"] { background: var(--sx-selected); color: var(--sx-on-selected); }
+.sx-popover { width: 360px; padding: 12px; }
+.sx-dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; margin: 0 0 8px; font-size: 13px; }
+.sx-dl dt { color: var(--sx-ink-muted); }
+.sx-dl dd { margin: 0; overflow-wrap: anywhere; }
+.sx-flex { flex: 1; }
+@keyframes sx-in { from { opacity: 0; transform: translateY(6px); } }

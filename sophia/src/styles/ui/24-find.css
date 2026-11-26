@@ -1,0 +1,25 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/24-find.css
+ * What:  Find & replace side panel and its highlights (::highlight(sophia-find…))
+ * Owner: engine/24-find.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+/* find & replace side panel */
+.sx-find { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.sx-find-row { display: flex; gap: 4px; align-items: center; }
+.sx-find-input { flex: 1; min-width: 0; height: 34px; box-sizing: border-box; padding: 0 10px; border: 1px solid rgba(160, 175, 205, 0.7); border-radius: 9px; background: rgba(255, 255, 255, 0.92); color: var(--sx-ink); font: 500 13px/1 var(--sx-font); }
+.sx-find-input:focus { outline: 2px solid var(--sx-focus); outline-offset: 1px; }
+.sx-find-opts { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.sx-find-opt { font: 600 11.5px/1.3 var(--sx-font); color: #33405a; display: inline-flex; align-items: center; gap: 4px; }
+.sx-find-status { margin: 0; font: 700 12px/1.3 var(--sx-font); color: #23304a; }
+.sx-find-replace { flex-wrap: wrap; }
+.sx-find-replace .sx-find-input { flex-basis: 100%; }
+.sx-find-replace .sx-btn { min-height: 32px; padding: 0 10px; flex: 1; }
+.sx-find-results .sx-hit { min-width: 0; white-space: normal; }
+.sx-find-results .sx-hit > span { display: block; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.sx-find-results { display: grid; gap: 2px; }
+.sx-find-section { margin: 8px 2px 2px; font: 800 9.5px/1.2 var(--sx-font); letter-spacing: 0.06em; text-transform: uppercase; color: #3467a2; }
+::highlight(sophia-find) { background-color: #fff1a8; color: inherit; }
+::highlight(sophia-find-current) { background-color: #ffb547; color: #111; }

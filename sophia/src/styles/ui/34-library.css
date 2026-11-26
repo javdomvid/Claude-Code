@@ -1,0 +1,266 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/34-library.css
+ * What:  Image library studio (dialog.image-library-v23)
+ * Owner: engine/34-library.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.image-library-v23 {
+  box-sizing: border-box;
+  width: min(1180px, 96vw);
+  height: min(920px, 94dvh);
+  max-height: 94dvh;
+  padding: 0;
+  border: 1px solid #c5d3eb;
+  border-radius: 22px;
+  background: #f7f9ff;
+  color: #213b60;
+  box-shadow: 0 20px 70px #112c5040;
+  font:
+    13px/1.6 "DM Sans",
+    Arial,
+    sans-serif;
+  overflow: hidden;
+}
+.image-library-v23[open] {
+  display: flex;
+  flex-direction: column;
+}
+.image-library-v23::backdrop {
+  background: #102e48a8;
+  backdrop-filter: blur(3px);
+}
+.image-library-v23 header {
+  padding: 22px 26px;
+  background: #eaf0ff;
+  border-bottom: 1px solid #d5e0f3;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  flex: none;
+}
+.image-library-v23 header small {
+  font-size: 10px;
+  letter-spacing: 1.6px;
+}
+.image-library-v23 h2 {
+  margin: 5px 0;
+  font-size: 30px;
+  letter-spacing: -0.7px;
+}
+.image-library-v23 header p {
+  margin: 0;
+  color: #526c91;
+}
+.image-library-v23 [data-mode] {
+  align-self: start;
+  padding: 7px 12px;
+  border-radius: 14px;
+  background: #dce7ff;
+  font-size: 10px;
+  max-width: 200px;
+}
+.image-library-v23 nav {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+  padding: 14px 26px;
+  background: white;
+  border-bottom: 1px solid #d5e0f3;
+  flex: none;
+}
+.image-library-v23 label {
+  display: grid;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.image-library-v23 nav label:first-child {
+  flex: 1;
+  min-width: 190px;
+}
+.image-library-v23 input,
+.image-library-v23 select,
+.image-library-v23 textarea {
+  box-sizing: border-box;
+  padding: 9px 11px;
+  border: 1px solid #bacbe7;
+  border-radius: 9px;
+  color: #254d91;
+  background: #fff;
+  font:
+    13px/1.5 "DM Sans",
+    Arial,
+    sans-serif;
+  width: 100%;
+  min-width: 0;
+}
+.image-library-v23 textarea {
+  resize: vertical;
+  max-height: 180px;
+}
+.image-library-v23 textarea:disabled {
+  background: #eef1f7;
+  color: #526782;
+}
+.image-library-v23 section {
+  padding: 14px 26px 24px;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+.image-library-v23 [data-status] {
+  font-weight: bold;
+}
+.image-library-v23 [data-error] {
+  color: #a02f4c;
+  background: #fff0f3;
+  padding: 10px;
+  border-radius: 10px;
+}
+.image-library-v23 [data-error]:empty {
+  display: none;
+}
+.image-library-v23 .il23-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.image-library-v23 article {
+  padding: 16px;
+  border: 1px solid #d7e1f3;
+  border-radius: 16px;
+  background: white;
+  overflow-wrap: anywhere;
+  display: grid;
+  gap: 9px;
+}
+.image-library-v23 .il23-thumb {
+  height: 150px;
+  display: grid;
+  place-items: center;
+  background: #eef2fa;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.image-library-v23 .il23-thumb img {
+  max-width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+}
+.image-library-v23 h3,
+.image-library-v23 h4 {
+  margin: 0;
+  font-size: 15px;
+}
+.image-library-v23 article small,
+.image-library-v23 .il23-note {
+  font-size: 10px;
+  color: #617594;
+  margin: 0;
+}
+.image-library-v23 button {
+  padding: 9px 15px;
+  border: 1px solid #bacbe7;
+  border-radius: 22px;
+  background: #f3f6ff;
+  color: #254d91;
+  font:
+    600 12px "DM Sans",
+    Arial,
+    sans-serif;
+  cursor: pointer;
+}
+.image-library-v23 button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.image-library-v23 footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 26px;
+  border-top: 1px solid #d7e1f3;
+  background: #fff;
+  flex: none;
+}
+.image-library-v23 footer > div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.image-library-v23 [data-apply],
+.image-library-v23 [data-review-button] {
+  background: #375caa;
+  color: white;
+}
+.image-library-v23 [data-discard] {
+  color: #a02f4c;
+  border-color: #e1b4c0;
+}
+.image-library-v23 [data-review] article {
+  margin: 12px 0;
+}
+.image-library-v23 [data-review] p {
+  white-space: pre-wrap;
+  margin: 0;
+}
+.image-library-v23 .il23-before {
+  color: #95394f;
+}
+.image-library-v23 .il23-after {
+  color: #23624c;
+}
+.image-library-v23 [hidden] {
+  display: none !important;
+}
+.image-library-v23 :focus-visible {
+  outline: 3px solid #6a8ee0;
+  outline-offset: 3px;
+}
+@media (max-width: 900px) {
+  .image-library-v23 .il23-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 600px) {
+  .image-library-v23 .il23-grid {
+      grid-template-columns: 1fr;
+    }
+  .image-library-v23 header,
+    .image-library-v23 nav,
+    .image-library-v23 section {
+      padding: 14px;
+    }
+  .image-library-v23 header {
+      display: block;
+    }
+  .image-library-v23 [data-mode] {
+      display: inline-block;
+      margin-top: 8px;
+    }
+  .image-library-v23 h2 {
+      font-size: 25px;
+    }
+  .image-library-v23 footer {
+      padding: 12px;
+      flex-wrap: wrap;
+    }
+  .image-library-v23 nav {
+      max-height: 23dvh;
+      overflow: auto;
+    }
+  .image-library-v23 nav label {
+      flex: 1;
+    }
+  .image-library-v23 nav label:first-child {
+      min-width: 100%;
+    }
+}
+@media print {
+  .image-library-v23 {
+      display: none !important;
+    }
+}

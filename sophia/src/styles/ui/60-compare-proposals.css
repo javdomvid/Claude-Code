@@ -1,0 +1,16 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/60-compare-proposals.css
+ * What:  compare revisions and agent-proposal preview dialogs
+ * Owner: engine/60-compare-proposals.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.sx-compare-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sx-compare-list, .sx-proposal { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; max-height: 46vh; overflow: auto; }
+.sx-compare-list li, .sx-proposal li { border: 1px solid var(--sx-outline); border-radius: var(--sx-r-sm); padding: 8px 10px; font-size: 13px; display: grid; gap: 4px; }
+.sx-compare-list del, .sx-proposal del { color: #8d2a40; background: #fbe7ec; text-decoration: line-through; padding: 2px 4px; border-radius: 4px; }
+.sx-compare-list ins, .sx-proposal ins { color: #145a3d; background: #e3f4ec; text-decoration: none; padding: 2px 4px; border-radius: 4px; }
+.sx-proposal li.is-invalid { background: var(--sx-surface-1); }
+.sx-proposal-note { color: var(--sx-danger); margin: 0 !important; font-size: 12px; }
+.sx-proposal label { margin: 0 !important; display: flex !important; gap: 6px; align-items: center; color: var(--sx-ink) !important; }

@@ -137,14 +137,15 @@ def build(input_path, output_path):
     zone, record, keys, profile = extract(text)
     short = "qc" if profile == "quick-card" else "sop"
     read = lambda p: (SRC / p).read_text(encoding="utf-8")
+    # Style order (cascade): fonts · tokens · paper · one "ui:NN-name" block per module stylesheet
+    # (styles/ui/NN-name.css, in name order, next to engine/NN-name.js) · print LAST.
     styles = [
         ("fonts", fonts_css()),
         ("tokens", read("styles/tokens.css")),
         ("paper", read(f"styles/paper.{short}.css") + "\n" + read("styles/paper.common.css")),
-        ("dialogs", read("styles/dialogs.css")),
-        ("app", read("styles/app.css")),
-        ("print", read("styles/print.css")),
     ]
+    styles += [("ui:" + f.stem, f.read_text(encoding="utf-8")) for f in sorted((SRC / "styles" / "ui").glob("*.css"))]
+    styles.append(("print", read("styles/print.css")))
     for name, css in styles:
         if "</style" in css.lower():
             fail(f"style {name} contains '</style'")

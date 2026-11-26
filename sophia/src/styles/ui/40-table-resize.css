@@ -1,0 +1,48 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/40-table-resize.css
+ * What:  column-resize handles over body tables (#v425-table-ui)
+ * Owner: engine/40-table-resize.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+#v425-table-ui {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+#v425-table-ui [role="separator"] {
+  position: absolute;
+  pointer-events: auto;
+  width: 14px;
+  height: 23px;
+  transform: translateX(-50%);
+  cursor: col-resize;
+  touch-action: none;
+  color: #fff;
+  background: #245988;
+  border: 1px solid white;
+  border-radius: 4px;
+  padding: 0;
+  line-height: 1;
+  text-align: center;
+  font: 700 13px system-ui;
+}
+#v425-table-ui [role="separator"]:focus-visible {
+  outline: 3px solid #84cdff;
+}
+#v425-table-ui .v425-guide {
+  position: absolute;
+  width: 2px;
+  background: #2677b5;
+}
+dialog[open] ~ #v425-table-ui,
+#v425-table-ui[hidden] {
+  display: none !important;
+}
+@media print {
+  #v425-table-ui {
+      display: none !important;
+    }
+}

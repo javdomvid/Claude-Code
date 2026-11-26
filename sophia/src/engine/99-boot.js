@@ -6,7 +6,7 @@
  *      result is recorded as a "Migration" revision at the next save.
  *      Current file → only make sure every block has an ID (silent).
  *   2. Heading numbers, header, view (A4 pages / continuous), editability.
- *   3. Interface (70-shell), comment highlights, undo baseline.
+ *   3. Interface (70–79 shell modules, mounted by 79-shell), comment highlights, undo baseline.
  *   4. When DM Sans has loaded, calculate the A4 pages (font metrics matter).
  * ========================================================================== */
 (() => {

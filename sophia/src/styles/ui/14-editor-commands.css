@@ -1,0 +1,119 @@
+/* ============================================================================
+ * SOPHIA · styles/ui/14-editor-commands.css
+ * What:  paragraph / link / insert-table dialogs (dialog.command-dialog)
+ * Owner: engine/14-editor-commands.js
+ * Rules: interface only (never select page content here: that is paper.*.css);
+ *        colours from tokens.css when possible; after any change run
+ *        tools/snapshot.cjs before/after (see docs/ARCHITECTURE.md §5).
+ * ========================================================================== */
+.command-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  padding: 0;
+  border: 2px solid #143c52;
+  border-radius: 15px 15px 4px 15px;
+  width: min(540px, calc(100vw - 28px));
+  max-height: 88dvh;
+  background: white;
+  color: #193f53;
+  box-shadow: 6px 6px 0 #0d2b4540;
+  overflow: auto;
+  font:
+    13px/1.6 "DM Sans",
+    Arial,
+    sans-serif;
+  z-index: 15000;
+}
+.command-dialog:not([open]) {
+  display: none;
+}
+.command-dialog::backdrop {
+  background: #09263899;
+  backdrop-filter: blur(2px);
+}
+.command-dialog form {
+  margin: 0;
+}
+.command-dialog header {
+  padding: 22px 26px;
+  background: #edf4f5;
+  border-bottom: 1px solid #ccdde4;
+}
+.command-dialog h2 {
+  font-size: clamp(22px, 3vw, 27px);
+  letter-spacing: -0.6px;
+  margin: 0 0 9px;
+  line-height: 1.2;
+}
+.command-dialog header p {
+  font-size: 11px;
+  color: #627d8b;
+  margin: 0;
+}
+.command-dialog section {
+  padding: 18px 26px;
+  display: grid;
+  gap: 13px;
+}
+.command-dialog label {
+  font-size: 11px;
+  font-weight: 600;
+  display: grid;
+  gap: 5px;
+}
+.command-dialog input,
+.command-dialog select {
+  font:
+    13px "DM Sans",
+    Arial,
+    sans-serif;
+  color: #173f53;
+  border: 1px solid #bcd0db;
+  background: #fafcfd;
+  border-radius: 6px;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.command-dialog input[aria-invalid="true"] {
+  border-color: #b42c46;
+}
+.command-dialog footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 26px;
+  border-top: 1px solid #ccdde4;
+}
+.command-dialog button {
+  padding: 10px 15px;
+  font:
+    600 12px "DM Sans",
+    Arial,
+    sans-serif;
+  border: 1px solid #173f53;
+  background: white;
+  color: #173f53;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.command-dialog button.primary {
+  background: #0b747c !important;
+  color: white !important;
+  border-color: #0b747c;
+}
+.command-dialog .command-error {
+  color: #a92b43;
+  font-size: 12px;
+  margin: 0;
+}
+.command-dialog :focus-visible {
+  outline: 3px solid #55aabd;
+  outline-offset: 2px;
+}
+@media print {
+  .command-dialog {
+      display: none !important;
+    }
+}

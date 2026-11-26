@@ -243,6 +243,6 @@ SOPHIA.find = (() => {
   area.addEventListener('input', () => { if (root?.isConnected && state.q) { clearTimeout(refresh); refresh = setTimeout(() => run(true), 400); } });
   return { open, render, clear, search: (q) => { state.q = q; run(false); return state.results.length; }, state };
 })();
-/* legacy entry points (75-flow Ctrl+F / Ctrl+H, other modules) */
+/* legacy entry points (85-flow Ctrl+F / Ctrl+H, other modules) */
 window.openDocumentFind = (q) => SOPHIA.find.open(q);
 window.replaceDialog = () => SOPHIA.find.open(undefined, true);

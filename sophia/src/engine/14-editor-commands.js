@@ -1,5 +1,5 @@
 /* ============================================================================
- * SOPHIA · 14-commands
+ * SOPHIA · 14-editor-commands
  * Selection memory and text/paragraph/table commands (execCommand adapter + transactions).
  * Reused from V76 (editor-commands-v12); adapted for the V77 core. Edit this module in
  * place — do not add override layers in other files.
