@@ -7,6 +7,9 @@
 #document, .layout-measure-v27 { font-family: "DM Sans", Arial, sans-serif; }
 .sheet { font-family: "DM Sans", Arial, sans-serif; }
 
+/* Source note (both profiles; restored from V76) */
+.pagecontent .source-note { border-top: 1px solid #dce5e9; padding-top: 20px; margin-top: 30px; font-size: 10px; color: #70828c; }
+
 /* K · automatic numbering */
 .pagecontent :is(h2, h3, h4)[data-num]::before { content: attr(data-num) "\00a0"; }
 

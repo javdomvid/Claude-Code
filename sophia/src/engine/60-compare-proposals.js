@@ -16,7 +16,7 @@ SOPHIA.compare = (() => {
     const opts = data.revisions.map((r, i) => '<option value="' + i + '">' + U.escapeHTML(SOPHIA.versions.label(r) + ' · ' + String(r.date).slice(0, 10) + ' · ' + (r.editorPID || r.author || '')) + '</option>').join('');
     const v = modal('Compare revisions',
       '<div class="sx-compare-pick"><label>From<select id="cmpA">' + opts + '</select></label><label>To<select id="cmpB">' + opts + '<option value="current">Current document (unsaved included)</option></select></label></div>' +
-      '<p data-summary class="muted"></p><ol class="sx-compare-list" data-list></ol>',
+      '<p data-summary class="muted"></p><ol class="sx-compare-list" data-list translate="no"></ol>',
       () => { const b = v.querySelector('#cmpB').value; v.remove(); if (b !== 'current') window.openHistoryStudio?.(Number(b)); },
       'Open “To” in History');
     const a = v.querySelector('#cmpA'), b = v.querySelector('#cmpB');
@@ -104,7 +104,7 @@ SOPHIA.proposals = (() => {
       '<p>Paste the proposal JSON or choose the file. Nothing changes until you apply the operations you keep selected.</p>' +
       '<label>Proposal file<input type="file" id="propFile" accept=".json,application/json"></label>' +
       '<label>…or paste JSON<textarea id="propText" rows="5" spellcheck="false"></textarea></label>' +
-      '<p data-head class="muted"></p><ol class="sx-proposal" data-ops></ol><p id="propErr" role="alert"></p>',
+      '<p data-head class="muted"></p><ol class="sx-proposal" data-ops translate="no"></ol><p id="propErr" role="alert"></p>',
       () => apply(v), 'Apply selected');
     let checked = [], proposal = null;
     const err = (m) => (v.querySelector('#propErr').textContent = m);

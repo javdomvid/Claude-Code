@@ -143,7 +143,15 @@ html,body{padding:0!important;margin:0!important;background:white!important;colo
     const d = document.createElement("dialog");
     d.id = "p42-print";
     d.setAttribute("aria-labelledby", "p42-title");
-    d.innerHTML = `<header><div><small>OUTPUT</small><h2 id="p42-title">Print preview</h2><p data-p42-source></p></div><div class="p42-actions"><label>Paper <select data-p42-paper><option value="A4">A4</option><option value="Letter">Letter</option></select></label><label>Page breaks <select data-p61-flow><option value="sheet">Keep sheet starts</option><option value="flow">Let content flow</option></select></label><button type="button" data-p42-print disabled>Print / Save PDF</button><button type="button" data-p42-close>Close preview</button><button type="button" data-p42-copy>Download print copy</button></div></header><p class="p42-note" role="status">Preparing preview...</p><div class="p42-viewport"><iframe title="Document-only print preview" sandbox="allow-same-origin allow-modals"></iframe></div>`;
+    d.innerHTML = `<header><div><small>OUTPUT · PRINT STUDIO</small><h2 id="p42-title">Print preview</h2><p data-p42-source></p><p class="p42-controlled" data-p42-controlled></p></div><div class="p42-actions"><label>Paper <select data-p42-paper><option value="A4">A4</option><option value="Letter">Letter</option></select></label><label>Page breaks <select data-p61-flow><option value="sheet">Keep sheet starts</option><option value="flow">Let content flow</option></select></label><button type="button" data-p42-copy>Download print copy</button><button type="button" data-p42-close hidden>Close preview</button><button type="button" data-p42-print disabled>Print / Save PDF</button></div></header><p class="p42-note" role="status">Preparing preview...</p><div class="p42-viewport"><iframe title="Document-only print preview" sandbox="allow-same-origin allow-modals"></iframe></div>`;
+    {
+      /* V78: what the controlled output will carry (owner decision H) */
+      const chips = d.querySelector("[data-p42-controlled]");
+      const add = (t) => { const c = document.createElement("span"); c.textContent = t; chips.append(c); };
+      add("Footer: " + data.id + " · V" + data.documentVersion + " · " + data.status + " · printed date");
+      add("“Uncontrolled copy when printed”");
+      if (SOPHIA.print.isDraft()) add("DRAFT watermark (not published)");
+    }
     const frame = d.querySelector("iframe"),
       viewport = d.querySelector(".p42-viewport"),
       paper = d.querySelector("[data-p42-paper]"),

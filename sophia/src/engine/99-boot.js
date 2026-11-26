@@ -39,6 +39,7 @@
   if (view === 'continuous') quiet(() => setDocumentView('continuous'));
   setEditable();
   SOPHIA.ui.mount();
+  SOPHIA.i18n.start();
   SOPHIA.comments.paint();
 
   undoStates.splice(0);

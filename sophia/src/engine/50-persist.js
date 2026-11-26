@@ -41,18 +41,7 @@ SOPHIA.persist = (() => {
 
   /* ---------- document zone: merged, normalized, one block per line ---------- */
   function contentClone() {
-    const c = normalizeBody(area.cloneNode(true));
-    const sheets = [...c.children].filter((n) => n.matches?.('.sheet'));
-    if (sheets.length > 1) {
-      const first = sheets[0].querySelector(':scope > .pagecontent');
-      for (const s of sheets.slice(1)) {
-        const pc = s.querySelector(':scope > .pagecontent');
-        if (pc && first) first.append(...pc.childNodes);
-        s.remove();
-      }
-      const n = sheets[0].querySelector('.page-number');
-      if (n) n.textContent = '1';
-    }
+    const c = mergeSheets(normalizeBody(area.cloneNode(true)));
     c.querySelectorAll('[contenteditable]').forEach((n) => n.removeAttribute('contenteditable'));
     c.querySelectorAll('[spellcheck]').forEach((n) => n.removeAttribute('spellcheck'));
     c.querySelectorAll('.selected,.layout-overflow').forEach((n) => n.classList.remove('selected', 'layout-overflow'));

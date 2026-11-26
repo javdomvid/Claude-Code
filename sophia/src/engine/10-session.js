@@ -102,6 +102,7 @@ window.EditorSession = (() => {
         area.innerHTML = sessionHTML;
         muted = false;
         SOPHIA.assets.resolveDocumentImages(area);
+        repaginate();
         data.comments = JSON.parse(sessionComments || '[]');
         data.status = sessionStatus;
         SOPHIA.recordDirty = false;
@@ -139,6 +140,7 @@ window.EditorSession = (() => {
         area.innerHTML = SOPHIA.sanitize.html(r.html);
         muted = false;
         SOPHIA.ids?.ensure();
+        repaginate();
         if (Array.isArray(r.comments)) data.comments = r.comments;
         setEditable();
         capture();

@@ -10,7 +10,7 @@
 'use strict';
 
 const SOPHIA = (window.SOPHIA = window.SOPHIA || {});
-SOPHIA.engine = 'V77.1';
+SOPHIA.engine = 'V78';
 SOPHIA.profile =
   document.documentElement.dataset.profile ||
   (document.querySelector('#document .qc-hero') ? 'quick-card' : 'sop');

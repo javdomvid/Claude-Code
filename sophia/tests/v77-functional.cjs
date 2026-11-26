@@ -58,7 +58,7 @@ async function save(p, mode, reason, verify = true) {
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
   let p = await open(ctx, file);
   const s0 = await p.evaluate(() => ({ engine: SOPHIA.engine, profile: SOPHIA.profile, dirty: EditorSession.get().dirty, ids: document.querySelectorAll('#document [data-block-id]').length, appbar: !!document.querySelector('.sx-appbar'), cmds: SOPHIA.commands.all().length, ribbonHidden: document.querySelector('.sx-ribbon').hidden, sheets: document.querySelectorAll('#document .sheet').length }));
-  ok(/^V77/.test(s0.engine) && s0.appbar, 'V77 interface mounted', s0);
+  ok(/^V7[7-9]|^V[89]/.test(s0.engine) && s0.appbar, 'SOPHIA interface mounted (' + s0.engine + ')', s0);
   ok(!s0.dirty, 'not dirty on open');
   ok(s0.ribbonHidden, 'edit panel hidden while reading');
   ok(p.errors.length === 0, 'no errors on load', p.errors);
@@ -84,7 +84,18 @@ async function save(p, mode, reason, verify = true) {
   await p.keyboard.press('Escape');
   ok(vp.length === 2 && vp.includes('true'), 'View panel with A4 / Continuous cards', vp);
 
+  // interface language (X): Spanish shell, document untouched, back to English
+  const canon0 = await p.evaluate(() => SOPHIA.canonical());
+  await p.click('.sx-appbar [data-cmd=language]');
+  await p.waitForTimeout(200);
+  const es = await p.evaluate(() => ({ edit: document.querySelector('.sx-appbar [data-cmd=edit] .sx-label').textContent, lang: document.documentElement.dataset.uiLang, same: SOPHIA.canonical() }));
+  await p.click('.sx-appbar [data-cmd=language]');
+  await p.waitForTimeout(200);
+  const en = await p.evaluate(() => document.querySelector('.sx-appbar [data-cmd=edit] .sx-label').textContent);
+  ok(es.lang === 'es' && es.edit === 'Modo edición' && es.same === canon0 && en === 'Edit mode', 'interface language EN ↔ ES (document untouched)', { es: es.edit, en });
+
   const pid = await startEditing(p);
+  ok(await p.evaluate(() => document.querySelector('.sx-main').dataset.mode === 'mini'), 'entering edit mode switches the main panel to Mini');
   const r1 = await p.evaluate(() => {
     const ribbon = document.querySelector('.sx-ribbon');
     const tabs = [...ribbon.querySelectorAll('.sx-tab')].map((t) => t.textContent);
@@ -145,6 +156,71 @@ async function save(p, mode, reason, verify = true) {
   const toc = await p.evaluate(() => { const h = document.querySelector('#document .pagecontent h2'); const r = document.createRange(); r.selectNodeContents(h); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r); SOPHIA.blocks.insertToc(); const nav = document.querySelector('nav[data-sophia-toc]'); return { items: nav?.querySelectorAll('li').length, first: nav?.querySelector('li')?.textContent, nums: [...document.querySelectorAll('#document [data-num]')].length }; });
   ok(toc.items > 0 && toc.nums > 0, 'table of contents + automatic numbers', toc);
 
+  // style gallery (profile styles only)
+  await p.click('.sx-ribbon .sx-tab >> nth=0');
+  await p.waitForTimeout(150);
+  const gal = await p.evaluate(() => {
+    const prof = SOPHIA.profile, names = [...document.querySelectorAll('.sx-ribbon .sx-style')].map((b) => b.dataset.style);
+    const para = [...document.querySelectorAll('#document .pagecontent > p:not(.source-note)')].pop();
+    const r = document.createRange(); r.selectNodeContents(para); r.collapse(true); getSelection().removeAllRanges(); getSelection().addRange(r); EditorCommands.remember();
+    SOPHIA.blocks.applyStyle('source');
+    const isSource = para.isConnected ? para.classList.contains('source-note') : false;
+    return { prof, names, isSource };
+  });
+  await p.keyboard.press('Control+z');
+  ok(gal.names.length >= 8 && gal.names.includes(gal.prof === 'sop' ? 'steps' : 'card') && !gal.names.includes('blockquote') && gal.isSource, 'style gallery: established styles of this profile', gal);
+  // contextual Table tab + quick operations
+  const tcell = p.locator('#document .pagecontent table:not(.identity) td').first();
+  if (await tcell.count()) {
+    await tcell.click();
+    await p.waitForTimeout(250);
+    const tab = await p.evaluate(() => !!document.querySelector('.sx-tab-context'));
+    const rows0 = await p.evaluate(() => document.querySelector('#document .pagecontent table:not(.identity)').rows.length);
+    await p.evaluate(() => SOPHIA.commands.run('rowBelow'));
+    const rows1 = await p.evaluate(() => document.querySelector('#document .pagecontent table:not(.identity)').rows.length);
+    await p.keyboard.press('Control+z');
+    await p.waitForTimeout(150);
+    const rows2 = await p.evaluate(() => document.querySelector('#document .pagecontent table:not(.identity)').rows.length);
+    ok(tab && rows1 === rows0 + 1 && rows2 === rows0, 'contextual Table tab: insert row, undo', { tab, rows0, rows1, rows2 });
+  }
+  // insert-table grid picker
+  await p.locator('#document .pagecontent > p').first().click();
+  await p.evaluate(() => SOPHIA.tables.picker(document.querySelector('.sx-appbar')));
+  await p.click('.sx-gridpick-cell[data-r="2"][data-c="3"]');
+  const gp = await p.evaluate(() => [...document.querySelectorAll('#document .pagecontent table:not(.identity)')].some((t) => t.rows.length === 2 && t.rows[0].cells.length === 3 && t.rows[0].cells[0].tagName === 'TH'));
+  await p.keyboard.press('Control+z');
+  ok(gp, 'insert table from the size grid (2 × 3, header row)');
+  // find & replace side panel
+  const fword = await p.evaluate(() => (document.querySelector('#document .pagecontent > p').textContent.match(/[A-Za-z]{7,}/) || ['document'])[0]);
+  await p.keyboard.press('Control+h');
+  await p.waitForTimeout(250);
+  await p.fill('.sx-find .sx-find-input', fword);
+  await p.waitForTimeout(300);
+  const f1 = await p.evaluate(() => ({ n: SOPHIA.find.state.results.length, hl: !!CSS.highlights?.get('sophia-find') }));
+  await p.fill('.sx-find-replace .sx-find-input', 'ZZREPLACEDZZ');
+  await p.click('[data-find-replace-all]');
+  await p.waitForTimeout(300);
+  const f2 = await p.evaluate((w) => ({ left: (document.querySelector('#document').textContent.match(new RegExp(w, 'gi')) || []).length, put: (document.querySelector('#document').textContent.match(/ZZREPLACEDZZ/g) || []).length }), fword);
+  await p.keyboard.press('Control+z');
+  await p.waitForTimeout(200);
+  const f3 = await p.evaluate(() => (document.querySelector('#document').textContent.match(/ZZREPLACEDZZ/g) || []).length);
+  ok(f1.n > 0 && f1.hl && f2.put === f1.n && f3 === 0, 'find & replace panel: highlight, replace all, one undo', { fword, f1, f2, f3 });
+  // Layout Studio: rule on a block, plan recalculates, apply, undo
+  await p.evaluate(() => LayoutStudio.open());
+  await p.waitForSelector('.sx-ls .sx-ls-block');
+  const ls0 = await p.evaluate(() => document.querySelectorAll('.sx-ls .sx-ls-page').length);
+  await p.click('.sx-ls .sx-ls-block >> nth=3');
+  await p.check('.sx-ls [data-before]');
+  await p.waitForTimeout(400);
+  await p.waitForFunction(() => !document.querySelector('.sx-ls [data-apply]').disabled, null, { timeout: 5000 }).catch(() => {});
+  const ls1 = await p.evaluate(() => { const b = document.querySelector('.sx-ls .sx-ls-block[data-i="3"]'); return { first: !!b && b.parentElement.querySelector('.sx-ls-block') === b, badge: !!b?.textContent.includes('⤒'), pages: document.querySelectorAll('.sx-ls .sx-ls-page').length }; });
+  await p.click('.sx-ls [data-apply]');
+  await p.waitForTimeout(300);
+  const ls2 = await p.evaluate(() => ({ rule: document.querySelectorAll('#document [data-layout-before="page"]').length, open: !!document.querySelector('.sx-ls') }));
+  await p.keyboard.press('Control+z');
+  await p.waitForTimeout(200);
+  ok(ls0 > 0 && ls1.first && ls1.badge && ls2.rule >= 1 && !ls2.open, 'Layout Studio: page cards, rule → plan recalculated → applied', { ls0, ls1, ls2 });
+
   // A4 view while editing: typing never spills outside the sheet; pages recalculated, caret kept
   const before = await p.evaluate(() => document.querySelectorAll('#document .sheet').length);
   const lastP = p.locator('#document .pagecontent > p').first();
@@ -182,7 +258,7 @@ async function save(p, mode, reason, verify = true) {
   // the saved file: structure
   const html = fs.readFileSync(d1.target, 'utf8');
   const zone = html.slice(html.indexOf('<main id="document"'), html.indexOf('</main>'));
-  ok(/data-sophia="V77/.test(html) && /"format":"sophia\/77"/.test(html), 'saved file is sophia/77');
+  ok(/data-sophia="V[0-9.]+"/.test(html) && /"format":"sophia\/77"/.test(html), 'saved file is sophia/77');
   ok(!/<img[^>]+src="data:/.test(zone) && /data-asset="/.test(zone), 'images stored once (data-asset in the zone)');
   ok(zone.split('\n').length > 20, 'document zone is one block per line', zone.split('\n').length);
   const head = html.slice(0, html.indexOf('</head>'));
@@ -204,6 +280,18 @@ async function save(p, mode, reason, verify = true) {
   await p.click('#historyStudio [data-close]');
   await p.waitForTimeout(200);
   await startEditing(p);
+  // History › Restore this version (oldest) → unsaved changes, one undo step
+  const canonBefore = await p.evaluate(() => SOPHIA.canonical());
+  await p.evaluate(() => openHistoryStudio(0));
+  await p.waitForSelector('#historyStudio [data-restore78]');
+  await p.click('#historyStudio [data-restore78]');
+  await p.click('dialog.legacy-modal .primary');
+  await p.waitForTimeout(500);
+  const rs = await p.evaluate((c) => ({ changed: SOPHIA.canonical() !== c, dirty: EditorSession.get().dirty, history: !!document.querySelector('#historyStudio'), dup: (() => { const m = {}; document.querySelectorAll('#document [data-block-id]').forEach((n) => (m[n.dataset.blockId] = (m[n.dataset.blockId] || 0) + 1)); return Object.values(m).filter((v) => v > 1).length; })() }), canonBefore);
+  await p.keyboard.press('Control+z');
+  await p.waitForTimeout(300);
+  const rsBack = await p.evaluate((c) => SOPHIA.canonical() === c, canonBefore);
+  ok(rs.changed && rs.dirty && !rs.history && rs.dup === 0 && rsBack, 'History › Restore this version: unsaved changes, undo returns', { ...rs, rsBack });
   await p.locator('#document .pagecontent > p').first().click();
   await p.keyboard.press('End');
   await p.keyboard.type(' PUBLISH-TEST');

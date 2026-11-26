@@ -103,8 +103,10 @@ SOPHIA.comments = (() => {
       const meta = U.el('div', 'sx-comment-meta');
       meta.append(U.el('b', '', c.pid || 'Unknown'), U.el('span', '', String(c.date).slice(0, 16).replace('T', ' ') + (c.unsaved ? ' · unsaved' : '')));
       card.append(meta);
-      card.append(U.el('q', 'sx-comment-excerpt', c.excerpt || ''));
-      card.append(U.el('p', '', c.text));
+      const ex = U.el('q', 'sx-comment-excerpt', c.excerpt || ''), tx = U.el('p', '', c.text);
+      ex.setAttribute('translate', 'no');
+      tx.setAttribute('translate', 'no');
+      card.append(ex, tx);
       for (const r of c.replies || []) {
         const rp = U.el('p', 'sx-comment-reply');
         rp.append(U.el('b', '', r.pid + ': '), document.createTextNode(r.text));
@@ -162,20 +164,25 @@ SOPHIA.tbc = (() => {
 SOPHIA.checklist = (() => {
   'use strict';
   const U = SOPHIA.util;
+  /* Each item may carry an action { label, run } shown in the side panel (V78 · U). */
   function collect() {
     const items = [];
-    const add = (tone, text, node) => items.push({ tone, text, node });
-    const tbc = SOPHIA.tbc.count();
-    if (tbc) add('warn', tbc + ' text mark(s) still To Be Confirmed.', area.querySelector('.pagecontent .tbc'));
+    const add = (tone, text, node, action) => items.push({ tone, text, node, action });
+    const tbcNodes = [...area.querySelectorAll('.pagecontent .tbc, .qc-hero .tbc')];
+    if (tbcNodes.length) {
+      let i = -1;
+      add('warn', tbcNodes.length + ' text mark(s) still To Be Confirmed.', tbcNodes[0], { label: 'Next mark', run: () => { i = (i + 1) % tbcNodes.length; tbcNodes[i].scrollIntoView({ block: 'center', behavior: 'smooth' }); tbcNodes[i].animate?.([{ outline: '3px solid #e0a100' }, { outline: '3px solid transparent' }], { duration: 1400 }); } });
+    }
     const tbcText = [...area.querySelectorAll('.pagecontent p, .pagecontent li, .pagecontent td, .identity .value')].filter((n) => /\bTO BE CONFIRMED\b/.test(n.textContent) && !n.querySelector('.tbc')).length;
-    if (tbcText) add('warn', tbcText + ' place(s) still say “TO BE CONFIRMED”.', null);
+    if (tbcText) add('warn', tbcText + ' place(s) still say “TO BE CONFIRMED”.', null, { label: 'Find them', run: () => { SOPHIA.find.state.meta = true; SOPHIA.find.open('TO BE CONFIRMED'); } });
     const open = SOPHIA.comments.openCount();
-    if (open) add('warn', open + ' open comment(s).', null);
+    if (open) add('warn', open + ' open comment(s).', null, { label: 'Open comments', run: () => window.side?.('comments') });
     const noAlt = [...area.querySelectorAll('.pagecontent img')].filter((i) => !i.alt.trim()).length;
-    if (noAlt) add('warn', noAlt + ' image(s) without alternative text.', area.querySelector('.pagecontent img:not([alt]), .pagecontent img[alt=""]'));
-    const empty = [...area.querySelectorAll('.pagecontent table:not(.identity) :is(td,th)')].filter((c) => !c.textContent.trim() && !c.querySelector('img')).length;
-    if (empty) add('info', empty + ' empty table cell(s).', null);
-    if (SOPHIA.blocks && area.querySelector('nav[data-sophia-toc]') && !SOPHIA.blocks.tocIsCurrent()) add('info', 'The table of contents is out of date.', null);
+    if (noAlt) add('warn', noAlt + ' image(s) without alternative text.', area.querySelector('.pagecontent img:not([alt]), .pagecontent img[alt=""]'), { label: 'Image library', run: () => ImageLibrary.open() });
+    const emptyCells = [...area.querySelectorAll('.pagecontent table:not(.identity) :is(td,th)')].filter((c) => !c.textContent.trim() && !c.querySelector('img'));
+    if (emptyCells.length) add('info', emptyCells.length + ' empty table cell(s).', emptyCells[0]);
+    if (SOPHIA.blocks && area.querySelector('nav[data-sophia-toc]') && !SOPHIA.blocks.tocIsCurrent())
+      add('info', 'The table of contents is out of date.', area.querySelector('nav[data-sophia-toc]'), { label: 'Update contents', run: () => { if (!U.isEditing()) { toast(SOPHIA.strings.startEditingFirst); return; } SOPHIA.blocks.refreshToc(true); toast('Contents updated.'); window.side?.('checks'); } });
     return items;
   }
   function gate(mode, proceed) {

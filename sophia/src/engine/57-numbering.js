@@ -69,6 +69,21 @@ SOPHIA.numbering = (() => {
     apply();
     return ok ? plan.length : 0;
   }
+  /** With automatic numbering on: removes typed numbers equal to the automatic ones
+   *  (used when old content comes back, e.g. History › Restore of a pre-V77 version). */
+  function stripTyped() {
+    if (!enabled()) return 0;
+    let n = 0;
+    for (const { h, num } of compute()) {
+      if (!num) continue;
+      const bare = num.replace(/[.·\s]+$/, '');
+      const rx = QC ? new RegExp('^\\s*0?' + Number(bare) + '\\s*·\\s*') : new RegExp('^\\s*' + bare.replace(/\./g, '\\.') + '\\.?\\s+');
+      const t = document.createTreeWalker(h, NodeFilter.SHOW_TEXT, { acceptNode: (x) => (x.nodeValue.trim() ? 1 : 3) }).nextNode();
+      if (t && rx.test(t.nodeValue)) { t.nodeValue = t.nodeValue.replace(rx, ''); n++; }
+    }
+    if (n) apply();
+    return n;
+  }
   /** Turns automatic numbering on/off for this document (saved in the record, not an undo step). */
   function toggle() {
     if (!SOPHIA.util.isEditing()) { toast(SOPHIA.strings.startEditingFirst); return; }
@@ -85,5 +100,5 @@ SOPHIA.numbering = (() => {
   }
   let timer = 0;
   SOPHIA.bus.on('content-changed', () => { clearTimeout(timer); timer = setTimeout(apply, 120); });
-  return { apply, migrate, compute, label, enabled, toggle };
+  return { apply, migrate, compute, label, enabled, toggle, stripTyped };
 })();

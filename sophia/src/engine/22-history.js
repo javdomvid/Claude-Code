@@ -736,7 +736,7 @@
     shell.dataset.sidebar = "true";
     shell.setAttribute("aria-label", "History Studio");
     shell.innerHTML =
-      '<header aria-label="History controls"><div class="h41-rev"><div class="h37-island h37-ident"><span class="h37-kicker">HISTORY VIEW</span><h2 data-heading>Loading saved history...</h2></div><div class="h37-island h38-revision" role="group" aria-label="Saved revision"><button type="button" data-prev aria-label="Previous revision" title="Previous revision">‹</button><select data-version aria-label="Saved revision"><option value="-1">Latest · all history</option></select><button type="button" data-next aria-label="Next revision" title="Next revision">›</button></div></div><div class="h37-island h38-modes h41-modes" role="group" aria-label="Display mode"><button type="button" data-view="document" aria-pressed="true">Highlight changes</button><button type="button" data-view="clean" aria-pressed="false">Clean text</button></div><div class="h37-island h38-tools h41-tools" role="group" aria-label="View tools"><button type="button" data-sidebar aria-controls="h37-aside" aria-expanded="false">Sidebar</button><select data-zoom aria-label="Document zoom" title="Document zoom"><option value="0" selected>Fit</option><option value="65">65%</option><option value="85">85%</option><option value="100">100%</option><option value="125">125%</option></select><button type="button" data-print42>Print revision</button><button type="button" data-close>Close history</button></div></header><div class="h20-notice" data-warning role="status"></div><div class="h20-body"><aside id="h37-aside" aria-label="Change details" hidden><div class="h20-aside-head"><div class="h41-aside-title"><h3 data-count>Changes</h3><button type="button" data-close-sidebar41 aria-label="Close changes sidebar" title="Close changes sidebar">×</button></div><div class="h37-options"><label>Find a change<input type="search" data-query placeholder="Text, section or PID"></label><label>Recorded author<select data-pid><option value="">All authors</option></select></label><label class="h20-check"><input type="checkbox" data-deleted>Include previous / deleted text</label></div><label class="h20-check"><input type="checkbox" data-labels checked>Show PID labels</label><p data-reason></p></div><ul data-changes></ul></aside><section class="h20-view" aria-label="Saved snapshot"><div class="h20-document-scroll" tabindex="0" aria-label="Scroll saved snapshot"><div data-document-host></div><div data-plain hidden></div></div><div class="h37-watermark" data-watermark aria-hidden="true" hidden><span>HISTORICAL VERSION</span></div></section></div><div data-status role="status"></div>';
+      '<header aria-label="History controls"><div class="h41-rev"><div class="h37-island h37-ident"><span class="h37-kicker">HISTORY VIEW</span><h2 data-heading>Loading saved history...</h2></div><div class="h37-island h38-revision" role="group" aria-label="Saved revision"><button type="button" data-prev aria-label="Previous revision" title="Previous revision">‹</button><select data-version aria-label="Saved revision"><option value="-1">Latest · all history</option></select><button type="button" data-next aria-label="Next revision" title="Next revision">›</button></div></div><div class="h37-island h38-modes h41-modes" role="group" aria-label="Display mode"><button type="button" data-view="document" aria-pressed="true">Highlight changes</button><button type="button" data-view="clean" aria-pressed="false">Clean text</button></div><div class="h37-island h38-tools h41-tools" role="group" aria-label="View tools"><button type="button" data-sidebar aria-controls="h37-aside" aria-expanded="false">Sidebar</button><select data-zoom aria-label="Document zoom" title="Document zoom"><option value="0" selected>Fit</option><option value="65">65%</option><option value="85">85%</option><option value="100">100%</option><option value="125">125%</option></select><button type="button" data-print42>Print revision</button><button type="button" data-restore78 title="Bring this version’s content back into the editor as unsaved changes">Restore this version…</button><button type="button" data-close>Close history</button></div></header><div class="h20-notice" data-warning role="status"></div><div class="h20-body"><aside id="h37-aside" aria-label="Change details" hidden><div class="h20-aside-head"><div class="h41-aside-title"><h3 data-count>Changes</h3><button type="button" data-close-sidebar41 aria-label="Close changes sidebar" title="Close changes sidebar">×</button></div><div class="h37-options"><label>Find a change<input type="search" data-query placeholder="Text, section or PID"></label><label>Recorded author<select data-pid><option value="">All authors</option></select></label><label class="h20-check"><input type="checkbox" data-deleted>Include previous / deleted text</label></div><label class="h20-check"><input type="checkbox" data-labels checked>Show PID labels</label><p data-reason translate="no"></p></div><ul data-changes translate="no"></ul></aside><section class="h20-view" aria-label="Saved snapshot"><div class="h20-document-scroll" tabindex="0" aria-label="Scroll saved snapshot"><div data-document-host></div><div data-plain hidden translate="no"></div></div><div class="h37-watermark" data-watermark aria-hidden="true" hidden><span>HISTORICAL VERSION</span></div></section></div><div data-status role="status"></div>';
     data.revisions.forEach((r, i) => {
       const o = el(
         "option",
@@ -864,6 +864,42 @@
     listen(shell.querySelector("[data-sidebar]"), "click", () => {
       shell.dataset.sidebar = String(shell.dataset.sidebar !== "true");
       syncSidebar37();
+    });
+    /* V78 (owner decision U): restore an older version's content as unsaved changes.
+       One undo step; nothing is recorded until the person saves (draft or publish). */
+    listen(shell.querySelector("[data-restore78]"), "click", () => {
+      const i = selected < 0 ? data.revisions.length - 1 : selected,
+        r = data.revisions[i];
+      if (!r?.snapshot) return;
+      if (!EditorSession.get().pid) {
+        toast("Start editing first: restoring creates unsaved changes that you then save.");
+        return;
+      }
+      const label = SOPHIA.versions.label(r);
+      const v = modal(
+        "Restore " + label + "?",
+        "<p>The document content returns to this saved version. The current version number, history and comments are kept; the restore becomes <b>unsaved changes</b> (Ctrl+Z undoes it). Save draft or Publish to keep it.</p>",
+        (dlg) => {
+          dlg.remove();
+          const clean = SOPHIA.sanitize.html(r.snapshot);
+          const ok = EditorTransactions.run("Restore " + label, () => {
+            area.innerHTML = clean;
+            SOPHIA.assets.resolveDocumentImages(area);
+            SOPHIA.ids.ensure();
+            SOPHIA.numbering.stripTyped();
+            SOPHIA.numbering.apply();
+            SOPHIA.persist.applyHeader(area, data);
+          });
+          if (!ok) return;
+          setEditable();
+          repaginate();
+          closeHistory();
+          EditorSession.changed();
+          SOPHIA.bus.emit("content-changed");
+          toast(label + " restored as unsaved changes. Review, then Save draft or Publish.", { ms: 6000 });
+        },
+        "Restore content",
+      );
     });
     listen(shell.querySelector("[data-print42]"), "click", () => {
       const i = selected < 0 ? data.revisions.length - 1 : selected,

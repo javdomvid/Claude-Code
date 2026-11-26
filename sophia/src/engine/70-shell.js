@@ -83,9 +83,12 @@ SOPHIA.ui = (() => {
     focus: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', view: 'M3 4h8v16H3zM13 4h8v16h-8z',
     canvas: 'M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z', commands: 'M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3z',
     sidebar: 'M3 4h18v16H3zM9 4v16', ribbon: 'M3 5h18v6H3zM6 8h2M10 8h2M14 8h2M3 15h18M3 19h12', print: 'M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z',
-    outline: 'M4 6h16M8 12h12M12 18h8', chevron: 'M6 9l6 6 6-6', close: 'M6 6l12 12M18 6 6 18', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01',
+    outline: 'M4 6h16M8 12h12M12 18h8', lang: 'M3 5h12M9 3v2M5 5c1 4 4 7 8 8M13 5c-1 4-4 7-8 8M12 21l5-10 5 10M14 17h6', chevron: 'M6 9l6 6 6-6', close: 'M6 6l12 12M18 6 6 18', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01',
     brief: 'M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-5a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h6z', card: 'M3 6h18v12H3zM7 10h6M7 14h10', pending: 'M3 6h18v12H3zM12 9v3M12 15h.01',
-    marks: 'M13 4v16M17 4v16M19 4H9.5a4.5 4.5 0 0 0 0 9H13', more: 'M5 12h.01M12 12h.01M19 12h.01', move: 'M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4'
+    marks: 'M13 4v16M17 4v16M19 4H9.5a4.5 4.5 0 0 0 0 9H13',
+    rowAbove: 'M3 12h18v8H3zM3 16h18M12 3v6M9 6h6', rowBelow: 'M3 4h18v8H3zM3 8h18M12 15v6M9 18h6', colLeft: 'M12 3h8v18h-8zM16 3v18M3 12h6M6 9v6', colRight: 'M4 3h8v18H4zM8 3v18M15 12h6M18 9v6',
+    deleteRow: 'M3 8h18v8H3zM9 12h6', deleteCol: 'M8 3h8v18H8zM12 9v6', headerRow: 'M3 5h18v14H3zM3 10h18M7 7.5h10', equalCols: 'M3 5h18v14H3zM9 5v14M15 5v14M5 12h2M17 12h2',
+    shade: 'M3 5h18v14H3zM3 5l18 14M9 5l12 9M3 11l9 8', more: 'M5 12h.01M12 12h.01M19 12h.01', move: 'M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4'
   };
   function icon(name) {
     const span = U.el('span', 'sx-ico');
@@ -135,7 +138,24 @@ SOPHIA.ui = (() => {
   R('justify', 'Justify', 'Home', 'justify', () => EditorCommands.paragraph('textAlign', 'justify'), true);
   R('paragraphSettings', 'Paragraph settings…', 'Home', 'para', () => EditorCommands.paragraphDialog(), true);
   // Insert
-  R('insertTable', 'Table…', 'Insert', 'table', () => EditorCommands.insertTable(), true);
+  R('insertTable', 'Table…', 'Insert', 'table', () => SOPHIA.tables.picker(invoker()), true);
+  R('decisionTable', 'Decision table', 'Insert', 'table', () => SOPHIA.tables.decisionTable(), true, { profile: 'quick-card' });
+  // contextual Table tab (V78 · V2): shown while the caret is in a body table
+  const inTable = () => !!SOPHIA.tables.here();
+  const T = (id, label, icon, fn) => R(id, label, 'Table', icon, fn, true, { when: inTable, why: 'Place the cursor in a table cell first.' });
+  T('rowAbove', 'Insert row above', 'rowAbove', () => SOPHIA.tables.row(false));
+  T('rowBelow', 'Insert row below', 'rowBelow', () => SOPHIA.tables.row(true));
+  T('colLeft', 'Insert column left', 'colLeft', () => SOPHIA.tables.column(false));
+  T('colRight', 'Insert column right', 'colRight', () => SOPHIA.tables.column(true));
+  T('deleteRow', 'Delete row', 'deleteRow', () => SOPHIA.tables.deleteRow());
+  T('deleteCol', 'Delete column', 'deleteCol', () => SOPHIA.tables.deleteColumn());
+  T('deleteTable', 'Delete table', 'discard', () => SOPHIA.tables.deleteTable());
+  T('headerRow', 'Header row on / off', 'headerRow', () => SOPHIA.tables.toggleHeader());
+  T('equalCols', 'Equal column widths', 'equalCols', () => SOPHIA.tables.equalColumns());
+  T('shadeHeader', 'Shade: header grey', 'shade', () => SOPHIA.tables.shade('header'));
+  T('shadeAttention', 'Shade: attention amber', 'shade', () => SOPHIA.tables.shade('attention'));
+  T('shadeConfirmed', 'Shade: confirmed green', 'shade', () => SOPHIA.tables.shade('confirmed'));
+  T('shadeNone', 'Clear shading', 'clear', () => SOPHIA.tables.shade(null));
   R('insertImage', 'Image or screenshot…', 'Insert', 'image', () => EditorMedia.open(), true);
   R('insertLink', 'Link…', 'Insert', 'link', () => EditorCommands.insertLink(), true);
   R('calloutWarning', 'Warning callout', 'Insert', 'warning', () => SOPHIA.blocks.applyStyle('warning'), true);
@@ -177,13 +197,14 @@ SOPHIA.ui = (() => {
   R('compare', 'Compare revisions…', 'Review', 'compare', () => SOPHIA.compare.open());
   R('checks', 'Document checks…', 'Review', 'checks', () => DocumentReview.open());
   R('structure', 'Block structure…', 'Review', 'structure', () => BlockIdentity.open());
-  R('find', 'Find', 'Review', 'find', () => openDocumentFind(), false, { keys: 'Ctrl+F' });
-  R('replace', 'Find & replace', 'Review', 'replace', () => replaceDialog(), true, { keys: 'Ctrl+H' });
+  R('find', 'Find', 'Review', 'find', () => SOPHIA.find.open(), false, { keys: 'Ctrl+F' });
+  R('replace', 'Find & replace', 'Review', 'replace', () => SOPHIA.find.open(undefined, true), true, { keys: 'Ctrl+H' });
   R('wordCount', 'Word count', 'Review', 'words', wordCount);
   R('outline', 'Outline panel', 'Review', 'outline', () => side('outline'));
   R('showMarks', 'Show paragraph marks', 'Review', 'marks', () => { document.body.classList.toggle('showmarks'); refresh(); }, false, { pressed: () => document.body.classList.contains('showmarks') });
   R('shortcuts', 'Keyboard shortcuts', 'Help', 'keyboard', () => SophiaFlow.openHelp(), false, { keys: 'F1' });
   R('about', 'About this file', 'Help', 'info', about);
+  R('language', 'Interface language: English / Español', 'View', 'lang', () => SOPHIA.i18n.set(SOPHIA.i18n.lang === 'es' ? 'en' : 'es'));
 
   /* ---------- small actions ---------- */
   async function pastePlain() {
@@ -257,9 +278,11 @@ SOPHIA.ui = (() => {
     b.setAttribute('aria-label', label);
     if (c?.state || c?.pressed) b.setAttribute('aria-pressed', 'false');
     b.addEventListener('mousedown', (e) => { if (area.contains(document.activeElement) || document.activeElement === document.body) e.preventDefault(); });
-    b.onclick = () => { C.run(id); refreshSoon(); };
+    b.onclick = () => { lastInvoker = b; C.run(id); refreshSoon(); };
     return b;
   }
+  let lastInvoker = null;
+  const invoker = () => (lastInvoker?.isConnected && lastInvoker.getClientRects().length ? lastInvoker : document.querySelector('.sx-ribbon [data-cmd=insertTable]') || omni);
 
   const bar = runtime(U.el('header', 'sx-appbar'));
   bar.setAttribute('role', 'banner');
@@ -268,6 +291,7 @@ SOPHIA.ui = (() => {
   mark.setAttribute('aria-hidden', 'true');
   brand.append(mark, U.el('span', 'sx-app', 'SOPHIA'), U.el('span', 'sx-profile', SOPHIA.strings.profileLabel[SOPHIA.profile]));
   const titleEl = U.el('h1', 'sx-title');
+  titleEl.setAttribute('translate', 'no');
   const versionChip = U.el('button', 'sx-chip sx-chip-version');
   versionChip.type = 'button';
   versionChip.onclick = () => side('versions');
@@ -314,6 +338,12 @@ SOPHIA.ui = (() => {
   viewBtn.setAttribute('aria-haspopup', 'dialog');
   viewBtn.onclick = () => viewPanel(viewBtn);
   const canvasBtn = button('canvas', { short: 'Canvas', cls: 'sx-btn-text' });
+  /* interface language (owner decision X): shows the language you switch TO */
+  const langBtn = U.el('button', 'sx-btn sx-btn-text sx-lang');
+  langBtn.type = 'button';
+  langBtn.dataset.cmd = 'language';
+  langBtn.setAttribute('translate', 'no');
+  langBtn.onclick = () => { C.run('language'); refreshSoon(); };
   const sep = U.el('span', 'sx-sep');
   sep.setAttribute('aria-hidden', 'true');
   const mainBtn = U.el('button', 'sx-btn sx-btn-tonal sx-panel-toggle');
@@ -325,7 +355,7 @@ SOPHIA.ui = (() => {
   ribbonBtn.type = 'button';
   ribbonBtn.dataset.cmd = 'ribbonMode';
   ribbonBtn.onclick = () => cycleRibbon();
-  actions.append(historyBtn, editBtn, saveSplit, focusBtn, viewBtn, canvasBtn, sep, mainBtn, sideBtn, ribbonBtn);
+  actions.append(historyBtn, editBtn, saveSplit, focusBtn, viewBtn, canvasBtn, langBtn, sep, mainBtn, sideBtn, ribbonBtn);
   bar.append(ident, omni, actions);
 
   /* ---------- main panel (owner, V77.1: always available, Full / Mini / Hide) ----------
@@ -364,7 +394,15 @@ SOPHIA.ui = (() => {
       mainEl.append(tile);
     }
   }
+  /* Owner (V78): entering edit mode switches a Full main panel to Mini (the edit panel needs the
+     room); leaving edit mode brings it back. Changing it during editing is respected. */
+  let mainBeforeEdit = null;
+  function mainForSession(editingNow) {
+    if (editingNow && mainMode === 'full') { mainBeforeEdit = 'full'; mainMode = 'mini'; renderMain(); }
+    else if (!editingNow && mainBeforeEdit) { mainMode = mainBeforeEdit; mainBeforeEdit = null; renderMain(); }
+  }
   function cycleMain() {
+    mainBeforeEdit = null;
     mainMode = { full: 'mini', mini: 'hide', hide: 'full' }[mainMode];
     pref.set('mainpanel', mainMode);
     renderMain();
@@ -377,13 +415,13 @@ SOPHIA.ui = (() => {
     { tab: 'Home', groups: [
       { name: 'History', items: ['undo', 'redo'] },
       { name: 'Clipboard', items: ['pastePlain', 'clearFormat'] },
-      { name: 'Style', items: ['@style'] },
+      { name: 'Styles of this document', items: ['@gallery'] },
       { name: 'Font', items: ['bold', 'italic', 'underline', 'strike', 'superscript', 'subscript', '@color', '@highlight', '@size'] },
       { name: 'Paragraph', items: ['bullets', 'numbers', 'outdent', 'indent', 'alignLeft', 'alignCenter', 'alignRight', 'justify', '@spacing', 'paragraphSettings'] }
     ] },
     { tab: 'Insert', groups: [
       { name: 'Objects', items: ['insertTable', 'insertImage', 'insertLink', 'slashMenu'] },
-      { name: 'Blocks', items: ['calloutWarning', 'calloutConfirm', 'insertHr', 'pageBreak', 'insertCard', 'cardPending'] },
+      { name: 'Blocks', items: ['calloutWarning', 'calloutConfirm', 'insertHr', 'pageBreak', 'insertCard', 'cardPending', 'decisionTable'] },
       { name: 'Generated', items: ['insertToc', 'insertDate', 'symbols'] },
       { name: 'Bring in', items: ['importDocx', 'applyProposal'] }
     ] },
@@ -399,10 +437,19 @@ SOPHIA.ui = (() => {
       { name: 'Quality', items: ['checks', 'structure', 'wordCount'] },
       { name: 'Find', items: ['find', 'replace'] },
       { name: 'Help', items: ['showMarks', 'shortcuts'] }
+    ] },
+    /* contextual: only while the caret is in a body table (V78 · V2) */
+    { tab: 'Table', contextual: true, groups: [
+      { name: 'Rows & columns', items: ['rowAbove', 'rowBelow', 'colLeft', 'colRight'] },
+      { name: 'Delete', items: ['deleteRow', 'deleteCol', 'deleteTable'] },
+      { name: 'Format', items: ['headerRow', 'equalCols', 'shadeHeader', 'shadeAttention', 'shadeConfirmed', 'shadeNone'] },
+      { name: 'Studios', items: ['tableStudio', 'tableFlow'] }
     ] }
   ];
+  const TAB_TONE = { Home: 'navigate', Insert: 'assets', Layout: 'output', Review: 'review', Table: 'save' };
+  let tableContext = false;
   /* Short labels for Full mode (tooltips keep the full name). */
-  const SHORT = { pastePlain: 'Plain paste', clearFormat: 'Clear', paragraphSettings: 'Paragraph', insertTable: 'Table', insertImage: 'Image', insertLink: 'Link', slashMenu: 'Blocks /', calloutWarning: 'Warning', calloutConfirm: 'Confirm', insertHr: 'Line', pageBreak: 'Page break', insertCard: 'Card', cardPending: 'Pending', insertToc: 'Contents', insertDate: 'Date', symbols: 'Symbol', importDocx: 'Word .docx', applyProposal: 'Proposal', viewA4: 'A4', viewContinuous: 'Continuous', zoomFit: 'Fit', zoomOut: 'Zoom −', zoomIn: 'Zoom +', reflow: 'Reflow', layoutStudio: 'Layout', autoNumber: 'Auto 1.2', moveUp: 'Up', moveDown: 'Down', tableStudio: 'Table Studio', tableFlow: 'Table Flow', imageStudio: 'Image layout', imageLibrary: 'Library', addComment: 'Comment', markTbc: 'TBC', comments: 'All comments', versions: 'Changes', compare: 'Compare', history: 'History', checks: 'Checks', structure: 'Structure', wordCount: 'Count', find: 'Find', replace: 'Replace', showMarks: 'Marks ¶', shortcuts: 'Shortcuts', undo: 'Undo', redo: 'Redo' };
+  const SHORT = { rowAbove: 'Row above', rowBelow: 'Row below', colLeft: 'Column left', colRight: 'Column right', deleteRow: 'Row', deleteCol: 'Column', deleteTable: 'Table', headerRow: 'Header row', equalCols: 'Equal widths', shadeHeader: 'Grey', shadeAttention: 'Amber', shadeConfirmed: 'Green', shadeNone: 'No shading', decisionTable: 'Decision table', pastePlain: 'Plain paste', clearFormat: 'Clear', paragraphSettings: 'Paragraph', insertTable: 'Table', insertImage: 'Image', insertLink: 'Link', slashMenu: 'Blocks /', calloutWarning: 'Warning', calloutConfirm: 'Confirm', insertHr: 'Line', pageBreak: 'Page break', insertCard: 'Card', cardPending: 'Pending', insertToc: 'Contents', insertDate: 'Date', symbols: 'Symbol', importDocx: 'Word .docx', applyProposal: 'Proposal', viewA4: 'A4', viewContinuous: 'Continuous', zoomFit: 'Fit', zoomOut: 'Zoom −', zoomIn: 'Zoom +', reflow: 'Reflow', layoutStudio: 'Layout', autoNumber: 'Auto 1.2', moveUp: 'Up', moveDown: 'Down', tableStudio: 'Table Studio', tableFlow: 'Table Flow', imageStudio: 'Image layout', imageLibrary: 'Library', addComment: 'Comment', markTbc: 'TBC', comments: 'All comments', versions: 'Changes', compare: 'Compare', history: 'History', checks: 'Checks', structure: 'Structure', wordCount: 'Count', find: 'Find', replace: 'Replace', showMarks: 'Marks ¶', shortcuts: 'Shortcuts', undo: 'Undo', redo: 'Redo' };
   /* Compact tools (format toggles): icon-only even in Full, arranged in a 2-row grid. */
   const COMPACT = new Set(['bold', 'italic', 'underline', 'strike', 'superscript', 'subscript', 'bullets', 'numbers', 'outdent', 'indent', 'alignLeft', 'alignCenter', 'alignRight', 'justify', '@color', '@highlight']);
   const ribbon = runtime(U.el('div', 'sx-ribbon'));
@@ -411,6 +458,28 @@ SOPHIA.ui = (() => {
   let ribbonMode = ['full', 'mini', 'hide'].includes(pref.get('ribbon', 'full')) ? pref.get('ribbon', 'full') : 'full';
   let ribbonTab = pref.get('ribbontab', 'Home');
   function control(kind) {
+    if (kind === '@gallery' && ribbonMode === 'mini') kind = '@style';
+    if (kind === '@gallery') {
+      /* Style gallery: only the established styles of this profile (owner, V78). */
+      const g = U.el('div', 'sx-gallery');
+      g.setAttribute('role', 'listbox');
+      g.setAttribute('aria-label', 'Styles of this ' + SOPHIA.strings.profileLabel[SOPHIA.profile]);
+      for (const [v, l, hint] of SOPHIA.blocks.STYLES) {
+        const b = U.el('button', 'sx-style');
+        b.type = 'button';
+        b.dataset.style = v;
+        b.setAttribute('role', 'option');
+        b.title = l + ' — ' + hint;
+        const prev = U.el('span', 'sx-style-prev sx-style-' + v);
+        prev.setAttribute('aria-hidden', 'true');
+        prev.textContent = { p: 'Aa text', h2: SOPHIA.profile === 'quick-card' ? '01 · SECTION' : '1. SECTION', h3: SOPHIA.profile === 'quick-card' ? 'Card title' : '1.1 Sub-section', h4: '1.1.1 Group', steps: '1. Step', bullets: '• Item', warning: 'Warning', confirmation: 'Confirm', source: 'Source…', card: 'Card', pending: 'Pending', decision: 'If → Then' }[v] || l;
+        b.append(prev, U.el('span', 'sx-style-name', l));
+        b.addEventListener('mousedown', (e) => e.preventDefault());
+        b.onclick = () => { SOPHIA.blocks.applyStyle(v); refreshSoon(); };
+        g.append(b);
+      }
+      return g;
+    }
     const wrap = U.el('label', 'sx-field sx-field-' + kind.slice(1));
     if (kind === '@style') {
       const s = document.createElement('select');
@@ -462,8 +531,11 @@ SOPHIA.ui = (() => {
     if (ribbonMode === 'full') {
       const tabs = U.el('div', 'sx-tabs');
       tabs.setAttribute('role', 'tablist');
+      if (RIBBON.find((t) => t.tab === ribbonTab)?.contextual && !tableContext) ribbonTab = 'Home';
       for (const t of RIBBON) {
-        const b = U.el('button', 'sx-tab', t.tab);
+        if (t.contextual && !tableContext) continue;
+        const b = U.el('button', 'sx-tab' + (t.contextual ? ' sx-tab-context' : ''), t.contextual ? t.tab + ' ✦' : t.tab);
+        b.dataset.tone = TAB_TONE[t.tab];
         b.type = 'button';
         b.setAttribute('role', 'tab');
         b.setAttribute('aria-selected', String(t.tab === ribbonTab));
@@ -472,20 +544,21 @@ SOPHIA.ui = (() => {
       }
       tabs.addEventListener('keydown', (e) => {
         if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
-        const i = RIBBON.findIndex((t) => t.tab === ribbonTab), n = (i + (e.key === 'ArrowRight' ? 1 : RIBBON.length - 1)) % RIBBON.length;
-        ribbonTab = RIBBON[n].tab; pref.set('ribbontab', ribbonTab); renderRibbon(); refresh();
+        const tabsNow = RIBBON.filter((t) => !t.contextual || tableContext);
+        const i = tabsNow.findIndex((t) => t.tab === ribbonTab), n = (i + (e.key === 'ArrowRight' ? 1 : tabsNow.length - 1)) % tabsNow.length;
+        ribbonTab = tabsNow[n].tab; pref.set('ribbontab', ribbonTab); renderRibbon(); refresh();
         ribbon.querySelector('.sx-tab[aria-selected=true]')?.focus();
       });
       ribbon.append(tabs);
     }
     const strip = U.el('div', 'sx-strip');
-    const tabsToShow = ribbonMode === 'full' ? RIBBON.filter((t) => t.tab === ribbonTab) : RIBBON;
+    const tabsToShow = ribbonMode === 'full' ? RIBBON.filter((t) => t.tab === ribbonTab) : RIBBON.filter((t) => !t.contextual || tableContext);
     for (const t of tabsToShow) {
       for (const g of t.groups) {
         const items = g.items.filter(visible);
         if (!items.length) continue;
         const group = U.el('div', 'sx-group');
-        group.dataset.tone = { Home: 'navigate', Insert: 'assets', Layout: 'output', Review: 'review' }[t.tab];
+        group.dataset.tone = TAB_TONE[t.tab];
         group.setAttribute('role', 'group');
         group.setAttribute('aria-label', g.name);
         group.dataset.group = g.name;
@@ -519,7 +592,7 @@ SOPHIA.ui = (() => {
   side_.el.hidden = pref.get('side', window.innerWidth >= 1100 ? 'open' : 'closed') !== 'open';
   const sideTabs = U.el('div', 'sx-side-tabs');
   sideTabs.setAttribute('role', 'tablist');
-  const PANELS = [['outline', 'Outline', 'outline'], ['comments', 'Comments', 'comment'], ['versions', 'Versions', 'changes'], ['images', 'Images', 'image'], ['checks', 'Checks', 'checks']];
+  const PANELS = [['outline', 'Outline', 'outline'], ['find', 'Find', 'find'], ['comments', 'Comments', 'comment'], ['versions', 'Versions', 'changes'], ['images', 'Images', 'image'], ['checks', 'Checks', 'checks']];
   for (const [name, label, ic] of PANELS) {
     const b = U.el('button', 'sx-side-tab');
     b.type = 'button';
@@ -542,6 +615,7 @@ SOPHIA.ui = (() => {
 
   function renderOutline(root) {
     const list = U.el('ol', 'sx-outline');
+    list.setAttribute('translate', 'no');
     const items = SOPHIA.numbering.compute();
     if (!items.length) root.append(U.el('p', 'sx-empty', 'No headings yet. Use Heading 1–3 (Ctrl+Alt+1…3) to build the outline.'));
     for (const { h, num } of items) {
@@ -572,7 +646,7 @@ SOPHIA.ui = (() => {
       b.type = 'button';
       b.title = 'Open in History Studio';
       b.append(U.el('b', '', SOPHIA.versions.label(r)), U.el('span', '', String(r.date || '').slice(0, 16).replace('T', ' ') + ' · ' + (r.editorPID || r.author || '—')));
-      if (r.reason) b.append(U.el('small', '', r.reason));
+      if (r.reason) { const why = U.el('small', '', r.reason); why.setAttribute('translate', 'no'); b.append(why); }
       b.onclick = () => openHistoryStudio(i);
       li.append(b);
       list.append(li);
@@ -588,8 +662,12 @@ SOPHIA.ui = (() => {
     root.append(head);
     const ul = U.el('ul', 'sx-checklist');
     for (const it of items) {
-      const li = U.el('li', 'sx-check-' + it.tone, it.text);
-      if (it.node) { li.tabIndex = 0; li.onclick = li.onkeydown = (e) => { if (e.type === 'keydown' && e.key !== 'Enter') return; it.node.scrollIntoView({ block: 'center', behavior: 'smooth' }); }; }
+      const li = U.el('li', 'sx-check-' + it.tone);
+      li.append(U.el('span', '', it.text));
+      const row = U.el('div', 'sx-row');
+      if (it.node) { const g = U.el('button', 'sx-btn sx-btn-text', 'Go to'); g.type = 'button'; g.onclick = () => it.node.scrollIntoView({ block: 'center', behavior: 'smooth' }); row.append(g); }
+      if (it.action) { const a = U.el('button', 'sx-btn sx-btn-tonal', it.action.label); a.type = 'button'; a.onclick = it.action.run; row.append(a); }
+      if (row.children.length) li.append(row);
       ul.append(li);
     }
     root.append(ul);
@@ -611,6 +689,7 @@ SOPHIA.ui = (() => {
     else if (side_.name === 'comments') SOPHIA.comments.render(sideContent);
     else if (side_.name === 'versions') renderVersions(sideContent);
     else if (side_.name === 'checks') renderChecks(sideContent);
+    else if (side_.name === 'find') SOPHIA.find.render(sideContent);
     else if (side_.name === 'images') {
       const tools = U.el('div');
       tools.id = 'imageTools';
@@ -690,7 +769,7 @@ SOPHIA.ui = (() => {
     p.setAttribute('aria-label', 'Document status');
     p._anchor = statusChip;
     const dl = U.el('dl', 'sx-dl');
-    const row = (k, v) => dl.append(U.el('dt', '', k), U.el('dd', '', v));
+    const row = (k, v) => { const dd = U.el('dd', '', v); dd.setAttribute('translate', 'no'); dl.append(U.el('dt', '', k), dd); };
     row('Document', data.id);
     row('Version', 'V' + data.documentVersion + ' · ' + data.status);
     row('Last revision', last ? SOPHIA.versions.label(last) + ' · ' + String(last.date).slice(0, 10) : '—');
@@ -740,7 +819,7 @@ SOPHIA.ui = (() => {
     b.type = 'button';
     b.dataset.cmd = id;
     if (tone) b.dataset.tone = tone;
-    b.dataset.search = (c.label + ' ' + c.group + ' ' + id).toLowerCase();
+    b.dataset.search = (c.label + ' ' + SOPHIA.i18n.tr(c.label) + ' ' + c.group + ' ' + id).toLowerCase();
     b.append(icon(c.icon || 'more'), U.el('span', '', c.label));
     if (c.keys) b.append(U.el('kbd', '', c.keys));
     if (!C.available(c)) { b.setAttribute('aria-disabled', 'true'); b.title = c.editing && !U.isEditing() ? 'Start editing first' : c.why || ''; }
@@ -808,7 +887,7 @@ SOPHIA.ui = (() => {
       return;
     }
     const words = q.toLowerCase().split(/\s+/);
-    const cmds = C.all().filter((c) => c.label && words.every((w) => (c.label + ' ' + c.group + ' ' + c.id).toLowerCase().includes(w))).slice(0, 12);
+    const cmds = C.all().filter((c) => c.label && words.every((w) => (c.label + ' ' + SOPHIA.i18n.tr(c.label) + ' ' + SOPHIA.i18n.tr(c.group) + ' ' + c.group + ' ' + c.id).toLowerCase().includes(w))).slice(0, 12);
     const wrap = U.el('div', 'sx-omni-results');
     const colA = U.el('section', 'sx-omni-col');
     colA.append(U.el('h3', '', 'Commands'));
@@ -821,6 +900,7 @@ SOPHIA.ui = (() => {
     for (const m of hits) {
       const b = U.el('button', 'sx-hit');
       b.type = 'button';
+      b.setAttribute('translate', 'no');
       b.append(U.el('small', '', m.heading));
       const line = U.el('span');
       const start = Math.max(0, m.at - 48);
@@ -833,7 +913,7 @@ SOPHIA.ui = (() => {
       const all = U.el('button', 'sx-cmd');
       all.type = 'button';
       all.append(icon('find'), U.el('span', '', 'Open Find for all matches'), U.el('kbd', '', 'Ctrl+F'));
-      all.onclick = () => { closeOmni(false); openDocumentFind(); setTimeout(() => { const f = document.querySelector('.document-navigator-v19 input'); if (f) { f.value = q; f.dispatchEvent(new Event('input', { bubbles: true })); } }, 60); };
+      all.onclick = () => { closeOmni(false); SOPHIA.find.open(q); };
       colB.append(all);
     }
     wrap.append(colA, colB);
@@ -934,6 +1014,28 @@ SOPHIA.ui = (() => {
     p.querySelector('.sx-viewcard[aria-pressed=true]')?.focus();
   }
 
+  /* ---------- studio chrome (V78 · U): every studio window gets the same × close ----------
+     The × sends the dialog's own "cancel" event, so each studio keeps its close rules
+     (unsaved changes, rollback). Look: «studio family» in dialogs.css. */
+  const STUDIOS = '#p42-print, .layout-studio-v27, .table-studio-v26, .table-flow-v28, .media-dialog, .image-library-v23, .review-workspace-v22, .structure-v25, .command-dialog, .sv76-dialog';
+  function addClose(d) {
+    if (!d.matches?.(STUDIOS) || d.querySelector(':scope .sx-x')) return;
+    const head = d.querySelector(':scope > header, :scope > form > header') || d.firstElementChild;
+    if (!head) return;
+    const x = U.el('button', 'sx-x', '×');
+    x.type = 'button';
+    x.setAttribute('aria-label', 'Close');
+    x.title = 'Close (Esc)';
+    x.onclick = () => {
+      const ev = new Event('cancel', { cancelable: true });
+      if (d.dispatchEvent(ev) && d.open) d.close();
+    };
+    head.append(x);
+  }
+  new MutationObserver((records) => {
+    for (const r of records) for (const n of r.addedNodes) if (n.nodeType === 1 && n.tagName === 'DIALOG') queueMicrotask(() => addClose(n));
+  }).observe(document.body, { childList: true });
+
   /* ---------- focus exit pill ---------- */
   const focusExit = runtime(U.el('button', 'sx-focus-exit'));
   focusExit.type = 'button';
@@ -974,6 +1076,10 @@ SOPHIA.ui = (() => {
     viewBtn.replaceChildren(icon(cont ? 'continuous' : 'a4'), U.el('span', 'sx-label', 'View: ' + (cont ? 'Continuous' : 'A4 pages')));
     viewBtn.title = 'Document layout: A4 pages, Continuous, zoom, Layout Studio';
     canvasBtn.querySelector('.sx-label').textContent = 'Canvas: ' + (document.body.hasAttribute('data-jaom-light') ? 'Light' : 'Dark');
+    const es = SOPHIA.i18n.lang === 'es';
+    langBtn.replaceChildren(icon('lang'), U.el('span', 'sx-label', es ? 'EN' : 'ES'));
+    langBtn.title = es ? 'Interface in English' : 'Interfaz en español';
+    langBtn.setAttribute('aria-label', langBtn.title);
     /* Main panel shows what can be done now: edit-only tools appear while editing. */
     mainEl.querySelectorAll('[data-cmd]').forEach((b) => { const c = C.get(b.dataset.cmd); b.hidden = c?.id === 'edit' ? !!s.pid : !!(c?.editing && !s.pid); });
     mainEl.querySelectorAll('.sx-tile-main').forEach((t) => (t.hidden = !t.querySelector('[data-cmd]:not([hidden])')));
@@ -1003,14 +1109,10 @@ SOPHIA.ui = (() => {
       if (inDoc) { try { on = document.queryCommandState(c.state); } catch {} }
       b.setAttribute('aria-pressed', String(on));
     }
+    const cur = inDoc ? SOPHIA.blocks.currentStyle() : null;
     const styleSel = ribbon.querySelector('select[data-ctl=style]');
-    if (styleSel && inDoc && document.activeElement !== styleSel) {
-      const blk = U.nodeOf(sel.anchorNode)?.closest('p,h2,h3,h4,blockquote,aside.warning,li,td,th');
-      let v = 'p';
-      if (blk?.matches('aside.warning')) v = /confirm/i.test(blk.querySelector(':scope > b')?.textContent || '') ? 'confirmation' : 'warning';
-      else if (blk && /^(H2|H3|H4|BLOCKQUOTE)$/.test(blk.tagName)) v = blk.tagName.toLowerCase();
-      styleSel.value = v;
-    }
+    if (styleSel && document.activeElement !== styleSel) styleSel.value = cur || '';
+    ribbon.querySelectorAll('.sx-style').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.style === cur)));
   }
   /* App bar → main panel → edit panel are stacked; their bottoms become CSS variables so the
      page and the side panel never hide under them. */
@@ -1040,18 +1142,30 @@ SOPHIA.ui = (() => {
     if (mod && !e.shiftKey && !e.altKey && k === '-') { e.preventDefault(); zoom(-0.1); return; }
     if (mod && !e.shiftKey && !e.altKey && k === '0') { e.preventDefault(); zoom(1); }
   });
-  document.addEventListener('selectionchange', () => { clearTimeout(updateFormatState.t); updateFormatState.t = setTimeout(updateFormatState, 80); });
+  document.addEventListener('selectionchange', () => {
+    clearTimeout(updateFormatState.t);
+    updateFormatState.t = setTimeout(() => {
+      const t = U.isEditing() && !!SOPHIA.tables.here();
+      if (t !== tableContext) {
+        tableContext = t;
+        if (!t && RIBBON.find((x) => x.tab === ribbonTab)?.contextual) ribbonTab = pref.get('ribbontab', 'Home') === 'Table' ? 'Home' : pref.get('ribbontab', 'Home');
+        renderRibbon();
+        refresh();
+      } else updateFormatState();
+    }, 80);
+  });
 
   /* ---------- wiring ---------- */
   let sTimer = 0;
-  const sideSoon = () => { clearTimeout(sTimer); sTimer = setTimeout(() => { if (!side_.el.hidden && side_.name !== 'images') renderSide(); else badges(); }, 250); };
+  const sideSoon = () => { clearTimeout(sTimer); sTimer = setTimeout(() => { if (!side_.el.hidden && !['images', 'find'].includes(side_.name)) renderSide(); else badges(); }, 250); };
   SOPHIA.bus.on('session', refreshSoon);
-  SOPHIA.bus.on('session', (s) => { if (s.pid !== sideSoon.pid) { sideSoon.pid = s.pid; renderRibbon(); sideSoon(); } });
+  SOPHIA.bus.on('session', (s) => { if (s.pid !== sideSoon.pid) { sideSoon.pid = s.pid; mainForSession(!!s.pid); renderRibbon(); sideSoon(); } });
   SOPHIA.bus.on('record-changed', () => { refreshSoon(); sideSoon(); });
   SOPHIA.bus.on('comments-changed', sideSoon);
   SOPHIA.bus.on('outline-changed', sideSoon);
   SOPHIA.bus.on('content-changed', sideSoon);
   SOPHIA.bus.on('view-changed', refreshSoon);
+  SOPHIA.bus.on('lang-changed', () => { renderMain(); renderRibbon(); if (!side_.el.hidden) renderSide(); refresh(); });
   SOPHIA.bus.on('commands-changed', () => { if (mounted) { renderRibbon(); renderMain(); refreshSoon(); } });
 
   let mounted = false;

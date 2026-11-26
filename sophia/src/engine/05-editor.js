@@ -38,12 +38,32 @@ function setEditable() {
 }
 
 /* ---------- clean content (undo states, snapshots) ---------- */
+/* Undo states, recovery copies and comparisons use the MERGED document (one sheet), so
+   recalculating A4 pages never counts as an edit (V78). After restoring such a state,
+   call repaginate(). */
+function mergeSheets(root) {
+  const sheets = [...root.children].filter((n) => n.matches?.('.sheet'));
+  if (sheets.length < 2) return root;
+  const first = sheets[0].querySelector(':scope > .pagecontent');
+  for (const sh of sheets.slice(1)) {
+    const pc = sh.querySelector(':scope > .pagecontent');
+    if (pc && first) first.append(...pc.childNodes);
+    sh.remove();
+  }
+  const num = sheets[0].querySelector('.page-number');
+  if (num) num.textContent = '1';
+  return root;
+}
+function repaginate() {
+  if (!document.body.classList.contains('continuous-view')) paginateDocument(false);
+}
 function cleanContent() {
-  const c = normalizeBody(area.cloneNode(true));
+  const c = mergeSheets(normalizeBody(area.cloneNode(true)));
   c.querySelectorAll('[style]').forEach((n) => {
     if (!n.getAttribute('style').trim()) n.removeAttribute('style');
   });
-  c.querySelectorAll('[contenteditable]').forEach((n) => n.setAttribute('contenteditable', 'false'));
+  /* editability is session state, not content: setEditable() re-applies it after a restore */
+  c.querySelectorAll('[contenteditable]').forEach((n) => n.removeAttribute('contenteditable'));
   c.querySelectorAll('.selected').forEach((n) => n.classList.remove('selected'));
   c.querySelectorAll('[class=""]').forEach((n) => n.removeAttribute('class'));
   return c.innerHTML;
@@ -157,6 +177,7 @@ function stepUndo(direction) {
   area.innerHTML = undoStates[target];
   setEditable();
   muted = false;
+  repaginate();
   restoreCaret(caret);
   window.EditorMedia?.clear();
   window.EditorSession?.changed();

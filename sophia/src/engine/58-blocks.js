@@ -62,16 +62,60 @@ SOPHIA.blocks = (() => {
     s.removeAllRanges();
     s.addRange(r);
   }
-  /* ---------- style gallery ---------- */
-  const STYLES = [
-    ['p', 'Normal text'], ['h2', 'Heading 1'], ['h3', 'Heading 2'], ['h4', 'Heading 3'], ['blockquote', 'Quote'],
-    ['warning', 'Warning callout'], ['confirmation', 'Confirmation required']
-  ];
+  /* ---------- style gallery (V78 · owner: only the ESTABLISHED styles of each profile) ----------
+     Each entry: [name, label, hint]. SOP and Quick Card have their own fixed sets; free
+     styles are not offered. The paper CSS of the profile gives each one its look. */
+  const QC = SOPHIA.profile === 'quick-card';
+  const STYLES = QC
+    ? [['p', 'Body text', 'Normal paragraph'], ['h2', 'Section', '01 · numbered'], ['card', 'Information card', 'Card with title'], ['h3', 'Card title', 'Title inside a card'],
+       ['bullets', 'Bullet list', 'Checks, attachments'], ['decision', 'Decision table', 'Situation → next action'], ['warning', 'Warning', 'Amber callout'],
+       ['confirmation', 'Confirmation required', 'Open point'], ['pending', 'Pending card', 'Card to confirm'], ['source', 'Source note', 'Where it comes from']]
+    : [['p', 'Body text', 'Normal paragraph'], ['h2', 'Section', '1. numbered'], ['h3', 'Sub-section', '1.1 numbered'], ['h4', 'Step group', '1.1.1 numbered'],
+       ['steps', 'Procedure steps', 'Numbered actions'], ['bullets', 'Bullet list', 'Unordered points'], ['warning', 'Warning', 'Amber callout'],
+       ['confirmation', 'Confirmation required', 'Open point'], ['source', 'Source note', 'Reference / source']];
+  /** Name of the established style of the block that holds the caret (or null). */
+  function currentStyle() {
+    const s = getSelection();
+    const n = s.rangeCount ? U.nodeOf(s.anchorNode) : null;
+    if (!n || !area.contains(n)) return null;
+    const blk = n.closest('li, p, h2, h3, h4, aside.warning, td, th, blockquote');
+    if (!blk) return null;
+    if (blk.matches('aside.warning') || blk.closest('aside.warning')) return /confirm/i.test(blk.closest('aside.warning').querySelector(':scope > b')?.textContent || '') ? 'confirmation' : 'warning';
+    if (blk.tagName === 'LI') return blk.parentElement?.tagName === 'OL' ? 'steps' : 'bullets';
+    if (/^H[2-4]$/.test(blk.tagName)) return blk.tagName.toLowerCase();
+    if (blk.matches('p.source-note')) return 'source';
+    if (blk.matches('td, th')) return null;
+    return 'p';
+  }
   function applyStyle(name) {
     if (!U.isEditing()) { toast(SOPHIA.strings.startEditingFirst); return; }
-    if (['p', 'h2', 'h3', 'h4', 'blockquote'].includes(name)) { EditorCommands.command('formatBlock', name); return; }
+    if (name === 'steps' || name === 'bullets') {
+      const want = name === 'steps' ? 'OL' : 'UL', cur = currentStyle();
+      if (cur === name) return;
+      EditorCommands.command(want === 'OL' ? 'insertOrderedList' : 'insertUnorderedList');
+      return;
+    }
+    if (name === 'card') { SOPHIA.qc.insertCard(); return; }
+    if (name === 'pending') { SOPHIA.qc.togglePending(); return; }
+    if (name === 'decision') { SOPHIA.tables.decisionTable(); return; }
+    if (['p', 'h2', 'h3', 'h4', 'blockquote'].includes(name)) {
+      const b = currentTop();
+      if (b?.matches('p.source-note') && name === 'p') { EditorTransactions.run('Body text', () => b.classList.remove('source-note')); return; }
+      EditorCommands.command('formatBlock', name);
+      return;
+    }
     const b = currentTop();
     if (!b) { toast('Place the cursor in a paragraph first.'); return; }
+    if (name === 'source') {
+      EditorTransactions.run('Source note', () => {
+        if (b.matches('p')) { b.classList.add('source-note'); return; }
+        const p = document.createElement('p');
+        p.className = 'source-note';
+        p.append(...(b.matches('aside, h2, h3, h4, blockquote') ? b.childNodes : [b.cloneNode(true)]));
+        b.replaceWith(p);
+      });
+      return;
+    }
     const label = name === 'warning' ? 'Warning:' : 'Confirmation required:';
     EditorTransactions.run('Apply ' + label.replace(':', '') + ' style', () => {
       if (b.matches('aside.warning')) { const l = b.querySelector(':scope > b'); if (l) l.textContent = label; return; }
@@ -141,5 +185,5 @@ SOPHIA.blocks = (() => {
     e.preventDefault();
     move(e.key === 'ArrowUp' ? -1 : 1);
   });
-  return { move, applyStyle, STYLES, insertToc, refreshToc, tocIsCurrent, currentTop };
+  return { move, applyStyle, currentStyle, STYLES, insertToc, refreshToc, tocIsCurrent, currentTop };
 })();
