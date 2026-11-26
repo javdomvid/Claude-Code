@@ -1,4 +1,4 @@
-# SOPHIA V77 · Agent brief (firmware)
+# SOPHIA V78 · Agent brief (firmware)
 
 You are working on ONE self-contained SOPHIA file (an SOP or a Quick Card). It is an
 offline HTML document that carries its own editor. This brief is embedded in every
@@ -15,7 +15,7 @@ The application version (SOPHIA V77, V78…) is NOT the document version (V1, V1
 
 ## 2. File map (top to bottom)
 
-1. `<html lang="en" data-profile="sop|quick-card" data-sophia="V77">`
+1. `<html lang="en" data-profile="sop|quick-card" data-sophia="V78">`
 2. `<head>`: `<style data-sophia="fonts|tokens|paper|dialogs|app|print">` — print is always last.
 3. Comment marker `SOPHIA DOCUMENT ZONE` → **`<main id="document" class="workspace" data-sophia-zone="document">` … `</main>`** → comment marker `END DOCUMENT ZONE`.
 4. `<script type="application/json" id="record">` — revisions, events, comments, assets, versions. Written ONLY by the editor's save.
@@ -59,7 +59,8 @@ The saved file always has ONE `section.sheet`; A4 pages are recalculated on scre
 | Contents | `nav.toc[data-sophia-toc]` | Generated; never edit its items. |
 | Line | `hr` | |
 | Quick Card cards | `div.cards > section(.pending) > h3 + p/ul` | `.pending` = must be confirmed before use. |
-| Source note | `p.source-note` | |
+| Source note | `p.source-note` | Last block: where the content comes from. |
+| Decision table (Quick Card) | `table` with header row `Situation` · `Next action` | One decision per row. |
 | Page break | attribute `data-layout-before="page"` on any block | |
 
 ### Never
@@ -68,6 +69,12 @@ The saved file always has ONE `section.sheet`; A4 pages are recalculated on scre
 - add `style`, `script`, `iframe`, event attributes (`on…`), external images or fonts;
 - write version numbers, dates of approval or names of approvers that a person did not give you;
 - invent facts. Unknown → write `TO BE CONFIRMED` inside `<span class="tbc">…</span>`.
+
+### Established styles
+The editor's style gallery offers exactly these blocks: **SOP** — Body text, Section (h2), Sub-section (h3),
+Step group (h4), Procedure steps (`ol`), Bullet list (`ul`), Warning, Confirmation required, Source note.
+**Quick Card** — Body text, Section (h2), Information card, Card title (h3), Bullet list, Decision table,
+Warning, Confirmation required, Pending card, Source note. Use only these; no inline styles or colours.
 
 ## 4. Metadata (identity table)
 Change fields by their **label**, never by position: Level, Organization, Document Identity,

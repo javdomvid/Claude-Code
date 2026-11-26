@@ -39,6 +39,8 @@ window.LayoutStudio = (() => {
       m.remove();
     }
   }
+  // Visible words of a block, with a space between its lines and cells.
+  const words = (n) => String(n.innerText || n.textContent || "").replace(/\s+/g, " ").trim();
   function open() {
     if (active?.isConnected) { active.querySelector(".sx-ls-block")?.focus(); return; }
     if (document.querySelector("dialog[open],.modalveil,#archiveView")) { toast("Finish the current dialog first."); return; }
@@ -81,7 +83,7 @@ window.LayoutStudio = (() => {
     }
     function inspector() {
       const n = blocks[selected], r = rules[selected];
-      q("desc").textContent = n ? (selected + 1) + " · " + KIND(n) + " — " + (n.textContent.trim().slice(0, 220) || "Image or empty block") : "No body blocks.";
+      q("desc").textContent = n ? (selected + 1) + " · " + KIND(n) + " — " + (words(n).slice(0, 220) || "Image or empty block") : "No body blocks.";
       q("before").checked = !!r?.before;
       d.querySelectorAll("[data-keep]").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.keep === (r?.keep || "auto"))));
       q("prevkeep").disabled = !pid || selected === 0;
@@ -107,7 +109,7 @@ window.LayoutStudio = (() => {
           const b = make("button", "sx-ls-block");
           b.type = "button";
           b.dataset.i = i;
-          b.append(make("span", "sx-ls-kind", KIND(n)), make("span", "sx-ls-text", n.textContent.trim().slice(0, 80) || "Image / empty block"));
+          b.append(make("span", "sx-ls-kind", KIND(n)), make("span", "sx-ls-text", words(n).slice(0, 80) || "Image / empty block"));
           if (r.before) b.append(make("span", "sx-ls-badge", "⤒"));
           if (r.keep === "next" || (r.keep === "auto" && /^H[1-6]$/.test(n.tagName))) b.append(make("span", "sx-ls-badge" + (r.keep === "auto" ? " is-auto" : ""), "⛓"));
           if (report.warnings.some((w) => w.block === i + 1)) b.classList.add("is-warn");

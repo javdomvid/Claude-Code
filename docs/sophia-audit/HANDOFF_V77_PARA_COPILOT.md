@@ -90,3 +90,22 @@ La persona carga la propuesta con **Commands (omnibox) → Apply agent proposal�
 | History: **Clean text** sin resaltados | «Highlight changes» / «Clean text». Clean = documento formateado tal cual, sin resaltados, PIDs ni fechas; se cierra la barra de cambios; rojo y marca de agua se mantienen en versiones antiguas. |
 | Guardado sin tener que **subir el HTML** | Basta con descargar y «Confirm saved». La comprobación byte a byte es opcional. «Save HTML as…» escribe, relee y confirma solo. |
 | Texto que se salía del folio (A4) al editar | La página crece en vez de desbordarse y, al parar de escribir, se repagina conservando el cursor. |
+
+## 6. V78 — segunda revisión del responsable (26 nov 2026)
+Mismo formato de archivo (`sophia/77`). Fuente en `sophia/src`; módulos nuevos `08-i18n` y `64-table-tools`; `26-replace` se integra en `24-find`.
+
+| Decisión | Hecho |
+|---|---|
+| **U** — rediseñar las ventanas (studios) y darles más utilidades | Familia única de studios (sección final de `dialogs.css` + `STUDIOS` en `70-shell`): cristal, cabecera tonal, ×, botones tonales y acción principal a la derecha. History › **Restore this version** (vuelve el contenido antiguo como cambio sin guardar, un paso de deshacer). Checks con acciones (siguiente TBC, buscar, comentarios, imágenes, índice). Print Studio muestra qué lleva la salida controlada. |
+| **T** — Layout Studio | Reescrito: páginas como tarjetas con sus bloques; al pulsar un bloque: empezar en página nueva / mantener con el siguiente / con el anterior; el plan se recalcula solo; «Apply plan & show A4». |
+| **S** — al editar | El Main panel pasa a **Mini** al entrar a editar y vuelve al salir; se puede cambiar igualmente. |
+| **V** — galería de estilos | Solo los estilos establecidos del perfil (`SOPHIA.blocks.STYLES`): SOP con secciones 1. / 1.1 / 1.1.1, pasos, viñetas, aviso, confirmación, nota de fuente; Quick Card con secciones 01 ·, tarjeta, título de tarjeta, tabla de decisión, tarjeta pendiente… Sin estilos libres ni colores. |
+| **V2** — tablas tipo Word | Pestaña contextual **Table ✦** cuando el cursor está en una tabla (filas, columnas, borrar, fila de cabecera, anchos iguales, sombreado con la paleta del documento, Table Studio); insertar tabla con cuadrícula de tamaño; tabla de decisión en Quick Card. |
+| **V3** — buscar y reemplazar | Panel lateral **Find**: resalta todo, ‹ ›, mayúsculas, palabra completa, incluir información del documento, reemplazar uno / todos (un paso de deshacer). |
+| **V4** — modo sugerencias | **No hecho a propósito**: «Changes since last save» con Revert por bloque y las propuestas del agente ya cubren el caso; se revisará con el responsable. |
+| **X** — interfaz en español | Botón ES/EN. Un único diccionario en `08-i18n.js`; Copilot sigue escribiendo la interfaz en inglés y solo añade la traducción allí. Nunca se traduce el documento, el firmware ni el registro (`translate="no"` en contenedores con texto del documento). |
+| Correcciones | Deshacer independiente de la paginación A4; estilo «source note» de Quick Card restaurado; pegado conserva la gramática del documento. |
+
+Pendiente de decisión del responsable (explicado en la conversación): **Q**, **R**, **W**, **E** (claves PID: cómo añadir una persona o cambiar una clave de forma fácil y segura, y cómo debe hacerlo Copilot), **F** (huella de integridad de las revisiones). No implementar sin su decisión.
+
+Nota: el análisis de accesibilidad marca el contraste de `.source-note` en Quick Card (color #70828c heredado de V76). Es estilo del documento; no cambiarlo sin el responsable.

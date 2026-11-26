@@ -6,11 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository (`javdomvid/Claude-Code`) holds **documentation and tooling for Project SOPHIA**, an offline single-file HTML document studio (SOP and Quick Card editors). It is **not** the Claude Code CLI source; for questions about the Claude Code CLI itself, use the `claude-code-guide` agent or public docs.
 
-The SOPHIA HTML documents themselves (V74 base, V75/V76/V77 deliveries) are **deliberately not committed**: they contain corporate content, logos and test PID keys. They are exchanged as conversation attachments. Do not add them to the repo without the owner's explicit consent. Since V77 the **editor source** is committed in `sophia/` (engine, styles, fonts, docs, build, tests) — it contains no document content.
+The SOPHIA HTML documents themselves (V74 base, V75–V78 deliveries) are **deliberately not committed**: they contain corporate content, logos and test PID keys. They are exchanged as conversation attachments. Do not add them to the repo without the owner's explicit consent. Since V77 the **editor source** is committed in `sophia/` (engine, styles, fonts, docs, build, tests) — it contains no document content.
 
 ## Layout
 
-- `sophia/` — **V77 source** (current): `build.py` (source + any V74–V77 document → single HTML), `tools/finalize.cjs` (deliver already upgraded), `tests/v77-functional.cjs` (38 Chromium checks), `src/engine/NN-*.js` (modules in load order), `src/styles/` (tokens · app · paper.sop/qc + paper.common · dialogs · print), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
+- `sophia/` — **V78 source** (current; tests file still named v77-functional): `build.py` (source + any V74–V77 document → single HTML), `tools/finalize.cjs` (deliver already upgraded), `tests/v77-functional.cjs` (46 Chromium checks), `src/engine/NN-*.js` (modules in load order), `src/styles/` (tokens · app · paper.sop/qc + paper.common · dialogs · print), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
 - `docs/sophia-audit/` — audit of SOPHIA V74 and the V75 hand-off (Spanish):
   - `01_INFORME_AUDITORIA.md` findings by severity, with V75 status
   - `02_ARQUITECTURA_OBJETIVO.md` target architecture (engine + data, block model, integrity, agent proposals)

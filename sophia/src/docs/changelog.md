@@ -1,5 +1,30 @@
 # SOPHIA changelog
 
+## V78 (2026-11-26) — owner review: studios, page planning, Word-like tools, Spanish
+Same file format (`sophia/77`).
+- **Studios, one family** (U): History, Print Studio, Layout Studio, Table Studio, Image Studio,
+  Image library, Checks, Structure, paragraph / table dialogs and the save receipt share one look:
+  glass frame, tonal header, × close, tonal buttons, filled main action on the right.
+  New utilities: **History › Restore this version** (old content back as unsaved changes, one undo
+  step); **Checks** with actions (next TBC mark, find «TO BE CONFIRMED», open comments, image
+  library, update contents); **Print Studio** shows what the controlled output carries.
+- **Layout Studio rebuilt** (T): pages as cards listing their blocks; click a block → start on a new
+  page / keep with next / keep with previous; the plan recalculates by itself; apply.
+- **Style gallery** (V): only the established styles of the profile (SOP: sections 1. / 1.1 / 1.1.1,
+  procedure steps, bullets, warning, confirmation, source note; Quick Card: sections 01 ·, information
+  card, card title, decision table, pending card…). No free styles.
+- **Tables** (V2): contextual **Table ✦** tab while the cursor is in a table (rows, columns, delete,
+  header row, equal widths, document-palette shading, Table Studio); insert a table from a size grid.
+- **Find & replace** (V3) in the side panel: highlight all, ‹ ›, match case, whole word, include
+  document information, replace one / all (one undo step). Replaces the two old dialogs.
+- **Main panel → Mini** when entering edit mode (S); back when leaving; can still be changed.
+- **Interface in Spanish** (X): ES/EN button; one dictionary (`08-i18n.js`); the document, the
+  firmware and the record stay in English.
+- Fixes: undo is independent of A4 pagination (no «empty» undo after a reflow); Quick Card
+  «source note» style restored (lost in V77).
+- V4 (suggestion mode) not done on purpose: «Changes since last save» with Revert per block and the
+  agent proposals already cover it; to be revisited with the owner.
+
 ## V77.1 (2026-11-26) — owner review of V77
 Same file format (`sophia/77`); documents saved with V77 open unchanged.
 - **Main panel back** (as in V76), always available with **Main panel: Full / Mini / Hide** in the
