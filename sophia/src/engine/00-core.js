@@ -92,8 +92,61 @@ SOPHIA.sanitize = (() => {
       const doc = new DOMParser().parseFromString('<!doctype html><body>' + String(markup || ''), 'text/html');
       return clean(doc.body).innerHTML;
     },
-    element: clean
+    element: clean,
+    blocks
   };
+  /** Document-grammar sanitizer (agent proposals, Word import). Keeps exactly the
+   *  markup allowed by #sophia-agent-brief §3 and unwraps everything else. */
+  function blocks(markup) {
+    const doc = new DOMParser().parseFromString('<!doctype html><body>' + String(markup || ''), 'text/html');
+    const TAGS = /^(H1|H2|H3|H4|P|UL|OL|LI|TABLE|THEAD|TBODY|TR|TH|TD|ASIDE|BLOCKQUOTE|HR|BR|B|I|U|S|SUP|SUB|A|SPAN|DIV|SECTION|FIGURE|FIGCAPTION|IMG)$/;
+    const MAP = { STRONG: 'B', EM: 'I', STRIKE: 'S', DEL: 'S', H5: 'H4', H6: 'H4', TFOOT: 'TBODY' };
+    const CLASSES = { ASIDE: ['warning'], SPAN: ['tbc'], DIV: ['cards'], SECTION: ['pending'], P: ['source-note'], H2: ['nonum'], H3: ['nonum'], H4: ['nonum'] };
+    const DROP = /^(SCRIPT|STYLE|IFRAME|FRAME|OBJECT|EMBED|LINK|META|BASE|FORM|INPUT|BUTTON|SELECT|TEXTAREA|TEMPLATE|NOSCRIPT|SVG|MATH|VIDEO|AUDIO|CANVAS|NAV|MAIN|HEADER|FOOTER)$/;
+    function copy(node, parent) {
+      if (node.nodeType === 3) { parent.append(document.createTextNode(node.nodeValue)); return; }
+      if (node.nodeType !== 1) return;
+      let tag = node.tagName.toUpperCase();
+      tag = MAP[tag] || tag;
+      if (DROP.test(tag)) return;
+      const cls = (CLASSES[tag] || []).filter((c) => node.classList.contains(c));
+      if (!TAGS.test(tag) || ((tag === 'SPAN' || tag === 'DIV' || tag === 'ASIDE') && !cls.length && tag !== 'ASIDE')) {
+        node.childNodes.forEach((c) => copy(c, parent));
+        return;
+      }
+      if (tag === 'H1') tag = 'H2';
+      const el = document.createElement(tag.toLowerCase());
+      if (tag === 'ASIDE') el.className = 'warning';
+      else if (cls.length) el.className = cls.join(' ');
+      if (tag === 'SPAN') el.title = 'To Be Confirmed';
+      if (tag === 'A') {
+        const href = (node.getAttribute('href') || '').trim();
+        if (!/^(https?:|mailto:)/i.test(href)) { node.childNodes.forEach((c) => copy(c, parent)); return; }
+        el.href = href;
+        el.rel = 'noopener noreferrer';
+      }
+      if (tag === 'IMG') {
+        const src = node.getAttribute('src') || '';
+        if (!/^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/i.test(src)) return;
+        el.src = src;
+        el.alt = node.getAttribute('alt') || '';
+      }
+      if (tag === 'TD' || tag === 'TH') for (const a of ['colspan', 'rowspan']) { const v = +node.getAttribute(a); if (v > 1 && v <= 50) el.setAttribute(a, String(v)); }
+      if (node.getAttribute('data-layout-before') === 'page') el.dataset.layoutBefore = 'page';
+      node.childNodes.forEach((c) => copy(c, el));
+      parent.append(el);
+    }
+    const out = document.createDocumentFragment();
+    doc.body.childNodes.forEach((c) => copy(c, out));
+    /* loose inline text at top level → paragraphs */
+    let run = null;
+    for (const n of [...out.childNodes]) {
+      const inline = n.nodeType === 3 || /^(B|I|U|S|SUP|SUB|A|SPAN|BR|IMG)$/.test(n.tagName);
+      if (inline && (n.nodeType !== 3 || n.nodeValue.trim() || run)) { if (!run) { run = document.createElement('p'); n.before(run); } run.append(n); }
+      else { if (n.nodeType === 3) n.remove(); run = null; }
+    }
+    return out;
+  }
 })();
 
 /* ---------- event bus (UI listens; engine announces) ---------- */
@@ -197,7 +250,7 @@ SOPHIA.assets = {
     return out;
   },
   resolveDocumentImages(root = document) {
-    const store = (window.data && data.assets) || {};
+    const store = (SOPHIA.record && SOPHIA.record.assets) || {};
     root.querySelectorAll('img[data-asset]').forEach((img) => {
       const uri = store[img.dataset.asset];
       if (uri && img.getAttribute('src') !== uri) img.setAttribute('src', uri);

@@ -62,6 +62,8 @@ async function save(p, mode, reason) {
   ok(!s0.dirty, 'not dirty on open');
   ok(s0.ribbonHidden, 'edit panel hidden while reading');
   ok(p.errors.length === 0, 'no errors on load', p.errors);
+  const imgs = await p.evaluate(() => [...document.querySelectorAll('#document img')].map((i) => ({ ok: i.complete && i.naturalWidth > 0, asset: i.dataset.asset || null })));
+  ok(imgs.length > 0 && imgs.every((i) => i.ok), 'all document images load', imgs);
 
   const pid = await startEditing(p);
   const r1 = await p.evaluate(() => {
@@ -159,6 +161,8 @@ async function save(p, mode, reason) {
   // reopen, publish (+0.01), Big Validation (next major), publish without changes (+0.01)
   p = await open(ctx, d1.target);
   const s2 = await p.evaluate(() => ({ pending: !!SOPHIA.migration.pending, dirty: EditorSession.get().dirty, comments: data.comments.length, tbc: document.querySelectorAll('#document .tbc').length, toc: !!document.querySelector('nav[data-sophia-toc]'), dup: (() => { const m = {}; document.querySelectorAll('#document [data-block-id]').forEach((n) => (m[n.dataset.blockId] = (m[n.dataset.blockId] || 0) + 1)); return Object.values(m).filter((v) => v > 1).length; })() }));
+  const imgs2 = await p.evaluate(() => [...document.querySelectorAll('#document img')].every((i) => i.complete && i.naturalWidth > 0));
+  ok(imgs2, 'images load in the reopened copy (assets resolved)');
   ok(!s2.pending && !s2.dirty && s2.comments === 1 && s2.tbc === 1 && s2.toc && s2.dup === 0, 'reopened copy: clean, comments/TBC/TOC kept, unique IDs', s2);
   await startEditing(p);
   await p.locator('#document .pagecontent > p').first().click();

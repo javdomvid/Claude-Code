@@ -71,11 +71,7 @@ SOPHIA.proposals = (() => {
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     toast('Document map downloaded. Give it to the agent together with the brief.');
   }
-  function fragment(html) {
-    const clean = window.SophiaPaste?.sanitize(String(html || ''));
-    if (!clean) return null;
-    return clean.fragment;
-  }
+  const fragment = (html) => SOPHIA.sanitize.blocks(html);
   function check(p, op) {
     const res = { op, ok: true, note: '', before: '', after: '' };
     const target = op.targetBlockId ? SOPHIA.ids.find(op.targetBlockId) : null;

@@ -4,7 +4,7 @@
  * - importFile(): reads a .docx (ZIP) with the browser's DecompressionStream and
  *   inserts its text, headings, lists, tables and PNG/JPEG images after the
  *   current block, in ONE transaction (Ctrl+Z undoes it). Everything passes the
- *   paste sanitizer first. Word styles, fonts and colours are NOT kept on purpose:
+ *   document-grammar sanitizer (SOPHIA.sanitize.blocks) first. Word styles, fonts and colours are NOT kept on purpose:
  *   the SOPHIA page style applies.
  * - exportFile(): writes a simple .docx (headings, paragraphs, lists as text
  *   prefixes, tables, images, identity table) for people who must review in Word.
@@ -191,7 +191,7 @@ SOPHIA.docx = (() => {
         const { fragment, images } = await convert(await file.arrayBuffer());
         const holder = document.createElement('div');
         holder.append(fragment);
-        const clean = window.SophiaPaste?.sanitize(holder.innerHTML)?.fragment;
+        const clean = SOPHIA.sanitize.blocks(holder.innerHTML);
         if (!clean || !clean.childNodes.length) { toast('No text was found in that document.'); return; }
         const blocks = clean.children.length;
         const ok = EditorTransactions.run('Import ' + file.name, () => {
