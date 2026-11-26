@@ -4,17 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-This repository (`javdomvid/Claude-Code`) is currently **empty** — it has no commits, no source files, no README, and no build or test tooling of any kind. There is no existing codebase, architecture, or convention to document yet.
+This repository (`javdomvid/Claude-Code`) holds **documentation and tooling for Project SOPHIA**, an offline single-file HTML document studio (SOP and Quick Card editors). It is **not** the Claude Code CLI source; for questions about the Claude Code CLI itself, use the `claude-code-guide` agent or public docs.
 
-## What to do until real code exists
+The SOPHIA HTML editors themselves (V74 base, V75 delivery) are **deliberately not committed**: they contain corporate content, logos and test PID keys. They are exchanged as conversation attachments. Do not add them to the repo without the owner's explicit consent.
 
-Because there is nothing to analyze, do not invent build/test/lint commands or architectural descriptions — they would be fabricated and misleading. Instead:
+## Layout
 
-- If asked to add the first code to this repo, set up the project per the user's stated stack/framework, and update this file at that point with the real commands (build, lint, test, run a single test) and the actual high-level architecture.
-- If asked general questions about "Claude Code" the CLI tool (not this repository), note that this repo is not the Claude Code CLI source — use the `claude-code-guide` agent or public docs for those questions rather than treating this empty repo as its source.
+- `docs/sophia-audit/` — audit of SOPHIA V74 and the V75 hand-off (Spanish):
+  - `01_INFORME_AUDITORIA.md` findings by severity, with V75 status
+  - `02_ARQUITECTURA_OBJETIVO.md` target architecture (engine + data, block model, integrity, agent proposals)
+  - `03_DISENO_OBSIDIAN_JAOM.md` design audit/spec; `tokens/jaom-tokens.css` design tokens
+  - `04_PLAN_DE_TRABAJO.md` batch plan; `05_HERRAMIENTAS_TIPO_WORD.md` Word-like tool proposals
+  - `HANDOFF_V75_PARA_COPILOT.md` paste-ready hand-off; `copilot-instructions.md` standing rules for the dev AI
+  - `schemas/sophia-document.schema.json` (+ example documents) — JSON Schema 2020-12 for block content
+  - `tools/make_v75.py` — regenerates V75 from the V74 bases via anchored patches (verifies SHA-256)
+  - `tests/sophia-regression.mjs` — Playwright (Chromium) regression check for SOPHIA HTML files
 
-## Keeping this file current
+## Commands
 
-Once the repository has real content, replace this file with one that documents:
-- Common developer commands (build, lint, test — including how to run a single test)
-- The big-picture architecture and structure (only what requires reading multiple files to understand; skip anything easily discoverable by browsing)
+```bash
+# Regenerate V75 from the V74 bases (aborts if hashes or anchors don't match)
+python3 docs/sophia-audit/tools/make_v75.py <SOP_V74.html> <QuickCard_V74.html> <out_dir>
+
+# Browser regression check (Node 18+, Playwright with Chromium); exit code 1 on any FAIL
+node docs/sophia-audit/tests/sophia-regression.mjs <file.html> [more.html ...]
+
+# Validate example documents against the schema
+python3 -c "import json,jsonschema;s=json.load(open('docs/sophia-audit/schemas/sophia-document.schema.json'));[jsonschema.Draft202012Validator(s).validate(json.load(open(f))) for f in ['docs/sophia-audit/schemas/example.sop.document.json','docs/sophia-audit/schemas/example.quick-card.document.json']]"
+```
+
+## Rules that matter when touching SOPHIA HTML
+
+Edit only via exact, uniquely anchored substitutions (lines can be 70k chars); apply every change to both profiles; keep `sophia-v75-print-shell` as the last `<style>`; mark JS-created UI nodes `data-runtime`; route document mutations through `EditorTransactions.run`; never edit `#record` by hand; keep the approved toolbar layout unless the owner approves a change. Details: `docs/sophia-audit/copilot-instructions.md`.

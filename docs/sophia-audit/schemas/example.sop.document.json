@@ -1,0 +1,113 @@
+{
+  "schema": "sophia.document/2",
+  "id": "QA-SOP-0042",
+  "profile": "sop",
+  "meta": {
+    "title": "Recepción y verificación de materias primas",
+    "language": "es",
+    "classification": "TO BE CONFIRMED",
+    "fields": {
+      "level": "Site",
+      "organization": "Quality Assurance",
+      "documentIdentity": "Working Instructions",
+      "owner": "TO BE CONFIRMED"
+    },
+    "source": {
+      "title": "Guía rápida del proveedor (ejemplo)",
+      "updated": "2026-05-29",
+      "note": "Borrador generado a partir de la fuente; los puntos no explícitos se marcan como pendientes."
+    }
+  },
+  "blocks": [
+    {
+      "type": "callout",
+      "id": "b-draft00001",
+      "variant": "draft",
+      "title": "BORRADOR — PARA REVISIÓN, NO APROBADO",
+      "content": [
+        { "text": "Preparado a partir de la guía del proveedor. Las responsabilidades internas no se han validado." }
+      ]
+    },
+    { "type": "heading", "id": "b-scope00001", "level": 1, "text": "Alcance" },
+    {
+      "type": "paragraph",
+      "id": "b-scope00002",
+      "content": [
+        { "text": "Describe cómo recibir una solicitud de información de materia prima, adjuntar los certificados y enviarla a revisión." }
+      ]
+    },
+    { "type": "heading", "id": "b-gener00001", "level": 1, "text": "Consideraciones generales" },
+    {
+      "type": "list",
+      "id": "b-gener00002",
+      "ordered": false,
+      "items": [
+        { "id": "b-gener00003", "content": [ { "text": "Usa siempre las plantillas actualizadas enlazadas en la solicitud." } ] },
+        {
+          "id": "b-gener00004",
+          "content": [
+            { "text": "La divulgación de fórmula contiene datos confidenciales. Alcance exacto de visibilidad: " },
+            { "text": "TO BE CONFIRMED", "marks": ["tbc"] },
+            { "text": "." }
+          ]
+        }
+      ]
+    },
+    { "type": "heading", "id": "b-proce00001", "level": 1, "text": "Procedimiento" },
+    { "type": "heading", "id": "b-proce00002", "level": 2, "text": "Recibir y abrir la solicitud" },
+    {
+      "type": "step",
+      "id": "b-step000001",
+      "role": "Proveedor",
+      "content": [ { "text": "Abre el correo de notificación e identifica el enlace de acceso." } ]
+    },
+    {
+      "type": "step",
+      "id": "b-step000002",
+      "role": "Proveedor",
+      "content": [
+        { "text": "Inicia sesión en el portal y vuelve a pulsar el enlace de la solicitud si no se abre directamente." }
+      ],
+      "expected": [ { "text": "La pestaña de información prellenada aparece en solo lectura." } ]
+    },
+    {
+      "type": "callout",
+      "id": "b-confi00001",
+      "variant": "confirmation",
+      "title": "Confirmación requerida",
+      "content": [
+        { "text": "La fuente no explica qué acción tomar cuando la información inicial es correcta. No inferir una acción a partir de este borrador." }
+      ]
+    },
+    { "type": "heading", "id": "b-proce00003", "level": 2, "text": "Seleccionar la acción de envío" },
+    {
+      "type": "table",
+      "id": "b-table00001",
+      "caption": "Acciones de envío",
+      "headerRows": 1,
+      "columns": [ { "width": 30 }, { "width": 70 } ],
+      "rows": [
+        [ { "content": [ { "text": "Acción" } ] }, { "content": [ { "text": "Uso y siguiente paso" } ] } ],
+        [
+          { "content": [ { "text": "Revisión" } ] },
+          { "content": [ { "text": "Envía la solicitud al revisor correspondiente y pulsa " }, { "text": "Submit", "marks": ["bold"] }, { "text": "." } ] }
+        ],
+        [
+          { "content": [ { "text": "Ocultar divulgación" } ] },
+          { "content": [ { "text": "Oculta los adjuntos de divulgación al equipo comercial. Confirma el alcance antes de usarlo." } ], "fill": "highlight" }
+        ]
+      ]
+    },
+    { "type": "pageBreak", "id": "b-break00001" },
+    { "type": "heading", "id": "b-revie00001", "level": 1, "text": "Puntos de revisión y fuente" },
+    {
+      "type": "list",
+      "id": "b-revie00002",
+      "ordered": false,
+      "items": [
+        { "id": "b-revie00003", "content": [ { "text": "Confirmar la transición tras la corrección inicial." } ] },
+        { "id": "b-revie00004", "content": [ { "text": "Asignar propietario, clasificación y fecha de validación." } ] }
+      ]
+    }
+  ]
+}

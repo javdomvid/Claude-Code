@@ -1,0 +1,330 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sophia.document/2",
+  "title": "SOPHIA document content (v2)",
+  "description": "Contenido de un SOP o Quick Card como bloques tipados. Conjunto cerrado: sin HTML libre, sin colores ni tamaños arbitrarios. Las reglas que JSON Schema no puede expresar (IDs únicos en todo el documento, niveles de título sin saltos, assets existentes, bloques permitidos por perfil) las comprueba `sophia-cli validate`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "profile", "meta", "blocks"],
+  "properties": {
+    "schema": { "const": "sophia.document/2" },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9][A-Z0-9._-]{2,63}$",
+      "description": "Identificador del documento (p. ej. QA-SOP-0042). Estable entre versiones."
+    },
+    "profile": { "enum": ["sop", "quick-card"] },
+    "meta": { "$ref": "#/$defs/meta" },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/block" }
+    }
+  },
+  "$defs": {
+    "blockId": {
+      "type": "string",
+      "pattern": "^b-[a-z0-9]{10}$",
+      "description": "ID estable del bloque. Único en todo el documento. Nunca reutilizar el de un bloque borrado."
+    },
+    "tbcOrText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "Texto plano. Usa exactamente 'TO BE CONFIRMED' cuando el dato no se conoce: nunca lo inventes."
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "language", "classification", "fields"],
+      "properties": {
+        "title": { "type": "string", "minLength": 3, "maxLength": 200 },
+        "language": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$" },
+        "classification": {
+          "enum": ["Public", "Internal", "Confidential", "Restricted", "TO BE CONFIRMED"]
+        },
+        "fields": {
+          "type": "object",
+          "description": "Campos de identidad definidos por el perfil (identityFields[].key).",
+          "propertyNames": { "pattern": "^[a-z][a-zA-Z0-9]{1,40}$" },
+          "additionalProperties": { "$ref": "#/$defs/tbcOrText" }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["title"],
+          "properties": {
+            "title": { "type": "string", "maxLength": 300 },
+            "updated": { "type": "string", "format": "date" },
+            "note": { "type": "string", "maxLength": 1000 }
+          }
+        },
+        "keywords": { "type": "array", "items": { "type": "string", "maxLength": 60 }, "maxItems": 20 }
+      }
+    },
+    "mark": { "enum": ["bold", "italic", "underline", "code", "sup", "sub", "highlight", "tbc"] },
+    "inline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 5000 },
+        "marks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/mark" }
+        },
+        "link": {
+          "type": "string",
+          "pattern": "^(https://[^\\s<>\"']+|mailto:[^\\s<>\"']+)$",
+          "description": "Solo https: o mailto:."
+        }
+      }
+    },
+    "inlines": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/inline" }
+    },
+    "block": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "enum": ["heading", "paragraph", "list", "step", "callout", "table", "figure", "cardGrid", "hero", "divider", "pageBreak"]
+        }
+      },
+      "oneOf": [
+        { "$ref": "#/$defs/heading" },
+        { "$ref": "#/$defs/paragraph" },
+        { "$ref": "#/$defs/list" },
+        { "$ref": "#/$defs/step" },
+        { "$ref": "#/$defs/callout" },
+        { "$ref": "#/$defs/table" },
+        { "$ref": "#/$defs/figure" },
+        { "$ref": "#/$defs/cardGrid" },
+        { "$ref": "#/$defs/hero" },
+        { "$ref": "#/$defs/divider" },
+        { "$ref": "#/$defs/pageBreak" }
+      ]
+    },
+    "layoutRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "breakBefore": { "type": "boolean" },
+        "keepWithNext": { "enum": ["auto", "always", "never"] }
+      }
+    },
+    "heading": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "level", "text"],
+      "properties": {
+        "type": { "const": "heading" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "level": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Sin numeración: el motor numera (1, 1.1, 1.1.1)."
+        },
+        "numbered": { "type": "boolean", "default": true },
+        "layout": { "$ref": "#/$defs/layoutRules" }
+      }
+    },
+    "paragraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "content"],
+      "properties": {
+        "type": { "const": "paragraph" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "content": { "$ref": "#/$defs/inlines" },
+        "style": { "enum": ["normal", "lead", "small"], "default": "normal" },
+        "align": { "enum": ["start", "center", "end", "justify"], "default": "start" },
+        "layout": { "$ref": "#/$defs/layoutRules" }
+      }
+    },
+    "listItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "content"],
+      "properties": {
+        "id": { "$ref": "#/$defs/blockId" },
+        "content": { "$ref": "#/$defs/inlines" },
+        "children": {
+          "type": "array",
+          "maxItems": 50,
+          "items": { "$ref": "#/$defs/listItem" },
+          "description": "Máximo 3 niveles de anidación (lo comprueba la CLI)."
+        }
+      }
+    },
+    "list": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "ordered", "items"],
+      "properties": {
+        "type": { "const": "list" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "ordered": { "type": "boolean" },
+        "start": { "type": "integer", "minimum": 1 },
+        "items": { "type": "array", "minItems": 1, "maxItems": 100, "items": { "$ref": "#/$defs/listItem" } },
+        "layout": { "$ref": "#/$defs/layoutRules" }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "content"],
+      "description": "Paso de procedimiento. Los pasos consecutivos se numeran automáticamente.",
+      "properties": {
+        "type": { "const": "step" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "content": { "$ref": "#/$defs/inlines" },
+        "role": { "$ref": "#/$defs/tbcOrText", "description": "Responsable del paso, o TO BE CONFIRMED." },
+        "expected": { "$ref": "#/$defs/inlines", "description": "Resultado esperado / verificación." },
+        "substeps": { "type": "array", "maxItems": 30, "items": { "$ref": "#/$defs/listItem" } },
+        "layout": { "$ref": "#/$defs/layoutRules" }
+      }
+    },
+    "callout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "variant", "content"],
+      "properties": {
+        "type": { "const": "callout" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "variant": {
+          "enum": ["warning", "caution", "note", "confirmation", "draft"],
+          "description": "confirmation = pendiente de confirmar (no inferir); draft = aviso de borrador."
+        },
+        "title": { "type": "string", "maxLength": 120 },
+        "content": { "$ref": "#/$defs/inlines" },
+        "layout": { "$ref": "#/$defs/layoutRules" }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content"],
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/inline" },
+          "description": "Puede estar vacío para una celda en blanco."
+        },
+        "colspan": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "rowspan": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "align": { "enum": ["start", "center", "end"] },
+        "fill": { "enum": ["none", "light", "highlight", "muted"], "description": "Token del perfil, no color libre." }
+      }
+    },
+    "table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "rows"],
+      "properties": {
+        "type": { "const": "table" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "caption": { "type": "string", "maxLength": 300 },
+        "headerRows": { "type": "integer", "minimum": 0, "maximum": 2, "default": 1 },
+        "columns": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": { "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 } }
+          }
+        },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": { "type": "array", "minItems": 1, "maxItems": 12, "items": { "$ref": "#/$defs/cell" } }
+        },
+        "repeatHeader": { "type": "boolean", "default": true },
+        "layout": { "$ref": "#/$defs/layoutRules" }
+      }
+    },
+    "figure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "asset", "alt"],
+      "properties": {
+        "type": { "const": "figure" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "asset": { "type": "string", "pattern": "^sha256-[a-f0-9]{64}$" },
+        "alt": { "type": "string", "minLength": 5, "maxLength": 500 },
+        "caption": { "type": "string", "maxLength": 500 },
+        "width": { "type": "integer", "minimum": 10, "maximum": 100, "default": 100 },
+        "align": { "enum": ["start", "center", "end"], "default": "center" },
+        "layout": { "$ref": "#/$defs/layoutRules" }
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "blocks"],
+      "properties": {
+        "id": { "$ref": "#/$defs/blockId" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "tone": { "enum": ["default", "info", "success", "warning", "pending"], "default": "default" },
+        "blocks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/paragraph" },
+              { "$ref": "#/$defs/list" },
+              { "$ref": "#/$defs/callout" }
+            ]
+          }
+        }
+      }
+    },
+    "cardGrid": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "cards"],
+      "description": "Solo perfil quick-card.",
+      "properties": {
+        "type": { "const": "cardGrid" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "columns": { "type": "integer", "minimum": 1, "maximum": 3, "default": 2 },
+        "cards": { "type": "array", "minItems": 1, "maxItems": 9, "items": { "$ref": "#/$defs/card" } },
+        "layout": { "$ref": "#/$defs/layoutRules" }
+      }
+    },
+    "hero": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "title"],
+      "description": "Solo perfil quick-card; como máximo uno y en primera posición.",
+      "properties": {
+        "type": { "const": "hero" },
+        "id": { "$ref": "#/$defs/blockId" },
+        "eyebrow": { "type": "string", "maxLength": 80 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "subtitle": { "type": "string", "maxLength": 240 },
+        "tags": { "type": "array", "maxItems": 6, "items": { "type": "string", "maxLength": 30 } }
+      }
+    },
+    "divider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": { "type": { "const": "divider" }, "id": { "$ref": "#/$defs/blockId" } }
+    },
+    "pageBreak": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": { "type": { "const": "pageBreak" }, "id": { "$ref": "#/$defs/blockId" } }
+    }
+  }
+}

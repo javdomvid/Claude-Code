@@ -1,0 +1,71 @@
+{
+  "schema": "sophia.document/2",
+  "id": "QA-QC-0007",
+  "profile": "quick-card",
+  "meta": {
+    "title": "Gestión de solicitudes de materia prima",
+    "language": "es",
+    "classification": "Internal",
+    "fields": {
+      "level": "Site",
+      "organization": "Supplier Operations",
+      "documentIdentity": "Quick Card",
+      "owner": "TO BE CONFIRMED"
+    }
+  },
+  "blocks": [
+    {
+      "type": "hero",
+      "id": "b-hero000001",
+      "eyebrow": "OPERACIONES DE PROVEEDOR · QUICK CARD",
+      "title": "Gestión de solicitudes de materia prima",
+      "subtitle": "Referencia práctica para el flujo de trabajo del proveedor.",
+      "tags": ["Acceso", "Formularios", "Adjuntos", "Envío"]
+    },
+    {
+      "type": "callout",
+      "id": "b-draft00002",
+      "variant": "draft",
+      "title": "BORRADOR · PARA REVISIÓN",
+      "content": [ { "text": "Referencia basada en la fuente; los pasos sin resolver se marcan como pendientes." } ]
+    },
+    { "type": "heading", "id": "b-acces00001", "level": 1, "text": "Acceso y comprobación" },
+    {
+      "type": "cardGrid",
+      "id": "b-grid000001",
+      "columns": 2,
+      "cards": [
+        {
+          "id": "b-card000001",
+          "title": "Abre la solicitud",
+          "tone": "info",
+          "blocks": [
+            { "type": "paragraph", "id": "b-card000002", "content": [ { "text": "Usa el enlace del correo y vuelve a pulsarlo tras iniciar sesión si hace falta." } ] }
+          ]
+        },
+        {
+          "id": "b-card000003",
+          "title": "Comprueba la información",
+          "tone": "pending",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "id": "b-card000004",
+              "content": [ { "text": "Acción cuando la información es correcta: " }, { "text": "TO BE CONFIRMED", "marks": ["tbc"] } ]
+            }
+          ]
+        }
+      ]
+    },
+    { "type": "heading", "id": "b-finis00001", "level": 1, "text": "Antes de terminar" },
+    {
+      "type": "list",
+      "id": "b-finis00002",
+      "ordered": false,
+      "items": [
+        { "id": "b-finis00003", "content": [ { "text": "Plantillas actualizadas usadas." } ] },
+        { "id": "b-finis00004", "content": [ { "text": "Cuatro adjuntos obligatorios comprobados." } ] }
+      ]
+    }
+  ]
+}

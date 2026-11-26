@@ -1,0 +1,170 @@
+/*
+ * Obsidian JAOM · Material Expressive Glass — tokens propuestos (SOPHIA)
+ * ------------------------------------------------------------------
+ * Fuente: valores que ya usa V74 (jaom-glass-v48, sophia-phase1-shared, sophia-light-elevation)
+ * normalizados en escalas. Semántica del contrato vigente:
+ *   azul petróleo = acción primaria · lavanda = selección · ámbar = atención / cambios pendientes
+ *   rojo = error / descartar / contexto histórico · lienzo negro por defecto, opción Light
+ *
+ * Reglas:
+ *  - La app usa SOLO var(--jaom-*). El folio usa SOLO var(--paper-*) (tokens de perfil).
+ *  - Nada de colores literales nuevos en componentes. Nada de !important fuera de @layer print/overrides.
+ *  - Este archivo NO cambia el aspecto por sí mismo: define variables. Migrar componente a componente
+ *    (ver 03_DISENO_OBSIDIAN_JAOM.md §5) y comparar capturas antes/después.
+ */
+@layer reset, tokens, legacy, base, paper, app, components, utilities, overrides, print;
+
+@layer tokens {
+  :root {
+    /* ---------- Lienzo (canvas) ---------- */
+    --jaom-canvas-obsidian: #0e0e11;            /* actual: --jaom-canvas */
+    --jaom-canvas-light: #ffffff;               /* actual: body[data-jaom-light] */
+    --jaom-canvas: var(--jaom-canvas-obsidian);
+
+    /* ---------- Tinta ---------- */
+    --jaom-ink: #202e46;                        /* actual: --ph-ink */
+    --jaom-ink-muted: #4a5a73;
+    --jaom-ink-subtle: #657e8b;                 /* ojo: 3,83:1 sobre #eef3f9 → solo ≥ 14px o sobre blanco */
+    --jaom-ink-inverse: #ffffff;
+
+    /* ---------- Cristal (solo 2 niveles) ---------- */
+    --jaom-glass-1-bg: rgba(231, 239, 255, .82); /* barra superior; actual .69 → subir legibilidad */
+    --jaom-glass-1-blur: blur(18px) saturate(1.28);
+    --jaom-glass-1-fallback: #eef2fb;           /* sin backdrop-filter o prefers-reduced-transparency */
+    --jaom-glass-2-bg: rgba(242, 245, 251, .90); /* popovers, More tools, Views */
+    --jaom-glass-2-blur: blur(14px) saturate(1.2);
+    --jaom-glass-2-fallback: #f4f6fb;
+    --jaom-glass-border: rgba(255, 255, 255, .72);
+    --jaom-glass-gradient: linear-gradient(110deg, #e2ebfff0, #eee3ffba); /* dock actual */
+
+    /* ---------- Superficies sólidas ---------- */
+    --jaom-surface: #ffffff;
+    --jaom-surface-container: #f8faff;          /* actual .ui32-tile */
+    --jaom-surface-container-high: #f2f5fb;     /* actual .ui31-glass fallback */
+    --jaom-outline: #d6e1ee;
+    --jaom-outline-strong: #bacbe7;
+    --jaom-scrim: rgba(8, 12, 28, .45);
+
+    /* ---------- Acción / estado ---------- */
+    --jaom-primary: #104f60;                    /* azul petróleo, actual --ph-main */
+    --jaom-primary-hover: #185669;
+    --jaom-on-primary: #ffffff;
+    --jaom-selected: #e3d5ff;                   /* lavanda, actual --ph-selected */
+    --jaom-on-selected: #42256b;
+    --jaom-attention: #b26a00;                  /* ámbar: cambios pendientes, avisos */
+    --jaom-attention-container: #fff3dc;
+    --jaom-danger: #a02f4c;                     /* rojo: error / descartar */
+    --jaom-danger-container: #fbe7ec;
+    --jaom-success: #1f6b4a;
+    --jaom-success-container: #e3f4ec;
+    --jaom-historic: #762d3d;                   /* EXCLUSIVO de revisión histórica (fondo History) */
+    --jaom-historic-watermark: #f4c2cc;
+    --jaom-focus: #3b5bdb;
+
+    /* ---------- Tonos bento (tarjetas por propósito) ---------- */
+    --jaom-tone-navigate: #eaf0ff;
+    --jaom-tone-assets: #e8f5f2;
+    --jaom-tone-review: #eee8f9;
+    --jaom-tone-output: #faf0e5;
+    --jaom-tone-save: #e6f2ee;
+    --jaom-tone-caption: #405470;               /* rótulos de tarjeta */
+
+    /* ---------- Forma ---------- */
+    --jaom-radius-xs: 6px;
+    --jaom-radius-sm: 9px;                      /* botones */
+    --jaom-radius-md: 12px;                     /* tarjetas */
+    --jaom-radius-lg: 16px;                     /* barras */
+    --jaom-radius-xl: 20px;                     /* diálogos */
+    --jaom-radius-pill: 999px;
+
+    /* ---------- Elevación (lienzo oscuro por defecto) ---------- */
+    --jaom-elev-0: none;
+    --jaom-elev-1: 0 1px 2px #070d2433, 0 2px 6px #070d241f;
+    --jaom-elev-2: 0 6px 22px #090f284d;        /* actual dock */
+    --jaom-elev-3: 0 20px 70px #112c5040;       /* actual diálogos */
+
+    /* ---------- Espaciado (base 4) ---------- */
+    --jaom-space-1: 4px;  --jaom-space-2: 8px;  --jaom-space-3: 12px; --jaom-space-4: 16px;
+    --jaom-space-5: 20px; --jaom-space-6: 24px; --jaom-space-8: 32px; --jaom-space-10: 40px;
+
+    /* ---------- Tipografía de interfaz ---------- */
+    --jaom-font: 'DM Sans', Arial, sans-serif;  /* incrustar DM Sans (OFL) para que esto sea verdad */
+    --jaom-text-label-sm: 600 11px/16px var(--jaom-font);  /* rótulos VERSALITAS, letter-spacing .08em */
+    --jaom-text-label: 500 13px/18px var(--jaom-font);     /* botones */
+    --jaom-text-body: 400 14px/20px var(--jaom-font);
+    --jaom-text-title-sm: 600 16px/22px var(--jaom-font);
+    --jaom-text-title: 600 20px/26px var(--jaom-font);
+    --jaom-text-headline: 600 24px/30px var(--jaom-font);
+
+    /* ---------- Tamaños de control ---------- */
+    --jaom-control-h: 40px;                     /* actual 30–34px */
+    --jaom-control-h-touch: 44px;
+
+    /* ---------- Movimiento (Material Expressive, corto; nunca anima el folio) ---------- */
+    --jaom-ease-standard: cubic-bezier(.2, 0, 0, 1);
+    --jaom-ease-emphasized-decelerate: cubic-bezier(.05, .7, .1, 1);
+    --jaom-dur-1: 100ms; --jaom-dur-2: 200ms; --jaom-dur-3: 300ms; --jaom-dur-4: 450ms;
+
+    /* ---------- Capas ---------- */
+    --jaom-z-base: 0; --jaom-z-sticky: 10; --jaom-z-dropdown: 20; --jaom-z-overlay: 30;
+    --jaom-z-modal: 40; --jaom-z-toast: 50;
+
+    /* ---------- Estados ---------- */
+    --jaom-state-hover: 8%;      /* capa de estado sobre el color del contenido */
+    --jaom-state-pressed: 12%;
+    --jaom-state-disabled-content: .38;
+  }
+
+  /* Lienzo claro (preferencia del USUARIO, no del documento) */
+  :root[data-jaom-canvas="light"],
+  body[data-jaom-light] {
+    --jaom-canvas: var(--jaom-canvas-light);
+    --jaom-elev-2: 0 0 0 1px #26334b20, 0 5px 16px #26334b1c;   /* actual --sophia-light-panel */
+    --jaom-elev-1: inset 0 0 0 1px #26334b20, 0 0 0 1px #26334b1c; /* actual --sophia-light-edge */
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :root {
+      --jaom-glass-1-bg: var(--jaom-glass-1-fallback);
+      --jaom-glass-2-bg: var(--jaom-glass-2-fallback);
+      --jaom-glass-1-blur: none;
+      --jaom-glass-2-blur: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :root { --jaom-dur-1: 0ms; --jaom-dur-2: 0ms; --jaom-dur-3: 0ms; --jaom-dur-4: 0ms; }
+  }
+  @media (pointer: coarse) {
+    :root { --jaom-control-h: var(--jaom-control-h-touch); }
+  }
+}
+
+/* Ejemplo de componente canónico usando solo tokens (referencia para Copilot) */
+@layer components {
+  .jaom-btn {
+    min-height: var(--jaom-control-h);
+    padding: 0 var(--jaom-space-3);
+    border-radius: var(--jaom-radius-sm);
+    font: var(--jaom-text-label);
+    color: var(--jaom-ink);
+    background: var(--jaom-surface-container);
+    border: 1px solid transparent;
+    transition: background-color var(--jaom-dur-2) var(--jaom-ease-standard),
+                transform var(--jaom-dur-1) var(--jaom-ease-standard);
+  }
+  .jaom-btn:hover { background: color-mix(in srgb, var(--jaom-ink) var(--jaom-state-hover), var(--jaom-surface-container)); }
+  .jaom-btn:active { transform: scale(.97); }
+  .jaom-btn:focus-visible { outline: 2px solid var(--jaom-focus); outline-offset: 2px; }
+  .jaom-btn--filled { background: var(--jaom-primary); color: var(--jaom-on-primary); }
+  .jaom-btn--danger { color: var(--jaom-danger); background: var(--jaom-danger-container); }
+  .jaom-btn:disabled { opacity: 1; color: rgb(from var(--jaom-ink) r g b / var(--jaom-state-disabled-content)); cursor: not-allowed; }
+  .jaom-btn:disabled:hover { background: var(--jaom-surface-container); }
+}
+
+/* Impresión: solo el folio. La app no aporta nada más a esta capa. */
+@layer print {
+  @media print {
+    html, body { background: #fff !important; }
+    body > :not(#document) { display: none !important; }
+  }
+}
