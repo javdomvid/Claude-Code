@@ -1,8 +1,13 @@
 /* ============================================================================
- * SOPHIA · 34-library
- * Image library: alternative text and captions in reviewed batches.
- * Reused from V76 (image-library-v23); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 34-library                                  layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Image library: browse body images, edit alternative text and captions in
+ *          reviewed batches.
+ * OWNS     ImageLibrary; dialog.image-library-v23 (style: styles/ui/34-library.css).
+ * EXPORTS  ImageLibrary {open}
+ * USES     EditorSession, EditorTransactions, area, cleanContent, data, toast
+ * RULES    Changes are staged and applied in one transaction.
+ * TESTS    tools/snapshot.cjs studio-library
  * ========================================================================== */
 /* V23: isolated draft model for image metadata. No document mutation until
    reviewed apply; one transaction per batch. Existing rich captions are read-only. */
@@ -58,7 +63,16 @@ window.ImageLibrary = (() => {
     d.className = "image-library-v23";
     d.setAttribute("aria-label", "Image library");
     d.innerHTML =
-      '<header><div><small>ASSETS · IMAGE LIBRARY</small><h2>Image library</h2><p>Browse body images. Edit alternative text and simple figure captions together, then review before applying.</p></div><span data-mode></span></header><nav><label>Search metadata<input type="search" data-search placeholder="Alternative text, caption or image number"></label><label>Filter<select data-filter><option value="all">All images</option><option value="missing">Missing alternative text</option><option value="pending">Pending edits</option><option value="external">Not embedded</option></select></label><button type="button" data-prev>Previous</button><span data-page></span><button type="button" data-next>Next</button></nav><section><p data-status role="status" aria-live="polite"></p><p data-error role="alert"></p><div data-grid class="il23-grid"></div><div data-review hidden></div></section><footer><div><button type="button" data-close>Close</button><button type="button" data-discard hidden>Discard edits and close</button></div><div><button type="button" data-back hidden>Back to editing</button><button type="button" data-review-button>Review batch</button><button type="button" data-apply hidden>Apply reviewed batch</button></div></footer>';
+      '<header><div><small>ASSETS · IMAGE LIBRARY</small><h2>Image library</h2><p>Browse body images. Edit alternative text and simple figure captions together, then review before applying.</p>' +
+        '</div><span data-mode></span></header><nav><label>Search metadata<input type="search" data-search placeholder="Alternative text, caption or image number">' +
+        '</label><label>Filter<select data-filter><option value="all">All images</option><option value="missing">Missing alternative text</option>' +
+        '<option value="pending">Pending edits</option><option value="external">Not embedded</option></select>' +
+        '</label><button type="button" data-prev>Previous</button><span data-page></span><button type="button" data-next>Next</button>' +
+        '</nav><section><p data-status role="status" aria-live="polite"></p><p data-error role="alert"></p><div data-grid class="il23-grid">' +
+        '</div><div data-review hidden></div></section><footer><div><button type="button" data-close>Close</button>' +
+        '<button type="button" data-discard hidden>Discard edits and close</button></div><div><button type="button" data-back hidden>Back to editing</button>' +
+        '<button type="button" data-review-button>Review batch</button><button type="button" data-apply hidden>Apply reviewed batch</button>' +
+        '</div></footer>';
     const q = (x) => d.querySelector("[data-" + x + "]");
     q("mode").textContent = editable
       ? "Editing session · " + pid

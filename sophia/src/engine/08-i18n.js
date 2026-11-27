@@ -1,14 +1,21 @@
 /* ============================================================================
- * SOPHIA · 08-i18n  (V78 · owner decision X: interface in English or Spanish)
- * - English is the SOURCE language of the code, the firmware and the document.
- *   This module only translates the INTERFACE around the document, after it is
- *   drawn: text nodes and title / aria-label / placeholder attributes.
- * - Never translated: #document (the document zone), anything inside an element
- *   with translate="no" (outline, search results, comments, revision reasons…),
- *   form values, the record, the firmware, the History snapshot.
- * - To add a translation: add "English text": "Texto en español" to ES below
- *   (exact text, without surrounding spaces) or a pattern to PATTERNS.
- *   Do not translate inside modules; keep writing English there.
+ * SOPHIA · 08-i18n                                     layer: CORE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Interface language. English is the source language of code, firmware and
+ *          document; this module translates only the INTERFACE after it is drawn (text
+ *          nodes and title / aria-label / placeholder / data-short attributes).
+ * OWNS     SOPHIA.i18n, the language preference (sophia:pref:lang), html[data-ui-lang],
+ *          the translation engine (dictionaries come from 09-lang-xx modules).
+ * EXPORTS  SOPHIA.i18n {LANGS, add(code, name, dict, patterns), set(code), start(), tr(text),
+ *          lang, ES, PATTERNS}
+ * USES     SOPHIA.{bus}, MutationObserver on <body>
+ * EMITS    lang-changed
+ * RULES    - Never translated: #document, anything inside [translate="no"], form values,
+ *            the record, the firmware, History snapshots.
+ *          - Do not translate inside modules: keep writing English there and add the
+ *            translation to every 09-lang-xx dictionary (lint E8 checks they match).
+ *          - A string that is not in a dictionary stays in English (safe fallback).
+ * TESTS    tests/functional.cjs (language switch) · tools/snapshot.cjs edit-es@1280
  * ========================================================================== */
 SOPHIA.i18n = (() => {
   'use strict';

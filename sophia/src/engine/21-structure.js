@@ -1,8 +1,13 @@
 /* ============================================================================
- * SOPHIA · 21-structure
- * Structure inspector: block inventory, identity status and comparison with the last saved revision. IDs are maintained automatically by 20-ids.
- * Reused from V76 (block-identity-v25); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 21-structure                                layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Block structure studio: inventory of blocks, identity status (missing /
+ *          duplicate IDs) and comparison with the last saved revision; repair of IDs.
+ * OWNS     BlockIdentity; dialog.structure-v25 (style: styles/ui/21-structure.css).
+ * EXPORTS  BlockIdentity {open}
+ * USES     SOPHIA.ids, EditorSession, EditorTransactions, area, cleanContent, data, toast
+ * RULES    Read-only except "repair IDs" (one transaction).
+ * TESTS    tools/snapshot.cjs studio-structure
  * ========================================================================== */
 /* V25 identity service: explicit, undoable metadata migration. Never mutates on
    opening, typing, undo, replay or export. New/copied blocks require refresh.
@@ -164,7 +169,16 @@ window.BlockIdentity = (() => {
     d.className = "structure-v25";
     d.setAttribute("aria-label", "Document structure");
     d.innerHTML =
-      '<header><small>REVIEW · DOCUMENT STRUCTURE</small><h2>Stable block identities</h2><p>Inspect structure and prepare a controlled identity migration. Saved historical snapshots are never rewritten.</p></header><nav><button type="button" data-inventory>Block inventory</button><button type="button" data-compare>Compare with saved</button><button type="button" data-refresh>Refresh inspection</button></nav><section><p data-summary role="status" aria-live="polite"></p><p data-error role="alert"></p><div data-filters><label>Search text, tag or ID<input type="search" data-search></label><label>Identity status<select data-filter><option value="">All</option><option>Ready</option><option>Missing</option><option>Duplicate</option><option>Invalid</option></select></label></div><div data-list></div><div data-pages><button type="button" data-prev>Previous</button><span data-page></span><button type="button" data-next>Next</button></div><div data-preview hidden></div></section><footer><button type="button" data-close>Close</button><div><button type="button" data-back hidden>Back</button><button type="button" data-plan>Preview identity migration</button><button type="button" data-apply hidden>Apply identity migration</button></div></footer>';
+      '<header><small>REVIEW · DOCUMENT STRUCTURE</small><h2>Stable block identities</h2><p>Inspect structure and prepare a controlled identity migration. Saved historical snapshots are never rewritten.</p>' +
+        '</header><nav><button type="button" data-inventory>Block inventory</button><button type="button" data-compare>Compare with saved</button>' +
+        '<button type="button" data-refresh>Refresh inspection</button></nav><section><p data-summary role="status" aria-live="polite">' +
+        '</p><p data-error role="alert"></p><div data-filters><label>Search text, tag or ID<input type="search" data-search>' +
+        '</label><label>Identity status<select data-filter><option value="">All</option><option>Ready</option>' +
+        '<option>Missing</option><option>Duplicate</option><option>Invalid</option></select></label></div><div data-list>' +
+        '</div><div data-pages><button type="button" data-prev>Previous</button><span data-page></span><button type="button" data-next>Next</button>' +
+        '</div><div data-preview hidden></div></section><footer><button type="button" data-close>Close</button>' +
+        '<div><button type="button" data-back hidden>Back</button><button type="button" data-plan>Preview identity migration</button>' +
+        '<button type="button" data-apply hidden>Apply identity migration</button></div></footer>';
     const q = (x) => d.querySelector("[data-" + x + "]");
     let inventory = inspect(),
       page = 0,

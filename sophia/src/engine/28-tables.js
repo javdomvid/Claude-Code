@@ -1,8 +1,14 @@
 /* ============================================================================
- * SOPHIA · 28-tables
- * Table Studio: detached draft, preview, explicit transaction commit.
- * Reused from V76 (table-studio-v26); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 28-tables                                   layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Table Studio: edit a detached draft of a body table (layout, cell formatting,
+ *          rows/columns, merge/split), preview, then commit in one transaction.
+ * OWNS     TableStudio; dialog.table-studio-v26 (style: styles/ui/28-tables.css).
+ * EXPORTS  TableStudio {open}
+ * USES     EditorCommands, EditorSession, EditorTransactions, area, cleanContent, toast
+ * RULES    The document changes only on Apply (one undo step). Quick operations live in
+ *          64-table-tools; this studio is for the rest.
+ * TESTS    tools/snapshot.cjs studio-table
  * ========================================================================== */
 /* V26: detached table draft, safe text/layout preview, explicit transaction commit.
    No snapshot rewrite. New cells have no copied block IDs. Existing cells retain
@@ -82,7 +88,36 @@ window.TableStudio = (() => {
     d.className = "table-studio-v26";
     d.setAttribute("aria-label", "Table Studio");
     d.innerHTML =
-      '<header><small>ASSETS · TABLE STUDIO</small><h2>Table Studio</h2><p>Prepare layout and structure changes on a separate draft. The document changes only when you apply.</p></header><nav><label>Body table<select data-table></select></label><span data-mode></span></nav><section><div class="ts26-controls"><fieldset data-edit><legend>Table layout</legend><div class="ts26-fields"><label>Width (%) · blank keeps current<input data-width type="number" min="10" max="100" step="1" placeholder="Keep current"></label><label>Table alignment<select data-align><option value="">Keep current</option><option value="left">Left</option><option value="center">Centre</option><option value="right">Right</option></select></label><label>Plain-text table caption<input data-caption maxlength="1000"></label></div><button type="button" data-stage-layout>Stage table layout</button><h3>Cell formatting</h3><div class="ts26-fields"><label>Apply to<select data-scope><option value="cell">Selected cell</option><option value="row">Selected row</option><option value="column">Selected column</option><option value="all">All cells</option></select></label><label>Text alignment<select data-text><option value="">Keep current</option><option>left</option><option>center</option><option>right</option><option>justify</option></select></label><label>Vertical alignment<select data-vertical><option value="">Keep current</option><option>top</option><option>middle</option><option>bottom</option></select></label><label>Padding (px) · blank keeps current<input data-padding type="number" min="0" max="32" step="1"></label><label>Border<select data-border><option value="">Keep current</option><option value="0">None</option><option value="1">1 px</option><option value="2">2 px</option></select></label><label>Cell fill<select data-fill><option value="">Keep current</option><option value="#ffffff">White</option><option value="#CBE7F5">Brand light blue</option><option value="#EDF2AE">Brand highlight</option><option value="#eef3fc">Soft grey-blue</option></select></label></div><button type="button" data-stage-cells>Stage cell formatting</button><h3>Rows & columns</h3><div class="ts26-fields"><label>Row<select data-row></select></label><label>Cell / column<select data-column></select></label></div><div class="ts26-actions"><button type="button" data-op="rowBefore">Row above</button><button type="button" data-op="row">Row below</button><button type="button" data-op="columnBefore">Column before</button><button type="button" data-op="column">Column after</button><button type="button" data-op="deleteRow">Delete row</button><button type="button" data-op="deleteColumn">Delete column</button><button type="button" data-op="header">Toggle selected row headers</button><button type="button" data-op="equal">Equal column widths</button></div><p data-complex class="ts26-note"></p></fieldset></div><div class="ts26-preview-column"><h3>Draft layout preview</h3><p class="ts26-note">Text-only layout preview. Original rich content, links and images are preserved on apply; they are not executed or loaded here. Click a preview cell to select it.</p><div data-preview class="ts26-preview"></div><h3>Staged operations</h3><ol data-operations></ol><p data-status role="status" aria-live="polite"></p><p data-error role="alert"></p><label data-delete-confirm hidden><input type="checkbox" data-confirm> I reviewed the removed content and confirm these deletions.</label></div></section><footer><div><button type="button" data-close>Cancel</button><button type="button" data-discard hidden>Discard draft and close</button></div><div><button type="button" data-reset>Reset table draft</button><button type="button" data-apply>Apply table changes</button></div></footer>';
+      '<header><small>ASSETS · TABLE STUDIO</small><h2>Table Studio</h2><p>Prepare layout and structure changes on a separate draft. The document changes only when you apply.</p>' +
+        '</header><nav><label>Body table<select data-table></select></label><span data-mode></span></nav><section>' +
+        '<div class="ts26-controls"><fieldset data-edit><legend>Table layout</legend><div class="ts26-fields">' +
+        '<label>Width (%) · blank keeps current<input data-width type="number" min="10" max="100" step="1" placeholder="Keep current">' +
+        '</label><label>Table alignment<select data-align><option value="">Keep current</option><option value="left">Left</option>' +
+        '<option value="center">Centre</option><option value="right">Right</option></select></label><label>Plain-text table caption<input data-caption maxlength="1000">' +
+        '</label></div><button type="button" data-stage-layout>Stage table layout</button><h3>Cell formatting</h3>' +
+        '<div class="ts26-fields"><label>Apply to<select data-scope><option value="cell">Selected cell</option>' +
+        '<option value="row">Selected row</option><option value="column">Selected column</option><option value="all">All cells</option>' +
+        '</select></label><label>Text alignment<select data-text><option value="">Keep current</option><option>left</option>' +
+        '<option>center</option><option>right</option><option>justify</option></select></label><label>Vertical alignment<select data-vertical>' +
+        '<option value="">Keep current</option><option>top</option><option>middle</option><option>bottom</option>' +
+        '</select></label><label>Padding (px) · blank keeps current<input data-padding type="number" min="0" max="32" step="1">' +
+        '</label><label>Border<select data-border><option value="">Keep current</option><option value="0">None</option>' +
+        '<option value="1">1 px</option><option value="2">2 px</option></select></label><label>Cell fill<select data-fill>' +
+        '<option value="">Keep current</option><option value="#ffffff">White</option><option value="#CBE7F5">Brand light blue</option>' +
+        '<option value="#EDF2AE">Brand highlight</option><option value="#eef3fc">Soft grey-blue</option></select>' +
+        '</label></div><button type="button" data-stage-cells>Stage cell formatting</button><h3>Rows & columns</h3>' +
+        '<div class="ts26-fields"><label>Row<select data-row></select></label><label>Cell / column<select data-column>' +
+        '</select></label></div><div class="ts26-actions"><button type="button" data-op="rowBefore">Row above</button>' +
+        '<button type="button" data-op="row">Row below</button><button type="button" data-op="columnBefore">Column before</button>' +
+        '<button type="button" data-op="column">Column after</button><button type="button" data-op="deleteRow">Delete row</button>' +
+        '<button type="button" data-op="deleteColumn">Delete column</button><button type="button" data-op="header">Toggle selected row headers</button>' +
+        '<button type="button" data-op="equal">Equal column widths</button></div><p data-complex class="ts26-note">' +
+        '</p></fieldset></div><div class="ts26-preview-column"><h3>Draft layout preview</h3><p class="ts26-note">Text-only layout preview. Original rich content, links and images are preserved on apply; they are not executed or loaded here. Click a preview cell to select it.</p>' +
+        '<div data-preview class="ts26-preview"></div><h3>Staged operations</h3><ol data-operations></ol><p data-status role="status" aria-live="polite">' +
+        '</p><p data-error role="alert"></p><label data-delete-confirm hidden><input type="checkbox" data-confirm> I reviewed the removed content and confirm these deletions.</label>' +
+        '</div></section><footer><div><button type="button" data-close>Cancel</button><button type="button" data-discard hidden>Discard draft and close</button>' +
+        '</div><div><button type="button" data-reset>Reset table draft</button><button type="button" data-apply>Apply table changes</button>' +
+        '</div></footer>';
     const q = (x) => d.querySelector("[data-" + x + "]");
     available.forEach((t, i) => {
       const o = make("option", "Table " + (i + 1) + " · " + t.textContent.trim().slice(0, 75));

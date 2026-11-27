@@ -1,8 +1,13 @@
 /* ============================================================================
- * SOPHIA · 42-table-flow
- * Table Flow (Quick Card): split a body table between rows with a repeated header.
- * Reused from V76 (table-flow-v28); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 42-table-flow                               layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Table Flow (Quick Card): split a body table between two rows, repeating the
+ *          header row, to control where a long table breaks.
+ * OWNS     TableFlow; dialog.table-flow-v28 (style: styles/ui/42-table-flow.css).
+ * EXPORTS  TableFlow {open}
+ * USES     EditorCommands, EditorSession, EditorTransactions, area, cleanContent, toast
+ * RULES    Quick Card only (the command is registered with profile: 'quick-card').
+ * TESTS    tools/snapshot.cjs studio-table-flow (Quick Card)
  * ========================================================================== */
 window.TableFlow = (() => {
   "use strict";
@@ -78,7 +83,13 @@ window.TableFlow = (() => {
     d.className = "table-flow-v28";
     d.setAttribute("aria-label", "Table Flow");
     d.innerHTML =
-      '<header><small>ASSETS · TABLE FLOW</small><h2>Table Flow</h2><p>Choose an exact row boundary. Preview both parts before changing the document.</p></header><section><aside><label>Body table<select data-table></select></label><p data-info></p><label>Split after body row<input data-row type="number" min="1" step="1" value="1"></label><label class="tf-check"><input data-repeat type="checkbox" checked> Repeat existing THEAD header</label><p>The continuation starts on a new A4 page when you use A4 / Reflow. Each part remains editable in Table Studio.</p><p>Header copies are independent. Oversized rows are never cut automatically. Nested tables and multiple body sections are protected.</p><p data-error role="alert"></p></aside><main><div data-preview></div></main></section><footer><button type="button" data-cancel>Cancel</button><button type="button" data-apply>Apply split</button></footer>';
+      '<header><small>ASSETS · TABLE FLOW</small><h2>Table Flow</h2><p>Choose an exact row boundary. Preview both parts before changing the document.</p>' +
+        '</header><section><aside><label>Body table<select data-table></select></label><p data-info></p><label>Split after body row<input data-row type="number" min="1" step="1" value="1">' +
+        '</label><label class="tf-check"><input data-repeat type="checkbox" checked> Repeat existing THEAD header</label>' +
+        '<p>The continuation starts on a new A4 page when you use A4 / Reflow. Each part remains editable in Table Studio.</p>' +
+        '<p>Header copies are independent. Oversized rows are never cut automatically. Nested tables and multiple body sections are protected.</p>' +
+        '<p data-error role="alert"></p></aside><main><div data-preview></div></main></section><footer><button type="button" data-cancel>Cancel</button>' +
+        '<button type="button" data-apply>Apply split</button></footer>';
     const q = (k) => d.querySelector("[data-" + k + "]");
     tables.forEach((t, i) => {
       const o = document.createElement("option");

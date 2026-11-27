@@ -1,7 +1,18 @@
 /* ============================================================================
- * SOPHIA · 58-blocks
- * L (owner, 2026-11-26): move blocks, paragraph style gallery, table of contents.
- * All changes go through EditorTransactions.run (one undo step each).
+ * SOPHIA · 58-blocks                                   layer: DOCUMENT
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Block operations (owner decision L): move a block up/down, the established
+ *          styles of each profile (style gallery), current style, table of contents.
+ * OWNS     SOPHIA.blocks; STYLES per profile (owner decision V).
+ * EXPORTS  SOPHIA.blocks {STYLES, applyStyle(name), currentStyle(), currentTop(), move(dir),
+ *          insertToc(), refreshToc(user)}
+ * USES     SOPHIA.{ids, numbering, qc, tables, bus}, EditorCommands, EditorTransactions, area,
+ *          muted, observer, toast
+ * LISTENS  content-changed
+ * RULES    - STYLES is the ONLY list of styles the editor offers; SOP and Quick Card have
+ *            their own. Do not add free styles or colours.
+ *          - Every change is one EditorTransactions.run step.
+ * TESTS    tests/functional.cjs (gallery, move, TOC)
  * ========================================================================== */
 SOPHIA.blocks = (() => {
   'use strict';
@@ -131,7 +142,8 @@ SOPHIA.blocks = (() => {
   }
   /* ---------- table of contents (generated block, refreshed automatically) ---------- */
   function tocItems() {
-    return SOPHIA.numbering.compute().filter(({ h }) => /^H[23]$/.test(h.tagName)).map(({ h, num }) => ({ level: h.tagName === 'H2' ? 1 : 2, text: (num ? num + ' ' : '') + h.textContent.trim(), id: h.dataset.blockId || '' }));
+    return SOPHIA.numbering.compute().filter(({ h }) => /^H[23]$/.test(h.tagName)).map(({ h, num }) => ({ level: h.tagName === 'H2' ? 1 : 2, text: (num ? num +
+      ' ' : '') + h.textContent.trim(), id: h.dataset.blockId || '' }));
   }
   function buildToc(nav) {
     nav.replaceChildren();

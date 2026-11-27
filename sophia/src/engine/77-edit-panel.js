@@ -65,7 +65,23 @@ SOPHIA.ui.editPanel = (() => {
   const TAB_TONE = { Home: 'navigate', Insert: 'assets', Layout: 'output', Review: 'review', Table: 'save' };
   let tableContext = false;
   /* Short labels for Full mode (tooltips keep the full name). */
-  const SHORT = { rowAbove: 'Row above', rowBelow: 'Row below', colLeft: 'Column left', colRight: 'Column right', deleteRow: 'Row', deleteCol: 'Column', deleteTable: 'Table', headerRow: 'Header row', equalCols: 'Equal widths', shadeHeader: 'Grey', shadeAttention: 'Amber', shadeConfirmed: 'Green', shadeNone: 'No shading', decisionTable: 'Decision table', pastePlain: 'Plain paste', clearFormat: 'Clear', paragraphSettings: 'Paragraph', insertTable: 'Table', insertImage: 'Image', insertLink: 'Link', slashMenu: 'Blocks /', calloutWarning: 'Warning', calloutConfirm: 'Confirm', insertHr: 'Line', pageBreak: 'Page break', insertCard: 'Card', cardPending: 'Pending', insertToc: 'Contents', insertDate: 'Date', symbols: 'Symbol', importDocx: 'Word .docx', applyProposal: 'Proposal', viewA4: 'A4', viewContinuous: 'Continuous', zoomFit: 'Fit', zoomOut: 'Zoom −', zoomIn: 'Zoom +', reflow: 'Reflow', layoutStudio: 'Layout', autoNumber: 'Auto 1.2', moveUp: 'Up', moveDown: 'Down', tableStudio: 'Table Studio', tableFlow: 'Table Flow', imageStudio: 'Image layout', imageLibrary: 'Library', addComment: 'Comment', markTbc: 'TBC', comments: 'All comments', versions: 'Changes', compare: 'Compare', history: 'History', checks: 'Checks', structure: 'Structure', wordCount: 'Count', find: 'Find', replace: 'Replace', showMarks: 'Marks ¶', shortcuts: 'Shortcuts', undo: 'Undo', redo: 'Redo' };
+  const SHORT = {
+    rowAbove: 'Row above', rowBelow: 'Row below', colLeft: 'Column left', colRight: 'Column right',
+    deleteRow: 'Row', deleteCol: 'Column', deleteTable: 'Table', headerRow: 'Header row',
+    equalCols: 'Equal widths', shadeHeader: 'Grey', shadeAttention: 'Amber', shadeConfirmed: 'Green',
+    shadeNone: 'No shading', decisionTable: 'Decision table', pastePlain: 'Plain paste',
+    clearFormat: 'Clear', paragraphSettings: 'Paragraph', insertTable: 'Table', insertImage: 'Image',
+    insertLink: 'Link', slashMenu: 'Blocks /', calloutWarning: 'Warning', calloutConfirm: 'Confirm',
+    insertHr: 'Line', pageBreak: 'Page break', insertCard: 'Card', cardPending: 'Pending',
+    insertToc: 'Contents', insertDate: 'Date', symbols: 'Symbol', importDocx: 'Word .docx',
+    applyProposal: 'Proposal', viewA4: 'A4', viewContinuous: 'Continuous', zoomFit: 'Fit',
+    zoomOut: 'Zoom −', zoomIn: 'Zoom +', reflow: 'Reflow', layoutStudio: 'Layout', autoNumber: 'Auto 1.2',
+    moveUp: 'Up', moveDown: 'Down', tableStudio: 'Table Studio', tableFlow: 'Table Flow',
+    imageStudio: 'Image layout', imageLibrary: 'Library', addComment: 'Comment', markTbc: 'TBC',
+    comments: 'All comments', versions: 'Changes', compare: 'Compare', history: 'History',
+    checks: 'Checks', structure: 'Structure', wordCount: 'Count', find: 'Find', replace: 'Replace',
+    showMarks: 'Marks ¶', shortcuts: 'Shortcuts', undo: 'Undo', redo: 'Redo'
+  };
   /* Compact tools (format toggles): icon-only even in Full, arranged in a 2-row grid. */
   const COMPACT = new Set(['bold', 'italic', 'underline', 'strike', 'superscript', 'subscript', 'bullets', 'numbers', 'outdent', 'indent', 'alignLeft', 'alignCenter', 'alignRight', 'justify', '@color', '@highlight']);
   const ribbon = runtime(U.el('div', 'sx-ribbon'));

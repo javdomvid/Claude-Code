@@ -1,8 +1,24 @@
 /* ============================================================================
- * SOPHIA · 85-flow
- * Fluid editing tools: selection bar, context menu, "/" menu, structured paste, changes since last save, shortcuts help.
- * Reused from V76 (sophia-v76-flow); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 85-flow                                     layer: SHELL
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Fluid editing tools around the caret: selection bar, context menu, "/" block
+ *          menu, symbols, structured paste from Word / web, "Changes since last save" card
+ *          with Revert per block, browser spelling only while editing, shortcuts help.
+ * OWNS     SophiaFlow, SophiaPaste; .sv76-* menus and dialogs and the change highlights
+ *          (style: styles/ui/85-flow.css); commands "symbols" and "changes".
+ * EXPORTS  SophiaFlow {openSlash, openHelp, openContextAtCaret, …}, SophiaPaste {handle}
+ *          (window globals)
+ * USES     EditorCommands, EditorMedia, EditorTransactions, TableFlow, TableStudio, area, data,
+ *          selectedImage, side, toast, Workbench, SOPHIA.{blocks, comments, tbc, sanitize}
+ * RULES    - Paste keeps only the document grammar (SOPHIA.sanitize.blocks).
+ *          - Every change is one EditorTransactions.run step.
+ * MAP      utilities · generic menu: openMenu, closeMenu · selection bar: barButton,
+ *          placeBar · "/" menu: blockItems, openSlash, insertBelow, openSymbols ·
+ *          context menu: contextItems, openContextAtCaret · paste: convertWordLists,
+ *          sanitizeHTML, insertFragment · changes since last save: computeChanges,
+ *          paintHighlights, revert, renderChanges · spelling: syncSpell ·
+ *          shortcuts help: openHelp · command registration
+ * TESTS    tests/functional.cjs (slash menu, changes, paste) · snapshot studio-shortcuts
  * ========================================================================== */
 /* SOPHIA V76 · Lote 2 · Edición fluida (W-01, W-02, W-03, W-04, W-06, W-10, W-12).
    Reglas: solo llama a comandos existentes (EditorCommands, EditorMedia, TableStudio, TableFlow,
@@ -19,7 +35,7 @@ window.SophiaFlow = (() => {
     document.execCommand("defaultParagraphSeparator", false, "p");
   } catch {}
 
-  /* ---------- utilidades ---------- */
+  /* ---------- utilities ---------- */
   const editing = () => !!window.EditorSession?.get().pid && !document.body.classList.contains("focusmode");
   const dialogOpen = () => !!document.querySelector("dialog[open],.modalveil,#historyStudio,#p42-print");
   const nodeOf = (n) => (n?.nodeType === 1 ? n : n?.parentElement);
@@ -83,7 +99,7 @@ window.SophiaFlow = (() => {
     clear: "M6 4h12M12 4l-4 16M4 20l16-16",
   };
 
-  /* ---------- menú genérico (contextual, «/», símbolos) ---------- */
+  /* ---------- generic menu (context, "/", symbols) ---------- */
   let activeMenu = null;
   function closeMenu(restoreFocus = true) {
     if (!activeMenu) return;
@@ -196,7 +212,7 @@ window.SophiaFlow = (() => {
     return r ? { x: r.left, y: r.bottom + 6 } : { x: innerWidth / 2 - 120, y: 160 };
   }
 
-  /* ---------- W-01 · mini-barra de selección ---------- */
+  /* ---------- W-01 · selection bar ---------- */
   const bar = make("div", "sv76-selbar");
   bar.dataset.runtime = "";
   bar.hidden = true;
@@ -296,7 +312,7 @@ window.SophiaFlow = (() => {
   addEventListener("scroll", scheduleBar, true);
   addEventListener("resize", scheduleBar);
 
-  /* ---------- W-03 · menú «/» e inserción de bloques ---------- */
+  /* ---------- W-03 · "/" menu and block insertion ---------- */
   function insertCallout(block, label) {
     return EditorTransactions.run("Insert callout", () => {
       const aside = make("aside", "warning"),
@@ -461,7 +477,7 @@ window.SophiaFlow = (() => {
     openSlash(block, s.getRangeAt(0).cloneRange());
   });
 
-  /* ---------- W-02 · menú contextual ---------- */
+  /* ---------- W-02 · context menu ---------- */
   function setSelectedImage(img) {
     area.querySelectorAll("img.selected").forEach((n) => n.classList.remove("selected"));
     try {
@@ -560,7 +576,7 @@ window.SophiaFlow = (() => {
     return true;
   }
 
-  /* ---------- W-06 · pegar con estructura (desde Word, Google Docs o web) ---------- */
+  /* ---------- W-06 · structured paste (from Word, Google Docs or the web) ---------- */
   let plainNext = false,
     plainTimer = 0;
   const BLOCK = /^(P|H2|H3|H4|UL|OL|TABLE|BLOCKQUOTE|HR)$/;
@@ -779,7 +795,7 @@ window.SophiaFlow = (() => {
     sanitize: (html) => sanitizeHTML(html),
   });
 
-  /* ---------- W-12 · cambios desde el último guardado ---------- */
+  /* ---------- W-12 · changes since last save ---------- */
   const HL = { added: "sophia-added", modified: "sophia-modified", moved: "sophia-moved" };
   const prefKey = "sophia:pref:highlight-changes";
   let highlightOn = (() => {
@@ -996,14 +1012,14 @@ window.SophiaFlow = (() => {
     syncSpell();
   });
 
-  /* ---------- W-10 · ortografía del navegador solo al editar ---------- */
+  /* ---------- W-10 · browser spelling only while editing ---------- */
   function syncSpell() {
     area.spellcheck = editing();
   }
   new MutationObserver(syncSpell).observe(document.body, { attributes: true, attributeFilter: ["class"] });
   syncSpell();
 
-  /* ---------- W-04 · atajos y ayuda ---------- */
+  /* ---------- W-04 · shortcuts and help ---------- */
   const SHORTCUTS = [
     ["Ctrl+S", "Save draft (download + verify)"],
     ["Ctrl+P", "Print Studio"],
@@ -1136,10 +1152,10 @@ window.SophiaFlow = (() => {
     true,
   );
 
-  /* ---------- Deshacer conserva el cursor (el núcleo sustituye innerHTML) ---------- */
-  /* ---------- registro en Commands (Ctrl+K) ---------- */
+  /* ---------- undo keeps the caret (the core replaces innerHTML) ---------- */
+  /* ---------- registration in Commands (Ctrl+K) ---------- */
   if (typeof Workbench?.register === "function") {
-    Workbench.register("shortcuts", "Keyboard shortcuts", "Review", openHelp);
+    /* "shortcuts" (F1) is registered in 72-command-list; it runs SophiaFlow.openHelp. */
     Workbench.register("changes", "Changes since last save", "Review", () => side("versions"));
     Workbench.register(
       "symbols",

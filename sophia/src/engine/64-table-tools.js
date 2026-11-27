@@ -1,10 +1,16 @@
 /* ============================================================================
- * SOPHIA · 64-table-tools  (V78 · owner decision V2)
- * Quick table operations for the contextual "Table" tab of the edit panel and the
- * insert-table grid picker. Each operation is ONE undo step (EditorTransactions).
- * Simple tables only (no merged cells); merged tables → Table Studio.
- * Cell shading is limited to the document palette (no free colours):
- *   header grey · attention amber · confirmed green · none.
+ * SOPHIA · 64-table-tools                              layer: DOCUMENT
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Quick table operations for the contextual "Table ✦" tab and the insert-table
+ *          size grid (owner decision V2): rows, columns, delete, header row, equal widths,
+ *          shading from the document palette, decision table (Quick Card).
+ * OWNS     SOPHIA.tables; the size-grid picker (style: styles/ui/64-table-tools.css).
+ * EXPORTS  SOPHIA.tables {here, row, column, deleteRow, deleteColumn, deleteTable,
+ *          toggleHeader, equalColumns, shade, insert, decisionTable, picker, SHADES}
+ * USES     SOPHIA.blocks, EditorCommands, EditorTransactions, area, toast
+ * RULES    Simple tables only (merged cells → Table Studio). Shading only from SHADES
+ *          (header grey · attention amber · confirmed green · none).
+ * TESTS    tests/functional.cjs (Table tab, grid picker)
  * ========================================================================== */
 SOPHIA.tables = (() => {
   'use strict';
@@ -156,7 +162,8 @@ SOPHIA.tables = (() => {
       b.type = 'button';
       b.dataset.r = r; b.dataset.c = c;
       b.setAttribute('aria-label', r + ' rows × ' + c + ' columns');
-      b.onmouseenter = b.onfocus = () => { hr = r; hc = c; grid.querySelectorAll('button').forEach((x) => x.classList.toggle('is-on', +x.dataset.r <= r && +x.dataset.c <= c)); label.textContent = r + ' × ' + c + (head.checked ? ' · header row' : ''); };
+      b.onmouseenter = b.onfocus = () => { hr = r; hc = c; grid.querySelectorAll('button').forEach((x) => x.classList.toggle('is-on', +x.dataset.r <= r && +x.dataset.c <= c)); label.textContent = r +
+        ' × ' + c + (head.checked ? ' · header row' : ''); };
       b.onclick = () => { pop.remove(); insert(r, c, head.checked); };
       grid.append(b);
     }

@@ -54,7 +54,7 @@ Nunca mezcles los dos en el mismo cambio.
 10. **PID = autoría declarada**, no identidad verificada. Las claves quedan como están (decisión E pendiente).
 11. **Prueba siempre:**
     - `python3 sophia/build.py <doc.html> <out.html>`;
-    - `node sophia/tests/v77-functional.cjs <out.html>`, que debe dar **ALL PASS**.
+    - `node sophia/tests/functional.cjs <out.html>`, que debe dar **ALL PASS**.
 
     Añade una comprobación por cada herramienta nueva.
 

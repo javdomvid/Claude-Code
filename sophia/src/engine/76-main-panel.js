@@ -31,7 +31,14 @@ SOPHIA.ui.mainPanel = (() => {
     { name: 'Output', tone: 'output', items: ['print', 'downloadCopy', 'exportDocx'] },
     { name: 'Agent', tone: 'agent', items: ['brief', 'exportMap', 'applyProposal'] }
   ];
-  const MAIN_SHORT = { outline: 'Outline', find: 'Find', structure: 'Structure', layoutStudio: 'Layout', versions: 'Changes', compare: 'Compare', comments: 'Comments', checks: 'Checks', imageLibrary: 'Images', tableStudio: 'Tables', importDocx: 'Import .docx', edit: 'Edit mode', saveDraft: 'Save draft', publish: 'Publish & save', bigValidation: 'Big Validation', discard: 'Discard', print: 'Print', downloadCopy: 'Download', exportDocx: 'Word copy', brief: 'Brief', exportMap: 'Map', applyProposal: 'Proposal' };
+  const MAIN_SHORT = {
+    outline: 'Outline', find: 'Find', structure: 'Structure', layoutStudio: 'Layout', versions: 'Changes',
+    compare: 'Compare', comments: 'Comments', checks: 'Checks', imageLibrary: 'Images',
+    tableStudio: 'Tables', importDocx: 'Import .docx', edit: 'Edit mode', saveDraft: 'Save draft',
+    publish: 'Publish & save', bigValidation: 'Big Validation', discard: 'Discard', print: 'Print',
+    downloadCopy: 'Download', exportDocx: 'Word copy', brief: 'Brief', exportMap: 'Map',
+    applyProposal: 'Proposal'
+  };
   const mainEl = runtime(U.el('div', 'sx-main'));
   mainEl.setAttribute('role', 'toolbar');
   mainEl.setAttribute('aria-label', 'Main panel');

@@ -1,12 +1,20 @@
 /* ============================================================================
- * SOPHIA · 10-session
- * Editing session (PID), dirty state, local recovery, discard.
- * Public API kept from V11 for reused modules: window.EditorSession
- *   { start, saved, discard, recover, changed, refresh, get, panel, subscribe }
- *
- * PID = DECLARED local authorship, not identity. The key check below is a
- * convenience lock kept on purpose (owner decision E, 2026-11-26: "leave as is,
- * review in a later version"). Keys live in #sophia-pid-registry, not in code.
+ * SOPHIA · 10-session                                  layer: SAFETY
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Who is editing and whether there are unsaved changes: the PID editing session,
+ *          dirty state, local recovery copy (sanitized), discard; the "Start editing" dialog.
+ * OWNS     EditorSession and the local PID registry read from #sophia-pid-registry.
+ * EXPORTS  EditorSession {start, saved, discard, recover, changed, refresh, get, panel,
+ *          subscribe, rebase}, localPIDKeys, edit() (Start editing dialog), discardPID(),
+ *          recoverDraft()
+ * USES     SOPHIA.{bus, ask, assets, canonical, ids, sanitize, recordDirty}, data, area, modal,
+ *          toast, capture, cleanContent, setEditable, refreshOutline, repaginate, muted,
+ *          pidSession, undoStates, undoPosition, EditorCommands
+ * EMITS    session (snapshot {pid, dirty, recovery, panel}), content-changed
+ * RULES    - PID = DECLARED local authorship, not identity (owner decision E: the key check
+ *            is a convenience lock; real authentication is a later decision).
+ *          - Never print, log or copy PID keys. Keys live in #sophia-pid-registry only.
+ * TESTS    tests/functional.cjs (start editing, discard, recover, dirty state)
  * ========================================================================== */
 const localPIDKeys = (() => {
   try { return JSON.parse(document.getElementById('sophia-pid-registry')?.textContent || '{}'); }
@@ -179,7 +187,7 @@ window.EditorSession = (() => {
 /* ---------- Start editing (PID modal) — legacy name kept: edit() ---------- */
 function edit() {
   if (document.body.classList.contains('focusmode')) {
-    SOPHIA.ui?.setFocus(false);
+    SOPHIA.ask.leaveFocus();
     if (EditorSession.get().pid) return;
   }
   if (EditorSession.get().pid) {

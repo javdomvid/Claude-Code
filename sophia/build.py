@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SOPHIA V77 build — assembles a single-file editor from sophia/src + a document.
+"""SOPHIA build — assembles a single-file editor from sophia/src + a document.
 
     python3 sophia/build.py <input.html> <output.html>
 
@@ -8,10 +8,12 @@ CONTENT is taken: the document zone (#document), the record (#record) and the lo
 registry. Everything else (styles, engine, docs) comes from sophia/src, so a build never
 carries old patch layers forward.
 
+Before building, tools/lint.py checks the module contracts (a build stops on errors).
+
 The output opens directly in Edge/Chrome. If the input was older than V77, the editor
 upgrades it on open (block IDs, automatic heading numbers) and records a "Migration"
 revision at the next save. To deliver an already-upgraded file, run
-    node sophia/tools/finalize.mjs <output.html> <final.html>
+    node sophia/tools/finalize.cjs <output.html> <final.html>
 which opens the build headless and writes it with SOPHIA's own serializer.
 """
 import base64
@@ -132,7 +134,18 @@ def fonts_css():
     return "\n".join(out)
 
 
+def lint():
+    """Architecture check first (tools/lint.py): a build with broken module contracts stops here."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("sophia_lint", ROOT / "tools" / "lint.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    if mod.main() != 0:
+        fail("architecture check failed (see ERROR lines above). Fix them, or read sophia/ARCHITECTURE.md.")
+
+
 def build(input_path, output_path):
+    lint()
     text = pathlib.Path(input_path).read_text(encoding="utf-8")
     zone, record, keys, profile = extract(text)
     short = "qc" if profile == "quick-card" else "sop"

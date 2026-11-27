@@ -1,8 +1,25 @@
 /* ============================================================================
- * SOPHIA · 22-history
- * History Studio: replay of saved revisions, word-level attribution, clean/changes views, historical red + watermark.
- * Reused from V76 (history-engine-v20 + history-repair-v29 (Quick Card branch, now shared)); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 22-history                                  layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  History Studio: replays saved revisions, word-level attribution, "Highlight
+ *          changes" / "Clean text" views, historical red + watermark for older versions,
+ *          and "Restore this version" (as unsaved changes, one undo step).
+ * OWNS     the History Studio dialog (#historyStudio) and the compare engine
+ *          (style: styles/ui/22-history.css, written in layers — see its header).
+ * EXPORTS  openHistoryStudio(index), historyCompare(a, b), enrichHistory(record)
+ *          (window globals, created inside the module)
+ * USES     SOPHIA.{assets, ids, numbering, persist, sanitize, versions, bus}, data, area,
+ *          localPIDKeys (only to tell valid PIDs), modal, normalizeBody, repaginate,
+ *          setEditable, toast, EditorSession, EditorTransactions, PrintStudio42
+ * EMITS    content-changed (after Restore)
+ * RULES    - Snapshots render in a shadow root with sanitized HTML (safeRoot); never
+ *            insert snapshot HTML into the page without SOPHIA.sanitize.blocks.
+ *          - Restore goes through EditorTransactions.run.
+ * MAP      metadata & colours: meta, color, label · text model: tokens, hash, safeRoot,
+ *          blocks · diff: alignWords, similarity, transition, replay · drawing: decorate,
+ *          changesFor, draw, notice · layout helpers: fit37, syncSidebar37, jump59 ·
+ *          close: closeHistory · restore: [data-restore78]
+ * TESTS    tests/functional.cjs (History restore, clean text) · snapshot studio-history*
  * ========================================================================== */
 (() => {
   "use strict";
@@ -736,7 +753,27 @@
     shell.dataset.sidebar = "true";
     shell.setAttribute("aria-label", "History Studio");
     shell.innerHTML =
-      '<header aria-label="History controls"><div class="h41-rev"><div class="h37-island h37-ident"><span class="h37-kicker">HISTORY VIEW</span><h2 data-heading>Loading saved history...</h2></div><div class="h37-island h38-revision" role="group" aria-label="Saved revision"><button type="button" data-prev aria-label="Previous revision" title="Previous revision">‹</button><select data-version aria-label="Saved revision"><option value="-1">Latest · all history</option></select><button type="button" data-next aria-label="Next revision" title="Next revision">›</button></div></div><div class="h37-island h38-modes h41-modes" role="group" aria-label="Display mode"><button type="button" data-view="document" aria-pressed="true">Highlight changes</button><button type="button" data-view="clean" aria-pressed="false">Clean text</button></div><div class="h37-island h38-tools h41-tools" role="group" aria-label="View tools"><button type="button" data-sidebar aria-controls="h37-aside" aria-expanded="false">Sidebar</button><select data-zoom aria-label="Document zoom" title="Document zoom"><option value="0" selected>Fit</option><option value="65">65%</option><option value="85">85%</option><option value="100">100%</option><option value="125">125%</option></select><button type="button" data-print42>Print revision</button><button type="button" data-restore78 title="Bring this version’s content back into the editor as unsaved changes">Restore this version…</button><button type="button" data-close>Close history</button></div></header><div class="h20-notice" data-warning role="status"></div><div class="h20-body"><aside id="h37-aside" aria-label="Change details" hidden><div class="h20-aside-head"><div class="h41-aside-title"><h3 data-count>Changes</h3><button type="button" data-close-sidebar41 aria-label="Close changes sidebar" title="Close changes sidebar">×</button></div><div class="h37-options"><label>Find a change<input type="search" data-query placeholder="Text, section or PID"></label><label>Recorded author<select data-pid><option value="">All authors</option></select></label><label class="h20-check"><input type="checkbox" data-deleted>Include previous / deleted text</label></div><label class="h20-check"><input type="checkbox" data-labels checked>Show PID labels</label><p data-reason translate="no"></p></div><ul data-changes translate="no"></ul></aside><section class="h20-view" aria-label="Saved snapshot"><div class="h20-document-scroll" tabindex="0" aria-label="Scroll saved snapshot"><div data-document-host></div><div data-plain hidden translate="no"></div></div><div class="h37-watermark" data-watermark aria-hidden="true" hidden><span>HISTORICAL VERSION</span></div></section></div><div data-status role="status"></div>';
+      '<header aria-label="History controls"><div class="h41-rev"><div class="h37-island h37-ident"><span class="h37-kicker">HISTORY VIEW</span>' +
+        '<h2 data-heading>Loading saved history...</h2></div><div class="h37-island h38-revision" role="group" aria-label="Saved revision">' +
+        '<button type="button" data-prev aria-label="Previous revision" title="Previous revision">‹</button><select data-version aria-label="Saved revision">' +
+        '<option value="-1">Latest · all history</option></select><button type="button" data-next aria-label="Next revision" title="Next revision">›</button>' +
+        '</div></div><div class="h37-island h38-modes h41-modes" role="group" aria-label="Display mode"><button type="button" data-view="document" aria-pressed="true">Highlight changes</button>' +
+        '<button type="button" data-view="clean" aria-pressed="false">Clean text</button></div><div class="h37-island h38-tools h41-tools" role="group" aria-label="View tools">' +
+        '<button type="button" data-sidebar aria-controls="h37-aside" aria-expanded="false">Sidebar</button><select data-zoom aria-label="Document zoom" title="Document zoom">' +
+        '<option value="0" selected>Fit</option><option value="65">65%</option><option value="85">85%</option>' +
+        '<option value="100">100%</option><option value="125">125%</option></select><button type="button" data-print42>Print revision</button>' +
+        '<button type="button" data-restore78 title="Bring this version’s content back into the editor as unsaved changes">Restore this version…</button>' +
+        '<button type="button" data-close>Close history</button></div></header><div class="h20-notice" data-warning role="status">' +
+        '</div><div class="h20-body"><aside id="h37-aside" aria-label="Change details" hidden><div class="h20-aside-head">' +
+        '<div class="h41-aside-title"><h3 data-count>Changes</h3><button type="button" data-close-sidebar41 aria-label="Close changes sidebar" title="Close changes sidebar">×</button>' +
+        '</div><div class="h37-options"><label>Find a change<input type="search" data-query placeholder="Text, section or PID">' +
+        '</label><label>Recorded author<select data-pid><option value="">All authors</option></select></label>' +
+        '<label class="h20-check"><input type="checkbox" data-deleted>Include previous / deleted text</label>' +
+        '</div><label class="h20-check"><input type="checkbox" data-labels checked>Show PID labels</label><p data-reason translate="no">' +
+        '</p></div><ul data-changes translate="no"></ul></aside><section class="h20-view" aria-label="Saved snapshot">' +
+        '<div class="h20-document-scroll" tabindex="0" aria-label="Scroll saved snapshot"><div data-document-host>' +
+        '</div><div data-plain hidden translate="no"></div></div><div class="h37-watermark" data-watermark aria-hidden="true" hidden>' +
+        '<span>HISTORICAL VERSION</span></div></section></div><div data-status role="status"></div>';
     data.revisions.forEach((r, i) => {
       const o = el(
         "option",

@@ -1,8 +1,13 @@
 /* ============================================================================
- * SOPHIA · 36-checks
- * Document checks (advisory) — also used by the pre-publish checklist.
- * Reused from V76 (document-review-v22); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 36-checks                                   layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Document checks (advisory): unresolved properties and text, empty cells, images
+ *          without alt text, oversized blocks, structure… Also feeds the pre-publish checklist.
+ * OWNS     DocumentReview; dialog.review-workspace-v22 (style: styles/ui/36-checks.css).
+ * EXPORTS  DocumentReview {open, collect}
+ * USES     SOPHIA.{blocks, ids}, EditorSession, area, data, toast
+ * RULES    Read-only: checks never change the document.
+ * TESTS    tools/snapshot.cjs studio-checks
  * ========================================================================== */
 /* V22 read-only review workspace. Findings are advisory, not approval gates. */
 window.DocumentReview = (() => {
@@ -112,7 +117,13 @@ window.DocumentReview = (() => {
     d.className = "review-workspace-v22";
     d.setAttribute("aria-label", "Document review workspace");
     d.innerHTML =
-      '<header><small>DOCUMENT REVIEW</small><h2>Check before sharing</h2><p>Read-only checks of the current document, including unsaved edits. No content is changed.</p></header><section><div data-summary class="review-summary"></div><p data-scope></p><label>Show findings<select data-filter><option value="">All findings</option><option>Review</option><option>Accessibility</option><option>Portability</option><option>Resource</option><option>Link</option><option>Layout</option><option>Content</option></select></label><p data-count role="status" aria-live="polite"></p><div data-findings></div></section><footer><button type="button" data-refresh>Run checks again</button><button type="button" data-close>Close review</button></footer>';
+      '<header><small>DOCUMENT REVIEW</small><h2>Check before sharing</h2><p>Read-only checks of the current document, including unsaved edits. No content is changed.</p>' +
+        '</header><section><div data-summary class="review-summary"></div><p data-scope></p><label>Show findings<select data-filter>' +
+        '<option value="">All findings</option><option>Review</option><option>Accessibility</option><option>Portability</option>' +
+        '<option>Resource</option><option>Link</option><option>Layout</option><option>Content</option></select>' +
+        '</label><p data-count role="status" aria-live="polite"></p><div data-findings></div></section><footer>' +
+        '<button type="button" data-refresh>Run checks again</button><button type="button" data-close>Close review</button>' +
+        '</footer>';
     const q = (x) => d.querySelector("[data-" + x + "]");
     let report = null,
       closed = false;

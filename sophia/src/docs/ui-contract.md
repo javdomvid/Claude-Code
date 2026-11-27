@@ -8,7 +8,7 @@ Use this when you change the EDITOR (not a document). It is embedded in every fi
    `sophia/src/styles`). Never add "override" scripts or styles at the end of the file, never
    monkey-patch another module, never add a second toolbar. If a module is wrong, fix that module.
 2. **Rebuild, then test.** `python3 sophia/build.py <document.html> <out.html>` and
-   `node sophia/tests/v77-functional.cjs <out.html>` (must print ALL PASS) +
+   `node sophia/tests/functional.cjs <out.html>` (must print ALL PASS) +
    `node docs/sophia-audit/tests/sophia-regression.mjs <out.html>`.
 3. **Never touch the document zone of a real document** while improving the editor. Content changes
    are the document agent's job (see `#sophia-agent-brief`).
@@ -76,7 +76,7 @@ Legacy globals kept on purpose (reused modules read them): `data`, `area`, `toas
 3. Place its id in 70-shell: `MAIN` (main panel tile), `RIBBON` (edit panel tab + group) and/or
    `SHEET` (omnibox bento by area). Mini modes show every tool of their panel automatically;
    Full shows labels (and, in the edit panel, the selected tab).
-4. Add a check to `sophia/tests/v77-functional.cjs`.
+4. Add a check to `sophia/tests/functional.cjs`.
 
 ## 5. Styles
 Studio windows share the «studio family» section at the end of `dialogs.css` (glass frame, tonal

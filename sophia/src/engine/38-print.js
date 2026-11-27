@@ -1,8 +1,16 @@
 /* ============================================================================
- * SOPHIA · 38-print
- * Print Studio (iframe + strict CSP) and the controlled print frame: footer with ID/version/status/date and DRAFT watermark.
- * Reused from V76 (p42-print-module); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 38-print                                    layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Print Studio: document-only preview in a sandboxed iframe with a strict CSP,
+ *          controlled footer (ID · version · status · printed date · "Uncontrolled copy when
+ *          printed") and DRAFT watermark for documents that are not published.
+ * OWNS     PrintStudio42, SOPHIA.print; dialog#p42-print (style: styles/ui/38-print.css).
+ * EXPORTS  SOPHIA.print {footerText, watermarkCSS, …}; PrintStudio42 {open} (window global
+ *          created inside the module)
+ * USES     style[data-sophia="paper"], data, area, cleanContent, SOPHIA.versions
+ * RULES    The printed page is styled ONLY by paper.*.css; the interface never prints
+ *          (style[data-sophia="print"] is the last style element).
+ * TESTS    tests/functional.cjs (print shell, PDF) · snapshot studio-print*
  * ========================================================================== */
 SOPHIA.print = (() => {
   const esc = (s) => '"' + String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/[\r\n]+/g, " ") + '"';
@@ -143,7 +151,14 @@ html,body{padding:0!important;margin:0!important;background:white!important;colo
     const d = document.createElement("dialog");
     d.id = "p42-print";
     d.setAttribute("aria-labelledby", "p42-title");
-    d.innerHTML = `<header><div><small>OUTPUT · PRINT STUDIO</small><h2 id="p42-title">Print preview</h2><p data-p42-source></p><p class="p42-controlled" data-p42-controlled></p></div><div class="p42-actions"><label>Paper <select data-p42-paper><option value="A4">A4</option><option value="Letter">Letter</option></select></label><label>Page breaks <select data-p61-flow><option value="sheet">Keep sheet starts</option><option value="flow">Let content flow</option></select></label><button type="button" data-p42-copy>Download print copy</button><button type="button" data-p42-close hidden>Close preview</button><button type="button" data-p42-print disabled>Print / Save PDF</button></div></header><p class="p42-note" role="status">Preparing preview...</p><div class="p42-viewport"><iframe title="Document-only print preview" sandbox="allow-same-origin allow-modals"></iframe></div>`;
+    d.innerHTML = `<header><div><small>OUTPUT · PRINT STUDIO</small><h2 id="p42-title">Print preview</h2><p data-p42-source>` +
+      `</p><p class="p42-controlled" data-p42-controlled></p></div><div class="p42-actions"><label>Paper <select data-p42-paper>` +
+      `<option value="A4">A4</option><option value="Letter">Letter</option></select></label><label>Page breaks <select data-p61-flow>` +
+      `<option value="sheet">Keep sheet starts</option><option value="flow">Let content flow</option></select>` +
+      `</label><button type="button" data-p42-copy>Download print copy</button><button type="button" data-p42-close hidden>Close preview</button>` +
+      `<button type="button" data-p42-print disabled>Print / Save PDF</button></div></header><p class="p42-note" role="status">Preparing preview...</p>` +
+      `<div class="p42-viewport"><iframe title="Document-only print preview" sandbox="allow-same-origin allow-modals">` +
+      `</iframe></div>`;
     {
       /* V78: what the controlled output will carry (owner decision H) */
       const chips = d.querySelector("[data-p42-controlled]");
@@ -275,7 +290,8 @@ html,body{padding:0!important;margin:0!important;background:white!important;colo
       };
       frame.onload = accept;
       html =
-        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; form-action 'none'; base-uri 'none'\"><title>Document print copy</title><style>" +
+        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; form-action 'none'; base-uri 'none'\">" +
+          "<title>Document print copy</title><style>" +
         templateCSS +
         "\n" +
         fonts() +

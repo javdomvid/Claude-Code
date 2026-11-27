@@ -1,8 +1,17 @@
 /* ============================================================================
- * SOPHIA · 30-layout-engine
- * Block paginator for A4 view: moves whole blocks, verifies content signature.
- * Reused from V76 (layout-engine-v27); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 30-layout-engine                            layer: DOCUMENT
+ * ----------------------------------------------------------------------------
+ * PURPOSE  A4 pagination: moves WHOLE blocks between sheets so nothing is split, honours
+ *          page-break rules (data-layout-before / data-layout-keep), detects overflow and
+ *          re-flows automatically while typing (caret kept).
+ * OWNS     LayoutEngine; body.sx-measuring while measuring.
+ * EXPORTS  LayoutEngine {reflow, merge, calculate, autoReflow, overflowing}
+ * USES     SOPHIA.{meta, bus}, area, continuationTemplate, muted, observer, refreshOutline,
+ *          setEditable, toast, EditorCommands, EditorMedia
+ * LISTENS  transaction
+ * RULES    Runs with muted = true: pagination is never an edit and never an undo step.
+ *          The saved file always has ONE sheet; pages exist only on screen and in print.
+ * TESTS    tests/functional.cjs (A4 overflow, reflow, layout rules)
  * ========================================================================== */
 /* V27 block paginator. Moves original child nodes, never splits or duplicates
    content blocks. Measurement uses rendered dimensions, not text estimates.

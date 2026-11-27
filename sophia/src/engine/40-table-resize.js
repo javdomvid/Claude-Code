@@ -1,8 +1,12 @@
 /* ============================================================================
- * SOPHIA · 40-table-resize
- * Column resize handles for simple body tables.
- * Reused from V76 (p425-table-resize); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 40-table-resize                             layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Column-resize handles over simple body tables while editing.
+ * OWNS     #v425-table-ui (style: styles/ui/40-table-resize.css).
+ * EXPORTS  nothing (self-contained; wires itself to the editing session)
+ * USES     EditorTransactions, PrintStudio42, area, EditorSession
+ * RULES    One drag = one transaction. Merged tables are left to Table Studio.
+ * TESTS    manual (drag a column border while editing)
  * ========================================================================== */
 (() => {
   "use strict";

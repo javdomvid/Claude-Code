@@ -1,13 +1,16 @@
 /* ============================================================================
- * SOPHIA · 57-numbering
- * K (owner, 2026-11-26): automatic heading numbers.
- * - Numbers are computed by the engine and written as data-num on headings
- *   (h2 → "3.", h3 → "3.1", h4 → "3.1.2" in SOP; "01 ·" on Quick Card h2).
- *   CSS shows them with ::before, so they print, survive A4 pagination and
- *   appear in history snapshots. Typing them by hand is no longer needed.
- * - A heading with class "nonum" is never numbered.
- * - migrate(): removes typed numbers that match the automatic ones (older files).
- * - data-num is ignored by SOPHIA.canonical() (renumbering is not an edit).
+ * SOPHIA · 57-numbering                                layer: DOCUMENT
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Automatic heading numbers (owner decision K): computed by the engine, written as
+ *          data-num and shown with CSS ::before (SOP 3. / 3.1 / 3.1.2; Quick Card 01 ·).
+ * OWNS     SOPHIA.numbering; record.settings.autoNumber.
+ * EXPORTS  SOPHIA.numbering {apply, compute, label, enabled, toggle, migrate, stripTyped}
+ * USES     SOPHIA.{recordDirty, bus}, EditorSession, area, data, muted, observer, toast
+ * EMITS    outline-changed
+ * LISTENS  content-changed
+ * RULES    - class="nonum" opts a heading out. data-num is ignored by SOPHIA.canonical().
+ *          - migrate() removes typed numbers only when ALL match the automatic ones.
+ * TESTS    tests/functional.cjs (numbering, outline)
  * ========================================================================== */
 SOPHIA.numbering = (() => {
   'use strict';

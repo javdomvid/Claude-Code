@@ -1,8 +1,16 @@
 /* ============================================================================
- * SOPHIA · 12-transactions
- * Synchronous mutation boundary: document DOM and undo journal roll back together.
- * Reused from V76 (editor-transactions-v21); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 12-transactions                             layer: SAFETY
+ * ----------------------------------------------------------------------------
+ * PURPOSE  The only safe way to change the document: run a function, and if it throws,
+ *          the document DOM and the undo journal roll back together. One call = one undo step.
+ * OWNS     EditorTransactions.
+ * EXPORTS  EditorTransactions {run(label, fn) → true|false, active()}
+ * USES     area, capture, muted, observer, undoStates, undoPosition, setEditable,
+ *          refreshOutline, toast, EditorSession, EditorCommands, EditorMedia, SOPHIA.bus
+ * EMITS    transaction (label, after a committed change)
+ * RULES    Every document mutation made by a feature goes through run(label, fn).
+ *          Keep fn synchronous; do not open dialogs inside it.
+ * TESTS    tests/functional.cjs (undo after every tool)
  * ========================================================================== */
 /* Shared synchronous mutation boundary. Document DOM and undo journal rollback
    together. External I/O and saved revision commits are deliberately excluded. */

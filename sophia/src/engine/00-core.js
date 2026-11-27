@@ -1,11 +1,25 @@
 /* ============================================================================
- * SOPHIA · 00-core
- * Namespace, strings, utilities, record loading (with the asset codec),
- * document versions and the profile.
- *
- * LEGACY CONTRACT (do not rename): several reused modules expect these
- * globals: `data` (the record), `area` (#document), `toast()`, `normalizeBody()`.
- * They are declared here at top level so every later <script> can use them.
+ * SOPHIA · 00-core                                     layer: CORE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  The foundation every module stands on: the SOPHIA namespace, interface strings,
+ *          small DOM utilities, the two sanitizers, the event bus, toasts, the image asset
+ *          codec, the record (#record → data) and the document-version rules.
+ * OWNS     SOPHIA (namespace), SOPHIA.{engine, profile, strings, util, sanitize, bus, ask,
+ *          assets, record, versions}; the legacy globals data, area, toast, normalizeBody.
+ * EXPORTS  SOPHIA, SOPHIA.engine, SOPHIA.profile, SOPHIA.strings, SOPHIA.util, SOPHIA.sanitize
+ *          {html, blocks}, SOPHIA.bus {on, emit}, SOPHIA.ask {panel, leaveFocus},
+ *          SOPHIA.assets, SOPHIA.record, SOPHIA.versions {nextPublish, nextMajor, label, …},
+ *          data (the record object), area (main#document), toast(text, opts), normalizeBody()
+ * USES     nothing (loads first)
+ * EMITS    ask:panel, ask:leave-focus (through SOPHIA.ask)
+ * RULES    - Nothing here may depend on a later module.
+ *          - SOPHIA.ask is how lower layers request something from the interface
+ *            (79-shell answers); never call SOPHIA.ui from CORE/SAFETY/DOCUMENT/FEATURE.
+ *          - Version rules (owner decision D): Save draft keeps the number; Publish & save
+ *            +0.01; Big Validation → next major .00. Change them only here.
+ * NOTE     LEGACY CONTRACT: reused modules expect the top-level globals data, area, toast(),
+ *          normalizeBody(); keep their names.
+ * TESTS    tests/functional.cjs (versions, sanitizer via proposals and paste)
  * ========================================================================== */
 'use strict';
 
@@ -165,6 +179,15 @@ SOPHIA.bus = (() => {
     }
   };
 })();
+/* Requests from lower layers to the interface. Core, document and feature modules never
+   call the shell (SOPHIA.ui) directly: they ASK, and 79-shell answers. This keeps the
+   layers independent (docs/ARCHITECTURE.md §2). */
+SOPHIA.ask = {
+  /** Show a side panel: 'outline' | 'find' | 'comments' | 'versions' | 'images' | 'checks'. */
+  panel: (name) => SOPHIA.bus.emit('ask:panel', name),
+  /** Leave focus reading (e.g. before a dialog that needs the interface). */
+  leaveFocus: () => SOPHIA.bus.emit('ask:leave-focus')
+};
 
 /* ---------- toasts (aria-live region, never printed, never saved) ---------- */
 function toast(text, opts = {}) {

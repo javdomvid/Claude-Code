@@ -1,12 +1,17 @@
 /* ============================================================================
- * SOPHIA · 20-ids
- * Stable block identities (owner decision F-id, 2026-11-26).
- * - Every content block gets data-block-id="b-xxxxxxxxxx" (10 chars, a–z0–9).
- * - Assigned on open and after every edit (debounced). When Enter or paste
- *   duplicates an ID, the FIRST block in document order keeps it.
- * - IDs are ignored by SOPHIA.canonical(), so assigning them never makes the
- *   document "dirty"; they are written to the file at the next save.
- * - Agents and proposals address blocks by these IDs (see #sophia-agent-brief).
+ * SOPHIA · 20-ids                                      layer: DOCUMENT
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Stable block identities (owner decision F-id): every content block carries
+ *          data-block-id="b-xxxxxxxxxx" (10 chars a–z0–9). Agents, proposals and comments
+ *          address blocks by these IDs.
+ * OWNS     SOPHIA.ids.
+ * EXPORTS  SOPHIA.ids {ensure(), find(id), blocks(), newId(taken), VALID}
+ * USES     area, muted, observer
+ * RULES    - Assigned on open and after edits; when Enter or paste duplicates an ID, the
+ *            FIRST block in document order keeps it.
+ *          - IDs are ignored by SOPHIA.canonical(): assigning them never makes the
+ *            document dirty; they are written at the next save. Never reuse an ID.
+ * TESTS    tests/functional.cjs (IDs after edits, proposals)
  * ========================================================================== */
 SOPHIA.ids = (() => {
   'use strict';

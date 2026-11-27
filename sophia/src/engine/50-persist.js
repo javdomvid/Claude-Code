@@ -1,15 +1,28 @@
 /* ============================================================================
- * SOPHIA · 50-persist
- * Saving (Draft / Publish & save / Big Validation), the verified-save receipt,
- * the file serializer and upgrades from older SOPHIA files.
- *
- * HOW A FILE IS WRITTEN (never by serializing the live page):
- *   head  = charset + viewport + title + every <style data-sophia> (pristine text)
- *   body  = document zone (rebuilt from the content, one block per line)
- *         + #record (JSON, images packed once) + #sophia-pid-registry
- *         + every <script type="text/plain" data-sophia-doc> (brief, contract, changelog)
- *         + every <script data-sophia-module> (pristine engine code)
- * Runtime UI is created by JavaScript and is therefore never written to disk.
+ * SOPHIA · 50-persist                                  layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Saving: Draft / Publish & save / Big Validation, the save receipt (download →
+ *          confirm, optional byte check), the file serializer, migration of older files
+ *          and "Upgrade an older SOPHIA file".
+ * OWNS     SOPHIA.persist, SOPHIA.migration, the header trace row; dialog.save-receipt
+ *          (style: styles/ui/50-persist.css).
+ * EXPORTS  SOPHIA.persist {serializeFile, offer, applyHeader, runMigrationTransforms,
+ *          upgradeFromFile, …}, SOPHIA.migration {pending}, exportPID(mode),
+ *          downloadCurrentCopy(), closeRevision()
+ * USES     SOPHIA.{assets, canonical, checklist, ids, meta, numbering, sanitize, versions,
+ *          bus}, EditorSession, LayoutEngine, area, cleanContent, mergeSheets, data,
+ *          localPIDKeys, modal, muted, normalizeBody, refreshOutline, toast, undoStates,
+ *          undoPosition
+ * EMITS    record-changed (after a confirmed save)
+ * RULES    - The file is NEVER written by serializing the live page. It is rebuilt from
+ *            pristine parts (a quine): styles, document zone (one block per line), #record,
+ *            #sophia-pid-registry, firmware docs, engine modules.
+ *          - Never overwrite the original file; downloads create a new file.
+ *          - Write '\x3c/script>' for a closing script tag inside code.
+ * NOTE     head = charset + viewport + title + every <style data-sophia>; body = document
+ *          zone + #record + #sophia-pid-registry + script[data-sophia-doc] +
+ *          script[data-sophia-module]. Runtime UI is never written to disk.
+ * TESTS    tests/functional.cjs (save draft → receipt → reopen, publish, Big Validation)
  * ========================================================================== */
 SOPHIA.persist = (() => {
   'use strict';
@@ -133,11 +146,16 @@ SOPHIA.persist = (() => {
     dialog.dataset.runtime = '';
     dialog.setAttribute('aria-labelledby', 'receipt-title');
     dialog.innerHTML =
-      '<form method="dialog" class="receipt-card"><header><span class="receipt-eyebrow">PORTABLE DOCUMENT · SAVE</span><h2 id="receipt-title">Your HTML is ready</h2><p>Download creates a new file. The original is never overwritten. With “Save HTML as”, choose a new name.</p></header>' +
+      '<form method="dialog" class="receipt-card"><header><span class="receipt-eyebrow">PORTABLE DOCUMENT · SAVE</span>' +
+        '<h2 id="receipt-title">Your HTML is ready</h2><p>Download creates a new file. The original is never overwritten. With “Save HTML as”, choose a new name.</p>' +
+        '</header>' +
       '<section><div class="receipt-file"><span class="receipt-file-icon" aria-hidden="true">HTML</span><div><strong data-file-name></strong><small data-file-info></small></div></div>' +
-      '<p class="receipt-state" data-state role="status" aria-live="polite">Ready to request download</p><div class="receipt-actions"><a data-download>Download HTML</a><button type="button" data-save-as>Save HTML as…</button></div>' +
+      '<p class="receipt-state" data-state role="status" aria-live="polite">Ready to request download</p><div class="receipt-actions">' +
+        '<a data-download>Download HTML</a><button type="button" data-save-as>Save HTML as…</button></div>' +
       '<p class="receipt-help">If the download does not start, use “Save HTML as”. Previews inside SharePoint, Teams or Copilot may block downloads: open the file directly in Edge or Chrome.</p>' +
-      '<details class="receipt-verify"><summary>Check a saved copy (optional)</summary><label class="receipt-check">Saved HTML<input type="file" data-verify accept=".html,.htm,text/html"></label><p>The copy is compared byte by byte with this export. It stays on this device.</p></details><p class="receipt-error" data-error role="alert"></p></section>' +
+      '<details class="receipt-verify"><summary>Check a saved copy (optional)</summary><label class="receipt-check">Saved HTML<input type="file" data-verify accept=".html,.htm,text/html">' +
+        '</label><p>The copy is compared byte by byte with this export. It stays on this device.</p></details>' +
+        '<p class="receipt-error" data-error role="alert"></p></section>' +
       '<footer><button type="button" data-cancel>Back to editing</button><button type="button" data-confirm>Confirm saved</button></footer></form>';
     const q = (k) => dialog.querySelector('[data-' + k + ']');
     const ui = { name: q('file-name'), info: q('file-info'), state: q('state'), download: q('download'), saveAs: q('save-as'), verify: q('verify'), error: q('error'), confirm: q('confirm'), cancel: q('cancel') };

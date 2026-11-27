@@ -1,11 +1,19 @@
 /* ============================================================================
- * SOPHIA · 60-compare-proposals
- * L: compare any two saved revisions (or a revision with the current content).
- * M: agent proposals — the agent never rewrites the file; it hands over a small
- *    JSON of block-level operations that a person previews and accepts or
- *    rejects one by one. Accepted operations are applied in ONE transaction
- *    (Ctrl+Z undoes them) and recorded as an event in the record.
- *    Also: "Export document map" — the block IDs + text the agent needs.
+ * SOPHIA · 60-compare-proposals                        layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Compare any two saved revisions (or one with the current text), and agent
+ *          proposals (owner decision M): block-level JSON operations previewed and
+ *          accepted/rejected one by one, applied in ONE transaction, recorded as an event.
+ *          Also "Export document map" (block IDs + text for the agent).
+ * OWNS     SOPHIA.compare, SOPHIA.proposals (style: styles/ui/60-compare-proposals.css).
+ * EXPORTS  SOPHIA.compare {open}, SOPHIA.proposals {open, apply, validate, exportMap}
+ * USES     SOPHIA.{ids, meta, sanitize, versions, recordDirty, lastProposal}, historyCompare,
+ *          EditorSession, EditorTransactions, cleanContent, data, modal, toast
+ * RULES    - Proposal schema: sophia.proposal/1 (see the agent brief §6). expectedText /
+ *            expectedValue must match; html passes SOPHIA.sanitize.blocks.
+ *          - An agent never sets the document version except through the setBaseVersion
+ *            operation, which only works on documents that were never published.
+ * TESTS    tests/functional.cjs (proposals)
  * ========================================================================== */
 SOPHIA.compare = (() => {
   'use strict';
@@ -15,7 +23,8 @@ SOPHIA.compare = (() => {
     if (!data.revisions.length) { toast('There are no saved revisions to compare.'); return; }
     const opts = data.revisions.map((r, i) => '<option value="' + i + '">' + U.escapeHTML(SOPHIA.versions.label(r) + ' · ' + String(r.date).slice(0, 10) + ' · ' + (r.editorPID || r.author || '')) + '</option>').join('');
     const v = modal('Compare revisions',
-      '<div class="sx-compare-pick"><label>From<select id="cmpA">' + opts + '</select></label><label>To<select id="cmpB">' + opts + '<option value="current">Current document (unsaved included)</option></select></label></div>' +
+      '<div class="sx-compare-pick"><label>From<select id="cmpA">' + opts + '</select></label><label>To<select id="cmpB">' +
+        opts + '<option value="current">Current document (unsaved included)</option></select></label></div>' +
       '<p data-summary class="muted"></p><ol class="sx-compare-list" data-list translate="no"></ol>',
       () => { const b = v.querySelector('#cmpB').value; v.remove(); if (b !== 'current') window.openHistoryStudio?.(Number(b)); },
       'Open “To” in History');

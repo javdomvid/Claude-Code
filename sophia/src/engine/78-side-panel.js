@@ -70,7 +70,8 @@ SOPHIA.ui.sidePanel = (() => {
     const cmp = button('compare', { short: 'Compare', cls: 'sx-btn-tonal' });
     head.append(cmp);
     root.append(head);
-    root.append(U.el('p', 'sx-hint', 'Save draft keeps V' + data.documentVersion + ' · Publish & save → V' + SOPHIA.versions.nextPublish(data.documentVersion) + ' · Big Validation → V' + SOPHIA.versions.nextMajor(data.documentVersion)));
+    root.append(U.el('p', 'sx-hint', 'Save draft keeps V' + data.documentVersion + ' · Publish & save → V' +
+      SOPHIA.versions.nextPublish(data.documentVersion) + ' · Big Validation → V' + SOPHIA.versions.nextMajor(data.documentVersion)));
     const list = U.el('ol', 'sx-revisions');
     data.revisions.map((r, i) => [r, i]).reverse().forEach(([r, i]) => {
       const li = U.el('li', 'sx-rev sx-rev-' + String(r.mode || r.status || '').toLowerCase().replace(/[^a-z]+/g, '-'));

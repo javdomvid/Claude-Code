@@ -1,5 +1,5 @@
-/* SOPHIA V77 · functional test (Playwright + Chromium, offline).
- *   node sophia/tests/v77-functional.cjs <file.html> [outDir]
+/* SOPHIA · functional test (Playwright + Chromium, offline).
+ *   node sophia/tests/functional.cjs <file.html> [outDir]
  * Opens the file, edits with the first PID of the local registry (the key is read
  * from the page and never printed), and checks: interface, ribbon Full/Mini/Hide,
  * undo, comments, TBC, block moves, TOC, numbering, proposals, Save draft →

@@ -1,13 +1,22 @@
 /* ============================================================================
- * SOPHIA · 99-boot
- * Start-up order (every step is idempotent; nothing here edits the wording):
- *   1. Older file (record.format ≠ "sophia/77")  → migration transforms
- *      (block IDs, typed heading numbers → automatic, header trace row). The
- *      result is recorded as a "Migration" revision at the next save.
- *      Current file → only make sure every block has an ID (silent).
- *   2. Heading numbers, header, view (A4 pages / continuous), editability.
- *   3. Interface (70–79 shell modules, mounted by 79-shell), comment highlights, undo baseline.
- *   4. When DM Sans has loaded, calculate the A4 pages (font metrics matter).
+ * SOPHIA · 99-boot                                     layer: BOOT
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Start-up order (every step idempotent; nothing here edits the wording):
+ *          1. older file (record.format ≠ "sophia/77") → migration transforms (block IDs,
+ *             typed heading numbers → automatic, header trace row), recorded as a
+ *             "Migration" revision at the next save; current file → make sure IDs exist;
+ *          2. heading numbers, header, view, editability;
+ *          3. interface (SOPHIA.ui.mount), interface language, comment highlights, undo
+ *             baseline;
+ *          4. when DM Sans has loaded, calculate the A4 pages (font metrics matter).
+ * OWNS     the start-up sequence; html[data-sophia-ready="true"] when done.
+ * EXPORTS  nothing
+ * USES     SOPHIA.{persist, migration, ids, numbering, blocks, ui, i18n, comments,
+ *          recordDirty, bus}, EditorSession, area, cleanContent, data, muted, observer,
+ *          paginateDocument, setDocumentView, setEditable, toast, undoStates, undoPosition
+ * EMITS    view-changed, outline-changed, ready
+ * RULES    Keep this file short: it only calls modules in order. Logic belongs to them.
+ * TESTS    tests/functional.cjs (load without errors, not dirty on open)
  * ========================================================================== */
 (() => {
   'use strict';

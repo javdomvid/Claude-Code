@@ -1,14 +1,16 @@
 /* ============================================================================
- * SOPHIA · 62-docx
- * L (owner, 2026-11-26): Word interchange, fully offline (no libraries).
- * - importFile(): reads a .docx (ZIP) with the browser's DecompressionStream and
- *   inserts its text, headings, lists, tables and PNG/JPEG images after the
- *   current block, in ONE transaction (Ctrl+Z undoes it). Everything passes the
- *   document-grammar sanitizer (SOPHIA.sanitize.blocks) first. Word styles, fonts and colours are NOT kept on purpose:
- *   the SOPHIA page style applies.
- * - exportFile(): writes a simple .docx (headings, paragraphs, lists as text
- *   prefixes, tables, images, identity table) for people who must review in Word.
- *   It is a copy for reading/commenting, not a controlled version of the document.
+ * SOPHIA · 62-docx                                     layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Word interchange, fully offline: import a .docx (text, headings, lists, tables,
+ *          PNG/JPEG images) after the current block in one transaction; export a simple
+ *          .docx review copy.
+ * OWNS     SOPHIA.docx.
+ * EXPORTS  SOPHIA.docx {importFile, exportFile}
+ * USES     SOPHIA.{blocks, sanitize}, EditorTransactions, area, data, toast,
+ *          DecompressionStream (browser)
+ * RULES    Word styles, fonts and colours are not kept on purpose (the SOPHIA page style
+ *          applies). The export is a reading copy, not a controlled version.
+ * TESTS    tests/functional.cjs (.docx round trip)
  * ========================================================================== */
 SOPHIA.docx = (() => {
   'use strict';
@@ -238,7 +240,9 @@ SOPHIA.docx = (() => {
       for (const c of node.childNodes) {
         if (c.nodeType === 3) {
           if (!c.nodeValue) continue;
-          const pr = (fmt.b ? '<w:b/>' : '') + (fmt.i ? '<w:i/>' : '') + (fmt.u ? '<w:u w:val="single"/>' : '') + (fmt.sup ? '<w:vertAlign w:val="superscript"/>' : fmt.sub ? '<w:vertAlign w:val="subscript"/>' : '') + (fmt.tbc ? '<w:highlight w:val="yellow"/>' : '');
+          const pr = (fmt.b ? '<w:b/>' : '') + (fmt.i ? '<w:i/>' : '') + (fmt.u ? '<w:u w:val="single"/>' : '') +
+            (fmt.sup ? '<w:vertAlign w:val="superscript"/>' : fmt.sub ? '<w:vertAlign w:val="subscript"/>' : '') +
+            (fmt.tbc ? '<w:highlight w:val="yellow"/>' : '');
           out += '<w:r>' + (pr ? '<w:rPr>' + pr + '</w:rPr>' : '') + '<w:t xml:space="preserve">' + X(c.nodeValue.replace(/\s+/g, ' ')) + '</w:t></w:r>';
         } else if (c.nodeType === 1) {
           const t = c.tagName;
@@ -266,8 +270,10 @@ SOPHIA.docx = (() => {
         '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
     }
     const p = (inner, style, extra = '') => '<w:p>' + (style || extra ? '<w:pPr>' + (style ? '<w:pStyle w:val="' + style + '"/>' : '') + extra + '</w:pPr>' : '') + inner + '</w:p>';
-    const cellXML = (c) => '<w:tc><w:tcPr>' + (c.colSpan > 1 ? '<w:gridSpan w:val="' + c.colSpan + '"/>' : '') + (c.tagName === 'TH' ? '<w:shd w:val="clear" w:fill="E7E7E7"/>' : '') + '</w:tcPr>' + (blocksOf(c, true) || p('')) + '</w:tc>';
-    const tableXML = (t) => '<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>' + ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map((s) => '<w:' + s + ' w:val="single" w:sz="4" w:color="999999"/>').join('') + '</w:tblBorders></w:tblPr>' +
+    const cellXML = (c) => '<w:tc><w:tcPr>' + (c.colSpan > 1 ? '<w:gridSpan w:val="' + c.colSpan + '"/>' : '') +
+      (c.tagName === 'TH' ? '<w:shd w:val="clear" w:fill="E7E7E7"/>' : '') + '</w:tcPr>' + (blocksOf(c, true) || p('')) + '</w:tc>';
+    const tableXML = (t) => '<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>' + ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map((s) => '<w:' +
+      s + ' w:val="single" w:sz="4" w:color="999999"/>').join('') + '</w:tblBorders></w:tblPr>' +
       [...t.rows].map((r) => '<w:tr>' + [...r.cells].map(cellXML).join('') + '</w:tr>').join('') + '</w:tbl>';
     function blocksOf(root, inCell) {
       let out = '';
@@ -277,12 +283,14 @@ SOPHIA.docx = (() => {
         const t = n.tagName;
         if (/^H[2-4]$/.test(t)) out += p((n.dataset.num ? '<w:r><w:t xml:space="preserve">' + X(n.dataset.num) + ' </w:t></w:r>' : '') + runsOf(n), 'Heading' + (Number(t[1]) - 1));
         else if (t === 'H1') out += p(runsOf(n), 'Title');
-        else if (t === 'UL' || t === 'OL') [...n.children].forEach((li, i) => { out += p('<w:r><w:t xml:space="preserve">' + (t === 'OL' ? i + 1 + '. ' : '• ') + '</w:t></w:r>' + runsOf(li), null, '<w:ind w:left="567" w:hanging="283"/>'); });
+        else if (t === 'UL' || t === 'OL') [...n.children].forEach((li, i) => { out += p('<w:r><w:t xml:space="preserve">' +
+          (t === 'OL' ? i + 1 + '. ' : '• ') + '</w:t></w:r>' + runsOf(li), null, '<w:ind w:left="567" w:hanging="283"/>'); });
         else if (t === 'TABLE') out += tableXML(n) + (inCell ? '' : p(''));
         else if (t === 'ASIDE') out += p(runsOf(n), null, '<w:pBdr><w:left w:val="single" w:sz="18" w:color="C49832"/></w:pBdr><w:shd w:val="clear" w:fill="FFF8E8"/>');
         else if (t === 'BLOCKQUOTE') out += p(runsOf(n), null, '<w:ind w:left="567"/>');
         else if (t === 'HR') out += p('', null, '<w:pBdr><w:bottom w:val="single" w:sz="6" w:color="8899AA"/></w:pBdr>');
-        else if (t === 'NAV') out += [...n.querySelectorAll('li')].map((li) => p('<w:r><w:t xml:space="preserve">' + X(li.textContent) + '</w:t></w:r>', null, li.className === 'toc-l2' ? '<w:ind w:left="400"/>' : '')).join('');
+        else if (t === 'NAV') out += [...n.querySelectorAll('li')].map((li) => p('<w:r><w:t xml:space="preserve">' +
+          X(li.textContent) + '</w:t></w:r>', null, li.className === 'toc-l2' ? '<w:ind w:left="400"/>' : '')).join('');
         else if (/^(DIV|SECTION|FIGURE)$/.test(t)) out += blocksOf(n, inCell);
         else if (t === 'IMG') out += p(imageRun(n));
         else out += p(runsOf(n));
@@ -295,15 +303,21 @@ SOPHIA.docx = (() => {
     body += p('<w:r><w:t xml:space="preserve">' + X(title) + '</w:t></w:r>', 'Title');
     const ident = clone.querySelector('.identity');
     if (ident) body += tableXML(ident) + p('');
-    body += p('<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">' + X(data.id + ' · V' + data.documentVersion + ' · ' + data.status + ' · exported ' + U.dateStamp() + ' from SOPHIA ' + SOPHIA.engine + ' — review copy, not the controlled document.') + '</w:t></w:r>');
+    body += p('<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">' + X(data.id + ' · V' + data.documentVersion +
+      ' · ' + data.status + ' · exported ' + U.dateStamp() + ' from SOPHIA ' + SOPHIA.engine + ' — review copy, not the controlled document.') + '</w:t></w:r>');
     clone.querySelectorAll('.pagecontent').forEach((pc) => (body += blocksOf(pc, false)));
     const NS = 'xmlns:w="' + W + '" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"';
-    const documentXML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + NS + '><w:body>' + body + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1418" w:bottom="1134" w:left="1418" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>';
+    const documentXML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + NS +
+      '><w:body>' + body + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1418" w:bottom="1134" w:left="1418" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>';
     const font = '<w:rFonts w:ascii="DM Sans" w:hAnsi="DM Sans" w:cs="Arial"/>';
-    const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="' + W + '"><w:docDefaults><w:rPrDefault><w:rPr>' + font + '<w:sz w:val="21"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="300" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
+    const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="' + W +
+      '"><w:docDefaults><w:rPrDefault><w:rPr>' + font + '<w:sz w:val="21"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="300" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
       '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' +
       '<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:rPr><w:b/><w:sz w:val="36"/></w:rPr></w:style>' +
-      [1, 2, 3].map((n) => '<w:style w:type="paragraph" w:styleId="Heading' + n + '"><w:name w:val="heading ' + n + '"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="' + (360 - n * 60) + '"/><w:outlineLvl w:val="' + (n - 1) + '"/></w:pPr><w:rPr><w:b/><w:sz w:val="' + (30 - n * 3) + '"/></w:rPr></w:style>').join('') + '</w:styles>';
+      [1, 2, 3].map((n) => '<w:style w:type="paragraph" w:styleId="Heading' + n + '"><w:name w:val="heading ' +
+        n + '"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="' +
+        (360 - n * 60) + '"/><w:outlineLvl w:val="' + (n - 1) + '"/></w:pPr><w:rPr><w:b/><w:sz w:val="' + (30 - n * 3) +
+        '"/></w:rPr></w:style>').join('') + '</w:styles>';
     const rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
       media.map((m) => '<Relationship Id="' + m.id + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/' + m.name + '"/>').join('') + '</Relationships>';
     const types = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpeg" ContentType="image/jpeg"/>' +

@@ -1,10 +1,15 @@
 /* ============================================================================
- * SOPHIA · 80-profile-qc
- * Quick Card only: information cards (.cards > section) and the "pending" card
- * state. Loaded in both profiles; does nothing in SOP.
- * Markup contract (also in the agent brief):
- *   <div class="cards"><section><h3>Title</h3><p>Text…</p></section>…</div>
- *   <section class="pending"> marks a card whose content must be confirmed.
+ * SOPHIA · 80-profile-qc                               layer: DOCUMENT
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Quick Card only: information cards (.cards > section) and the "pending" card
+ *          state. Loaded in both profiles; does nothing in SOP.
+ * OWNS     SOPHIA.qc.
+ * EXPORTS  SOPHIA.qc {insertCard, togglePending, active}
+ * USES     SOPHIA.blocks, EditorTransactions, area, toast
+ * RULES    Markup contract (also in the agent brief):
+ *          <div class="cards"><section><h3>Title</h3><p>Text…</p></section>…</div>;
+ *          <section class="pending"> = content to be confirmed before use.
+ * TESTS    tests/functional.cjs (Quick Card profile)
  * ========================================================================== */
 SOPHIA.qc = (() => {
   'use strict';

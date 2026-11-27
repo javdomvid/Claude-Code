@@ -13,7 +13,7 @@ and `build.py` assembles a complete offline HTML from them plus a document's con
 sophia/
   build.py                 source + document → single HTML (content taken from any V74–V77 file)
   tools/finalize.cjs       opens a build headless and writes it already upgraded (Migration revision)
-  tests/v77-functional.cjs 46 end-to-end checks (Chromium): UI, ribbon modes, edit, comments, TBC,
+  tests/functional.cjs 46 end-to-end checks (Chromium): UI, ribbon modes, edit, comments, TBC,
                            moves, TOC, numbering, proposals, save/verify/reopen, versions, .docx, print
   src/
     engine/NN-name.js      modules in load order (see src/docs/ui-contract.md §2)
@@ -33,11 +33,11 @@ python3 sophia/build.py <document.html> <out.html>
 node sophia/tools/finalize.cjs <out.html> <final.html>
 
 # Test (Node 18+, Playwright with Chromium); exit code 1 on any FAIL
-node sophia/tests/v77-functional.cjs <final.html> [outDir]
+node sophia/tests/functional.cjs <final.html> [outDir]
 ```
 
 The older `docs/sophia-audit/tests/sophia-regression.mjs` targets the V74–V76 toolbar and is kept
-for those versions; V77 is covered by `v77-functional.cjs`.
+for those versions; V77 is covered by `functional.cjs`.
 
 ## Rules (short version — full text in `src/docs/ui-contract.md`)
 

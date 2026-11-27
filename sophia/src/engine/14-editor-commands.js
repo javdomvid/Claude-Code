@@ -1,8 +1,16 @@
 /* ============================================================================
- * SOPHIA · 14-editor-commands
- * Selection memory and text/paragraph/table commands (execCommand adapter + transactions).
- * Reused from V76 (editor-commands-v12); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 14-editor-commands                          layer: DOCUMENT
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Text and paragraph commands on the current selection: selection memory, an
+ *          execCommand adapter that records undo, paragraph settings, links, insert-table
+ *          dialog, table actions entry point.
+ * OWNS     EditorCommands; dialog.command-dialog (style: styles/ui/14-editor-commands.css).
+ * EXPORTS  EditorCommands {remember, restore, command(name, value), paragraph(prop, value),
+ *          paragraphDialog, insertLink, insertTable, tableAction, textSize, …}
+ * USES     EditorTransactions, area, capture, stepUndo, toast
+ * RULES    Not the same thing as SOPHIA.commands (70-command-registry): this module DOES
+ *          the editing; the registry only lists what the interface can run.
+ * TESTS    tests/functional.cjs (formatting, paragraph dialog, links)
  * ========================================================================== */
 /* V12: shared selection/command service. No framework or network dependency.
    Browser text commands remain an adapter; block/table mutations are explicit transactions. */

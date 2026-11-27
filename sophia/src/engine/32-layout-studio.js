@@ -1,10 +1,16 @@
 /* ============================================================================
- * SOPHIA · 32-layout-studio
- * Layout Studio: off-screen A4 plan and block pagination rules.
- * V78 (owner decision T): redesigned — pages as cards listing their blocks, click a block to
- * set "start on a new page" / "keep with next", the plan recalculates automatically, apply.
- * Reused from V76 (layout-studio-v27); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 32-layout-studio                            layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Layout Studio (owner decision T): pages as cards listing their blocks; click a
+ *          block to set "start on a new page" / "keep with next" / "keep with previous";
+ *          the plan recalculates off-screen; Apply writes the rules in one transaction.
+ * OWNS     LayoutStudio; dialog.layout-studio-v27.sx-ls (style: styles/ui/32-layout-studio.css).
+ * EXPORTS  LayoutStudio {open} · internal global: words (block text helper)
+ * USES     LayoutEngine, EditorSession, EditorTransactions, area, cleanContent,
+ *          setDocumentView, toast
+ * RULES    Read-only when not editing ("Show A4 pages"). Rules are attributes on blocks:
+ *          data-layout-before="page", data-layout-keep="next|none".
+ * TESTS    tests/functional.cjs (Layout Studio) · snapshot studio-layout
  * ========================================================================== */
 /* Preview plans are measured off-screen. No document nodes are moved until
    explicit apply or the user requests A4 view. Rules are document edits;
@@ -53,16 +59,22 @@ window.LayoutStudio = (() => {
     active = d;
     d.setAttribute("aria-label", "Layout Studio");
     d.innerHTML =
-      '<header><small>LAYOUT STUDIO · A4 PAGES</small><h2>Plan the pages</h2><p>Click a block to decide where a page starts. Blocks are never split; the document changes only when you apply.</p></header>' +
+      '<header><small>LAYOUT STUDIO · A4 PAGES</small><h2>Plan the pages</h2><p>Click a block to decide where a page starts. Blocks are never split; the document changes only when you apply.</p>' +
+        '</header>' +
       '<section class="sx-ls-body"><div class="sx-ls-pages" data-pages aria-label="Calculated pages"></div>' +
       '<aside class="sx-ls-inspector"><h3>Selected block</h3><p class="sx-ls-desc" data-desc>Choose a block on the left.</p>' +
       '<div class="sx-ls-rules" data-rules><label class="sx-ls-check"><input type="checkbox" data-before> Start on a new page</label>' +
-      '<span class="sx-ls-cap">Keep with the next block</span><div class="sx-ls-seg" role="radiogroup" aria-label="Keep with next"><button type="button" data-keep="auto" role="radio">Auto</button><button type="button" data-keep="next" role="radio">Always</button><button type="button" data-keep="none" role="radio">Allow break</button></div>' +
-      '<p class="sx-ls-hint">Auto keeps headings with what follows.</p><div class="sx-ls-quick"><button type="button" data-prevkeep>Keep with previous</button><button type="button" data-reset>Reset all rules</button></div></div>' +
+      '<span class="sx-ls-cap">Keep with the next block</span><div class="sx-ls-seg" role="radiogroup" aria-label="Keep with next">' +
+        '<button type="button" data-keep="auto" role="radio">Auto</button><button type="button" data-keep="next" role="radio">Always</button>' +
+        '<button type="button" data-keep="none" role="radio">Allow break</button></div>' +
+      '<p class="sx-ls-hint">Auto keeps headings with what follows.</p><div class="sx-ls-quick"><button type="button" data-prevkeep>Keep with previous</button>' +
+        '<button type="button" data-reset>Reset all rules</button></div></div>' +
       '<p class="sx-ls-ro" data-ro hidden>Start editing to change page breaks. You can still preview the plan.</p>' +
       '<h3>Warnings</h3><div data-warnings class="sx-ls-warn"></div>' +
       '<p class="sx-ls-legend"><span class="sx-ls-badge">⤒ new page</span><span class="sx-ls-badge">⛓ keep with next</span></p></aside></section>' +
-      '<footer><p data-status role="status" aria-live="polite">Calculating…</p><div><button type="button" data-close>Cancel</button><button type="button" data-discard hidden>Discard rules and close</button><button type="button" data-apply disabled>Apply plan & show A4</button></div></footer>';
+      '<footer><p data-status role="status" aria-live="polite">Calculating…</p><div><button type="button" data-close>Cancel</button>' +
+        '<button type="button" data-discard hidden>Discard rules and close</button><button type="button" data-apply disabled>Apply plan & show A4</button>' +
+        '</div></footer>';
     const q = (x) => d.querySelector("[data-" + x + "]");
     let selected = 0, report = null, previewRules = "", closed = false, working = false, again = false, timer = 0;
     const changed = () => JSON.stringify(rules) !== original;

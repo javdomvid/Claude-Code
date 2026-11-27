@@ -1,8 +1,25 @@
 /* ============================================================================
- * SOPHIA · 16-media
- * Images: import, replace, placement, size, Image Layout Studio, side-panel properties.
- * Reused from V76 (editor-media-v14); adapted for the V77 core. Edit this module in
- * place — do not add override layers in other files.
+ * SOPHIA · 16-media                                    layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Images: import (local files only, no network), replace, delete, placement,
+ *          size and spacing, move with caption, Image Layout Studio, and the image tools
+ *          shown in the side panel "Images" tab.
+ * OWNS     EditorMedia; #imageInput (hidden file input); dialog.media-dialog, the
+ *          selection frame and drop guide (style: styles/ui/16-media.css).
+ * EXPORTS  EditorMedia {open, replace, remove, studio, render, select, layout, align, …}
+ * USES     EditorSession, EditorTransactions, area, capture, selectedImage, toast,
+ *          SOPHIA.{ask, assets}
+ * RULES    - Images are stored once in the record (SOPHIA.assets); the document keeps
+ *            <img data-asset="KEY">. Never put base64 in the document zone.
+ *          - Every change is one EditorTransactions.run step.
+ * MAP      selection & tickets: valid, remember, ticket, current, destination, image ·
+ *          figure layout: ensureFigure, layout, wrap, align · delete: remove ·
+ *          import: importTools, decode, insertFigures, stage, open, replace ·
+ *          move: unit, movable, targets, relocate, stepMove, moveDialog ·
+ *          size: preset, precise · pointer gestures: schedule, position, beginGesture,
+ *          pointerMove, endGesture · Image Layout Studio: studio · media bar:
+ *          placementPanel, attachPlacement · side panel: render · wiring: attach
+ * TESTS    tests/functional.cjs (images load) · tools/snapshot.cjs read-side-images
  * ========================================================================== */
 /* Hidden file inputs used by EditorMedia (runtime only, never saved). */
 (() => {
@@ -174,7 +191,9 @@ window.EditorMedia = (() => {
     let d = document.createElement("dialog");
     d.className = "command-dialog media-dialog";
     d.innerHTML =
-      '<form method="dialog"><header><h2>Delete selected image?</h2><p>The image and its own caption will be removed. You can undo this action in the current session.</p></header><footer><button type="button" value="cancel">Cancel</button><button type="button" class="primary" data-remove>Delete image</button></footer></form>';
+      '<form method="dialog"><header><h2>Delete selected image?</h2><p>The image and its own caption will be removed. You can undo this action in the current session.</p>' +
+        '</header><footer><button type="button" value="cancel">Cancel</button><button type="button" class="primary" data-remove>Delete image</button>' +
+        '</footer></form>';
     let e = epoch;
     d.querySelector("[data-remove]").onclick = () => {
       if (e !== epoch || !editable() || !im.isConnected) {
@@ -370,7 +389,10 @@ window.EditorMedia = (() => {
     d.className = "command-dialog media-dialog";
     d.setAttribute("aria-label", replacement ? "Replace image" : "Insert images");
     d.innerHTML =
-      '<form method="dialog"><header><h2></h2><p data-status role="status">Reading and validating local files…</p></header><section data-assets></section><p class="command-error" data-error role="alert"></p><footer><button type="button" data-cancel>Cancel</button><button type="button" class="primary" data-apply disabled></button></footer></form>';
+      '<form method="dialog"><header><h2></h2><p data-status role="status">Reading and validating local files…</p>' +
+        '</header><section data-assets></section><p class="command-error" data-error role="alert"></p><footer>' +
+        '<button type="button" data-cancel>Cancel</button><button type="button" class="primary" data-apply disabled>' +
+        '</button></footer></form>';
     d.querySelector("h2").textContent = replacement ? "Replace image" : "Insert images";
     let apply = d.querySelector("[data-apply]");
     apply.textContent = replacement ? "Replace image" : "Insert images";
@@ -645,7 +667,12 @@ window.EditorMedia = (() => {
     d.className = "command-dialog media-dialog";
     d.setAttribute("aria-label", "Move image and caption");
     d.innerHTML =
-      '<form method="dialog"><header><h2>Move image and caption</h2><p>Choose a body block. The original image is moved, not copied; its caption and formatting stay attached.</p></header><section><label>Find destination<input data-find type="search" placeholder="Search page, heading or text"></label><label>Destination<select data-target size="7"></select></label><label>Position<select data-where><option value="before">Before selected block</option><option value="after">After selected block</option></select></label><p class="command-error" data-error role="alert"></p></section><footer><button type="button" value="cancel">Cancel</button><button type="button" data-place class="primary">Move image</button></footer></form>';
+      '<form method="dialog"><header><h2>Move image and caption</h2><p>Choose a body block. The original image is moved, not copied; its caption and formatting stay attached.</p>' +
+        '</header><section><label>Find destination<input data-find type="search" placeholder="Search page, heading or text">' +
+        '</label><label>Destination<select data-target size="7"></select></label><label>Position<select data-where>' +
+        '<option value="before">Before selected block</option><option value="after">After selected block</option>' +
+        '</select></label><p class="command-error" data-error role="alert"></p></section><footer><button type="button" value="cancel">Cancel</button>' +
+        '<button type="button" data-place class="primary">Move image</button></footer></form>';
     let list = d.querySelector("[data-target]");
     function filter() {
       let text = d.querySelector("[data-find]").value.toLowerCase();
@@ -721,7 +748,12 @@ window.EditorMedia = (() => {
     d.className = "command-dialog media-dialog";
     d.setAttribute("aria-label", "Image size and spacing");
     d.innerHTML =
-      '<form method="dialog"><header><h2>Size and spacing</h2><p>Proportional sizing. Original pixels are retained. Spacing applies to the image and caption group.</p></header><section><label>Width<input data-width type="number" min="1" max="2400" step="1" required></label><label>Unit<select data-unit><option value="px">Pixels</option><option value="%">% of containing block</option></select></label><div class="media-spacing"></div><p data-size-info></p><p class="command-error" data-error role="alert"></p></section><footer><button type="button" value="cancel">Cancel</button><button type="button" data-size-apply class="primary">Apply size and spacing</button></footer></form>';
+      '<form method="dialog"><header><h2>Size and spacing</h2><p>Proportional sizing. Original pixels are retained. Spacing applies to the image and caption group.</p>' +
+        '</header><section><label>Width<input data-width type="number" min="1" max="2400" step="1" required></label>' +
+        '<label>Unit<select data-unit><option value="px">Pixels</option><option value="%">% of containing block</option>' +
+        '</select></label><div class="media-spacing"></div><p data-size-info></p><p class="command-error" data-error role="alert">' +
+        '</p></section><footer><button type="button" value="cancel">Cancel</button><button type="button" data-size-apply class="primary">Apply size and spacing</button>' +
+        '</footer></form>';
     let width = d.querySelector("[data-width]"),
       unitSelect = d.querySelector("[data-unit]");
     width.value = Math.round(im.offsetWidth);
@@ -974,7 +1006,22 @@ window.EditorMedia = (() => {
     const d = make("dialog");
     d.className = "command-dialog media-dialog layout-studio";
     d.setAttribute("aria-label", "Image Layout Studio");
-    d.innerHTML = `<form novalidate><header><h2>Image Layout Studio</h2><p>Preview locally. Nothing changes in the document until you apply.</p></header><div class="studio-grid"><section class="studio-controls"><label>Width (% of text area)<input data-width type="number" min="10" max="100" step="1" required></label><div class="studio-presets"></div><label>Layout<select data-layout><option value="block">Separate block</option><option value="left">Float left, text on right</option><option value="right">Float right, text on left</option></select></label><label>Block alignment<select data-align><option value="left">Left</option><option value="center">Centre</option><option value="right">Right</option></select></label><label>Space above (px)<input data-top type="number" min="0" max="2400" step="1" required></label><label>Space below (px)<input data-bottom type="number" min="0" max="2400" step="1" required></label><label>Text gap (px)<input data-gap type="number" min="0" max="160" step="1" value="18" required></label><label>Alternative text<input data-alt type="text"></label><label>Caption<textarea data-caption rows="3"></textarea></label></section><section class="studio-preview"><strong>LAYOUT PREVIEW</strong><p>Illustrative text, not your document content.</p><div data-canvas><figure data-figure><img data-preview alt="Layout preview"><figcaption data-preview-caption></figcaption></figure><p>Example paragraph showing how the image sits within the text area. The caption stays attached to the image.</p><p>Change width, alignment and spacing to compare the layout before applying it to your document.</p><p>Original image pixels are retained. This preview does not compress or crop your image.</p></div><p data-dimensions role="status"></p><p class="command-error" data-error role="alert"></p></section></div><footer><button type="button" data-cancel>Cancel</button><button type="button" class="primary" data-commit>Apply layout</button></footer></form>`;
+    d.innerHTML = `<form novalidate><header><h2>Image Layout Studio</h2><p>Preview locally. Nothing changes in the document until you apply.</p>` +
+      `</header><div class="studio-grid"><section class="studio-controls"><label>Width (% of text area)<input data-width type="number" min="10" max="100" step="1" required>` +
+      `</label><div class="studio-presets"></div><label>Layout<select data-layout><option value="block">Separate block</option>` +
+      `<option value="left">Float left, text on right</option><option value="right">Float right, text on left</option>` +
+      `</select></label><label>Block alignment<select data-align><option value="left">Left</option><option value="center">Centre</option>` +
+      `<option value="right">Right</option></select></label><label>Space above (px)<input data-top type="number" min="0" max="2400" step="1" required>` +
+      `</label><label>Space below (px)<input data-bottom type="number" min="0" max="2400" step="1" required>` +
+      `</label><label>Text gap (px)<input data-gap type="number" min="0" max="160" step="1" value="18" required>` +
+      `</label><label>Alternative text<input data-alt type="text"></label><label>Caption<textarea data-caption rows="3">` +
+      `</textarea></label></section><section class="studio-preview"><strong>LAYOUT PREVIEW</strong><p>Illustrative text, not your document content.</p>` +
+      `<div data-canvas><figure data-figure><img data-preview alt="Layout preview"><figcaption data-preview-caption>` +
+      `</figcaption></figure><p>Example paragraph showing how the image sits within the text area. The caption stays attached to the image.</p>` +
+      `<p>Change width, alignment and spacing to compare the layout before applying it to your document.</p>` +
+      `<p>Original image pixels are retained. This preview does not compress or crop your image.</p></div><p data-dimensions role="status">` +
+      `</p><p class="command-error" data-error role="alert"></p></section></div><footer><button type="button" data-cancel>Cancel</button>` +
+      `<button type="button" class="primary" data-commit>Apply layout</button></footer></form>`;
     const q = (x) => d.querySelector("[data-" + x + "]");
     const parent = originalUnit.parentElement;
     const cs = getComputedStyle(originalUnit);
@@ -1208,7 +1255,10 @@ window.EditorMedia = (() => {
     overlay.id = "media-selection";
     overlay.hidden = true;
     overlay.innerHTML =
-      '<div data-media-bar role="toolbar" aria-label="Selected image placement"><button type="button" data-drag title="Drag image and caption between blocks">Move ↕</button><button type="button" data-up title="Move one block up">↑</button><button type="button" data-down title="Move one block down">↓</button><button type="button" data-to>Move to…</button><button type="button" data-size>Size…</button></div><span data-media-dimensions></span><button type="button" data-resize aria-label="Resize image proportionally" title="Drag to resize; Shift snaps to 10 px. Arrow keys resize by 10 px.">↘</button>';
+      '<div data-media-bar role="toolbar" aria-label="Selected image placement"><button type="button" data-drag title="Drag image and caption between blocks">Move ↕</button>' +
+        '<button type="button" data-up title="Move one block up">↑</button><button type="button" data-down title="Move one block down">↓</button>' +
+        '<button type="button" data-to>Move to…</button><button type="button" data-size>Size…</button></div><span data-media-dimensions>' +
+        '</span><button type="button" data-resize aria-label="Resize image proportionally" title="Drag to resize; Shift snaps to 10 px. Arrow keys resize by 10 px.">↘</button>';
     overlay.querySelector("[data-drag]").onpointerdown = (e) => beginGesture(e, "move");
     overlay.querySelector("[data-resize]").onpointerdown = (e) => beginGesture(e, "resize");
     overlay.querySelector("[data-up]").onclick = () => stepMove(-1);
@@ -1567,7 +1617,7 @@ EditorMedia.attach({
   area,
   capture,
   notify: toast,
-  side: (name) => window.side?.(name),
+  side: (name) => SOPHIA.ask.panel(name),
   selected: () => selectedImage,
   select: (im) => { selectedImage = im; },
 });

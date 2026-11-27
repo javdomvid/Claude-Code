@@ -10,7 +10,7 @@ The SOPHIA HTML documents themselves (V74 base, V75–V78 deliveries) are **deli
 
 ## Layout
 
-- `sophia/` — **V78 source** (current; tests file still named v77-functional): `build.py` (source + any V74–V77 document → single HTML), `tools/finalize.cjs` (deliver already upgraded), `tests/v77-functional.cjs` (46 Chromium checks), `src/engine/NN-*.js` (modules in load order), `src/styles/` (tokens · app · paper.sop/qc + paper.common · dialogs · print), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
+- `sophia/` — **V78 source** (current; tests file still named v77-functional): `build.py` (source + any V74–V77 document → single HTML), `tools/finalize.cjs` (deliver already upgraded), `tests/functional.cjs` (46 Chromium checks), `src/engine/NN-*.js` (modules in load order), `src/styles/` (tokens · app · paper.sop/qc + paper.common · dialogs · print), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
 - `docs/sophia-audit/` — audit of SOPHIA V74 and the V75 hand-off (Spanish):
   - `01_INFORME_AUDITORIA.md` findings by severity, with V75 status
   - `02_ARQUITECTURA_OBJETIVO.md` target architecture (engine + data, block model, integrity, agent proposals)
@@ -27,12 +27,12 @@ The SOPHIA HTML documents themselves (V74 base, V75–V78 deliveries) are **deli
 # V77: build from any SOPHIA document, optionally finalize (already upgraded), then test
 python3 sophia/build.py <document.html> <out.html>
 node sophia/tools/finalize.cjs <out.html> <final.html>
-node sophia/tests/v77-functional.cjs <final.html> [outDir]   # exit 1 on any FAIL
+node sophia/tests/functional.cjs <final.html> [outDir]   # exit 1 on any FAIL
 
 # Regenerate V75 from the V74 bases (aborts if hashes or anchors don't match)
 python3 docs/sophia-audit/tools/make_v75.py <SOP_V74.html> <QuickCard_V74.html> <out_dir>
 
-# V74–V76 browser regression check (targets the old toolbar; V77 uses v77-functional.cjs)
+# V74–V76 browser regression check (targets the old toolbar; V77 uses functional.cjs)
 node docs/sophia-audit/tests/sophia-regression.mjs <file.html> [more.html ...]
 
 # Validate example documents against the schema
@@ -41,6 +41,6 @@ python3 -c "import json,jsonschema;s=json.load(open('docs/sophia-audit/schemas/s
 
 ## Rules that matter when touching SOPHIA
 
-V77+: change the editor only in `sophia/src`, editing the module that owns the concern in place (no override/patch layers), then rebuild and run `v77-functional.cjs`. Document content is changed only inside `main#document[data-sophia-zone=document]`, preferably through a `sophia.proposal/1` JSON (see `sophia/src/docs/agent-brief.md`). Keep `style[data-sophia="print"]` last; mark JS-created UI nodes `data-runtime`; route document mutations through `EditorTransactions.run`; never edit `#record` by hand; never print or copy the PID keys; inline module code must not contain a literal closing-script tag or HTML comment opener (build.py refuses it). Full contract: `sophia/src/docs/ui-contract.md`; standing rules for Copilot: `docs/sophia-audit/copilot-instructions.md`.
+V77+: change the editor only in `sophia/src`, editing the module that owns the concern in place (no override/patch layers), then rebuild and run `functional.cjs`. Document content is changed only inside `main#document[data-sophia-zone=document]`, preferably through a `sophia.proposal/1` JSON (see `sophia/src/docs/agent-brief.md`). Keep `style[data-sophia="print"]` last; mark JS-created UI nodes `data-runtime`; route document mutations through `EditorTransactions.run`; never edit `#record` by hand; never print or copy the PID keys; inline module code must not contain a literal closing-script tag or HTML comment opener (build.py refuses it). Full contract: `sophia/src/docs/ui-contract.md`; standing rules for Copilot: `docs/sophia-audit/copilot-instructions.md`.
 
 V74–V76 files (legacy): edit only via exact, uniquely anchored substitutions and keep `sophia-v75-print-shell` as the last `<style>`.

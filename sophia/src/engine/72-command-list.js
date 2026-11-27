@@ -12,7 +12,8 @@
  *          proposals, compare, comments, tbc, find, numbering, persist, versions, stats},
  *          PrintStudio42, LayoutStudio, TableFlow, ImageLibrary, DocumentReview,
  *          BlockIdentity, SophiaFlow, openHistoryStudio, exportPID, downloadCurrentCopy,
- *          setDocumentView, modal, side, SOPHIA.ui.{view, sidePanel, editPanel, mainPanel}
+ *          setDocumentView, modal, side, SOPHIA.i18n, SOPHIA.ui.{view, sidePanel, editPanel,
+ *          mainPanel}
  *          (all called only when the command RUNS, so load order does not matter)
  * RULES    - Add a command with R(id, 'Label', 'Group', 'icon', run, editingOnly, extra).
  *          - Keep the run function a one-liner that calls the owning module.
@@ -147,11 +148,19 @@
   }
   function wordCount() {
     const s = SOPHIA.stats();
-    modal('Word count', '<dl class="sx-dl"><dt>Words</dt><dd>' + s.words + '</dd><dt>A4 pages</dt><dd>' + (s.continuous ? '— (continuous view)' : s.pages) + '</dd><dt>Headings</dt><dd>' + SOPHIA.numbering.compute().length + '</dd><dt>Tables</dt><dd>' + area.querySelectorAll('.pagecontent table').length + '</dd><dt>Images</dt><dd>' + area.querySelectorAll('.pagecontent img').length + '</dd></dl>', (v) => v.remove(), 'Close');
+    modal('Word count', '<dl class="sx-dl"><dt>Words</dt><dd>' + s.words + '</dd><dt>A4 pages</dt><dd>' +
+      (s.continuous ? '— (continuous view)' : s.pages) + '</dd><dt>Headings</dt><dd>' + SOPHIA.numbering.compute().length +
+      '</dd><dt>Tables</dt><dd>' + area.querySelectorAll('.pagecontent table').length + '</dd><dt>Images</dt><dd>' +
+      area.querySelectorAll('.pagecontent img').length + '</dd></dl>', (v) => v.remove(), 'Close');
   }
   function about() {
     const last = data.revisions.at(-1);
-    modal('About this file', '<dl class="sx-dl"><dt>Application</dt><dd>SOPHIA ' + SOPHIA.engine + ' · ' + SOPHIA.strings.profileLabel[SOPHIA.profile] + ' editor</dd><dt>Document</dt><dd data-f="id"></dd><dt>Document version</dt><dd>V' + U.escapeHTML(data.documentVersion) + ' · ' + U.escapeHTML(data.status) + '</dd><dt>Last revision</dt><dd data-f="last"></dd><dt>Revisions in file</dt><dd>' + data.revisions.length + '</dd><dt>File format</dt><dd>' + U.escapeHTML(data.format || 'not yet saved as sophia/77') + '</dd></dl><p class="muted">The application version (' + SOPHIA.engine + ') and the document version (V' + U.escapeHTML(data.documentVersion) + ') are independent. Save draft keeps the number; Publish & save adds 0.01; Big Validation moves to the next major.</p>', (v) => v.remove(), 'Close')
+    modal('About this file', '<dl class="sx-dl"><dt>Application</dt><dd>SOPHIA ' + SOPHIA.engine + ' · ' +
+      SOPHIA.strings.profileLabel[SOPHIA.profile] + ' editor</dd><dt>Document</dt><dd data-f="id"></dd><dt>Document version</dt><dd>V' +
+      U.escapeHTML(data.documentVersion) + ' · ' + U.escapeHTML(data.status) + '</dd><dt>Last revision</dt><dd data-f="last"></dd><dt>Revisions in file</dt><dd>' +
+      data.revisions.length + '</dd><dt>File format</dt><dd>' + U.escapeHTML(data.format || 'not yet saved as sophia/77') +
+      '</dd></dl><p class="muted">The application version (' + SOPHIA.engine + ') and the document version (V' +
+      U.escapeHTML(data.documentVersion) + ') are independent. Save draft keeps the number; Publish & save adds 0.01; Big Validation moves to the next major.</p>', (v) => v.remove(), 'Close')
       .querySelector('[data-f="id"]').textContent = data.id;
     document.querySelector('dialog.legacy-modal [data-f="last"]').textContent = last ? SOPHIA.versions.label(last) + ' · ' + String(last.date).slice(0, 10) + ' · ' + (last.editorPID || last.author || '') : '—';
   }

@@ -1,12 +1,20 @@
 /* ============================================================================
- * SOPHIA · 55-review
- * J (owner, 2026-11-26): comments per block, "To Be Confirmed" marks and the
- * pre-publish checklist.
- * - Comments live in data.comments (the record), anchored by data-block-id.
- *   They are never part of the document text, never printed, and are saved
- *   with the next Save draft / Publish. Highlight uses the CSS Highlight API.
- * - TBC marks are content: <span class="tbc">…</span> (amber on screen,
- *   dotted underline when printed). Checks and the checklist count them.
+ * SOPHIA · 55-review                                   layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Review marks (owner decision J): comments per block, "To Be Confirmed" marks and
+ *          the pre-publish checklist (with an action button per item).
+ * OWNS     SOPHIA.comments, SOPHIA.tbc, SOPHIA.checklist; highlight sophia-comment
+ *          (style: styles/ui/55-review.css).
+ * EXPORTS  SOPHIA.comments {add, render, paint, openCount, …}, SOPHIA.tbc {toggle, count,
+ *          nodes}, SOPHIA.checklist {collect, confirm}
+ * USES     SOPHIA.{ask, blocks, find, ids, recordDirty, bus}, EditorSession,
+ *          EditorTransactions, ImageLibrary, area, data, modal, toast
+ * EMITS    comments-changed
+ * LISTENS  content-changed, record-changed
+ * RULES    - Comments live in the record (data.comments) anchored by data-block-id; never in
+ *            the document text, never printed; saved with the next save.
+ *          - TBC marks are content: <span class="tbc">…</span>.
+ * TESTS    tests/functional.cjs (comments, TBC, checklist)
  * ========================================================================== */
 SOPHIA.comments = (() => {
   'use strict';
@@ -37,7 +45,7 @@ SOPHIA.comments = (() => {
         data.comments.push({ id: 'c-' + SOPHIA.ids.newId(new Set()).slice(2), blockId: block.dataset.blockId, excerpt: block.textContent.trim().slice(0, 140), pid: EditorSession.get().pid, date: new Date().toISOString(), text, resolved: false, replies: [], unsaved: true });
         dlg.remove();
         markDirty();
-        window.side?.('comments');
+        SOPHIA.ask.panel('comments');
         toast('Comment added. It is saved with your next Save draft or Publish.');
       }, 'Add comment');
     v.querySelector('[data-excerpt]').textContent = '“' + block.textContent.trim().slice(0, 160) + '”';
@@ -171,18 +179,19 @@ SOPHIA.checklist = (() => {
     const tbcNodes = [...area.querySelectorAll('.pagecontent .tbc, .qc-hero .tbc')];
     if (tbcNodes.length) {
       let i = -1;
-      add('warn', tbcNodes.length + ' text mark(s) still To Be Confirmed.', tbcNodes[0], { label: 'Next mark', run: () => { i = (i + 1) % tbcNodes.length; tbcNodes[i].scrollIntoView({ block: 'center', behavior: 'smooth' }); tbcNodes[i].animate?.([{ outline: '3px solid #e0a100' }, { outline: '3px solid transparent' }], { duration: 1400 }); } });
+      add('warn', tbcNodes.length + ' text mark(s) still To Be Confirmed.', tbcNodes[0], { label: 'Next mark', run: () => { i = (i +
+        1) % tbcNodes.length; tbcNodes[i].scrollIntoView({ block: 'center', behavior: 'smooth' }); tbcNodes[i].animate?.([{ outline: '3px solid #e0a100' }, { outline: '3px solid transparent' }], { duration: 1400 }); } });
     }
     const tbcText = [...area.querySelectorAll('.pagecontent p, .pagecontent li, .pagecontent td, .identity .value')].filter((n) => /\bTO BE CONFIRMED\b/.test(n.textContent) && !n.querySelector('.tbc')).length;
     if (tbcText) add('warn', tbcText + ' place(s) still say “TO BE CONFIRMED”.', null, { label: 'Find them', run: () => { SOPHIA.find.state.meta = true; SOPHIA.find.open('TO BE CONFIRMED'); } });
     const open = SOPHIA.comments.openCount();
-    if (open) add('warn', open + ' open comment(s).', null, { label: 'Open comments', run: () => window.side?.('comments') });
+    if (open) add('warn', open + ' open comment(s).', null, { label: 'Open comments', run: () => SOPHIA.ask.panel('comments') });
     const noAlt = [...area.querySelectorAll('.pagecontent img')].filter((i) => !i.alt.trim()).length;
     if (noAlt) add('warn', noAlt + ' image(s) without alternative text.', area.querySelector('.pagecontent img:not([alt]), .pagecontent img[alt=""]'), { label: 'Image library', run: () => ImageLibrary.open() });
     const emptyCells = [...area.querySelectorAll('.pagecontent table:not(.identity) :is(td,th)')].filter((c) => !c.textContent.trim() && !c.querySelector('img'));
     if (emptyCells.length) add('info', emptyCells.length + ' empty table cell(s).', emptyCells[0]);
     if (SOPHIA.blocks && area.querySelector('nav[data-sophia-toc]') && !SOPHIA.blocks.tocIsCurrent())
-      add('info', 'The table of contents is out of date.', area.querySelector('nav[data-sophia-toc]'), { label: 'Update contents', run: () => { if (!U.isEditing()) { toast(SOPHIA.strings.startEditingFirst); return; } SOPHIA.blocks.refreshToc(true); toast('Contents updated.'); window.side?.('checks'); } });
+      add('info', 'The table of contents is out of date.', area.querySelector('nav[data-sophia-toc]'), { label: 'Update contents', run: () => { if (!U.isEditing()) { toast(SOPHIA.strings.startEditingFirst); return; } SOPHIA.blocks.refreshToc(true); toast('Contents updated.'); SOPHIA.ask.panel('checks'); } });
     return items;
   }
   function gate(mode, proceed) {
@@ -191,7 +200,8 @@ SOPHIA.checklist = (() => {
     if (!warns.length) { proceed(); return; }
     const list = items.map((i) => '<li class="sx-check-' + i.tone + '">' + U.escapeHTML(i.text) + '</li>').join('');
     modal(mode === 'Big Validation' ? 'Before Big Validation' : 'Before publishing',
-      '<p>These items are usually resolved before ' + (mode === 'Big Validation' ? 'a Big Validation' : 'publishing') + '. You can go back and fix them, or continue and record your reason in the next step.</p><ul class="sx-checklist">' + list + '</ul>' +
+      '<p>These items are usually resolved before ' + (mode === 'Big Validation' ? 'a Big Validation' : 'publishing') +
+        '. You can go back and fix them, or continue and record your reason in the next step.</p><ul class="sx-checklist">' + list + '</ul>' +
       '<label class="check"><input type="checkbox" id="chkOk"> I reviewed these items and want to continue.</label><p id="chkErr" role="alert"></p>',
       (dlg) => {
         if (!dlg.querySelector('#chkOk').checked) { dlg.querySelector('#chkErr').textContent = 'Tick the box to continue, or Cancel to go back.'; return; }

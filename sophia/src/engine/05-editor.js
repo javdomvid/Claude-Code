@@ -1,12 +1,26 @@
 /* ============================================================================
- * SOPHIA · 05-editor
- * Undo journal, editable regions, modal helper, clean/canonical content,
- * views (A4 / Continuous), outline + stats, paste routing, core shortcuts.
- *
- * LEGACY CONTRACT (top-level bindings used by reused modules — keep names):
- *   undoStates, undoPosition, muted, observer, capture(), stepUndo(),
- *   setEditable(), cleanContent(), refreshOutline(), modal(), selectedImage,
- *   continuationTemplate, setDocumentView(), paginateDocument(), pidSession.
+ * SOPHIA · 05-editor                                   layer: CORE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  The editing surface: which regions are editable, the undo journal with caret
+ *          restore, the clean/canonical content used to detect changes, the modal() helper,
+ *          A4 / Continuous views, outline + statistics, paste routing and core shortcuts.
+ * OWNS     SOPHIA.meta (identity fields by label), SOPHIA.canonical, SOPHIA.stats and the
+ *          legacy editing globals listed in EXPORTS.
+ * EXPORTS  SOPHIA.meta, SOPHIA.canonical, SOPHIA.stats, setEditable(), cleanContent(),
+ *          mergeSheets(root), repaginate(), capture(), stepUndo(dir), modal(title, html, onOk,
+ *          okLabel), setDocumentView('pages'|'continuous'), paginateDocument(), refreshOutline(),
+ *          undoStates, undoPosition, muted, observer, selectedImage, pidSession,
+ *          continuationTemplate · internal globals (do not use from other modules):
+ *          EDITABLE_SELECTOR, textOf, undoTimer, caretOffset, restoreCaret, mergeContinuous,
+ *          printWasContinuous
+ * USES     SOPHIA.{util, bus, ask, print}, data, area, toast, normalizeBody, LayoutEngine,
+ *          EditorCommands, EditorMedia, exportPID (at run time)
+ * EMITS    content-changed, outline-changed, view-changed
+ * RULES    - Undo states are page-independent: cleanContent() merges A4 sheets and drops
+ *            contenteditable, so pagination never creates "phantom" undo steps.
+ *          - `muted = true` while the engine itself rearranges the DOM (pagination).
+ *          - Content changes made by features go through EditorTransactions.run, not here.
+ * TESTS    tests/functional.cjs (undo, views, A4 overflow, paste)
  * ========================================================================== */
 
 /* ---------- identity metadata, read by LABEL (never by row position) ---------- */
@@ -314,7 +328,7 @@ area.addEventListener('click', (e) => {
   selectedImage = e.target.tagName === 'IMG' && e.target.closest('.pagecontent') ? e.target : null;
   if (selectedImage) {
     selectedImage.classList.add('selected');
-    window.side?.('images');
+    SOPHIA.ask.panel('images');
   }
 });
 

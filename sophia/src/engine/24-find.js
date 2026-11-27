@@ -1,13 +1,18 @@
 /* ============================================================================
- * SOPHIA · 24-find  (V78: find + replace in one side-panel tool; replaces the
- * V19 find dialog and the V21 replace studio)
- * - Side panel tab "Find": search box, Match case, Whole word, Include document
- *   information; every match highlighted (CSS Highlight API, no DOM change),
- *   current match in a stronger colour; results grouped by section; ‹ › / Enter.
- * - While editing: Replace / Replace all, each ONE undo step (EditorTransactions),
- *   on text nodes only (formatting of the first matched character is kept).
- *   Matches may cross bold/italic, never blocks, line breaks or images.
- * - Legacy entry points kept: openDocumentFind(), replaceDialog() → open the panel.
+ * SOPHIA · 24-find                                     layer: FEATURE
+ * ----------------------------------------------------------------------------
+ * PURPOSE  Find & replace in the side panel "Find" tab: search box, Match case, Whole word,
+ *          Include document information; every match highlighted, ‹ › / Enter to move;
+ *          while editing Replace / Replace all, each ONE undo step.
+ * OWNS     SOPHIA.find; highlights sophia-find / sophia-find-current
+ *          (style: styles/ui/24-find.css).
+ * EXPORTS  SOPHIA.find {open(query, replace), render(container), clear(), search(), state},
+ *          openDocumentFind(), replaceDialog() (legacy entry points → open the panel)
+ * USES     SOPHIA.{ask, numbering, bus}, EditorTransactions, area, toast
+ * LISTENS  content-changed, transaction
+ * RULES    Highlights use the CSS Highlight API (no DOM change). Replacements touch text
+ *          nodes only and never cross blocks, line breaks or images.
+ * TESTS    tests/functional.cjs (find, replace, replace all) · snapshot read-side-find
  * ========================================================================== */
 SOPHIA.find = (() => {
   'use strict';
@@ -235,7 +240,7 @@ SOPHIA.find = (() => {
   function open(query, replace) {
     if (typeof query === 'string') state.q = query;
     state.focusReplace = !!replace;
-    window.side?.('find');
+    SOPHIA.ask.panel('find');
   }
   let refresh = 0;
   SOPHIA.bus.on('content-changed', () => { if (root?.isConnected && state.q) { clearTimeout(refresh); refresh = setTimeout(() => run(true), 300); } });

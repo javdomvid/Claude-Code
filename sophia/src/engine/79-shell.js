@@ -8,7 +8,7 @@
  *          the legacy globals side() and Workbench.
  * EXPORTS  SOPHIA.ui.{mount, refresh, layout, side, setFocus, setCanvas, openSheet,
  *          focusOmni, menu, zoom, renderRibbon, renderMain, ribbonMode, mainMode, icon}
- *          window.side(name), window.Workbench {register, run, list, openPalette, refresh}
+ *          globals: side(name) and Workbench {register, run, list, openPalette, refresh}
  * USES     SOPHIA.ui.{kit, view, appbar, omnibox, mainPanel, editPanel, sidePanel},
  *          SOPHIA.commands, SOPHIA.bus, EditorSession, area
  * LISTENS  session, record-changed, comments-changed, outline-changed, content-changed,
@@ -109,6 +109,9 @@
   SOPHIA.bus.on('content-changed', sideSoon);
   SOPHIA.bus.on('view-changed', refreshSoon);
   SOPHIA.bus.on('lang-changed', () => { mainPanel.render(); editPanel.render(); if (!sidePanel.el.hidden) sidePanel.render(); refresh(); });
+  /* requests from lower layers (SOPHIA.ask in 00-core): they never call the interface directly */
+  SOPHIA.bus.on('ask:panel', (name) => sidePanel.show(name));
+  SOPHIA.bus.on('ask:leave-focus', () => view.setFocus(false));
   SOPHIA.bus.on('commands-changed', () => { if (mounted) { editPanel.render(); mainPanel.render(); refreshSoon(); } });
 
   /* ---------- mount (called once by 99-boot) ---------- */
