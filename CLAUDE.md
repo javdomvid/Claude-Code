@@ -10,7 +10,7 @@ The SOPHIA HTML documents themselves (V74 base, V75–V78 deliveries) are **deli
 
 ## Layout
 
-- `sophia/` — **V78 source** (current; tests file still named v77-functional): `build.py` (source + any V74–V77 document → single HTML), `tools/finalize.cjs` (deliver already upgraded), `tests/functional.cjs` (46 Chromium checks), `src/engine/NN-*.js` (modules in load order), `src/styles/` (tokens · app · paper.sop/qc + paper.common · dialogs · print), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
+- `sophia/` — **V79 source** (current): start with `sophia/ARCHITECTURE.md` (layers, change flow, safety net, recipes) and `sophia/MODULES.md` (generated module map). `build.py` (runs `tools/lint.py`, then source + any V74–V79 document → single HTML), `tools/lint.py` (architecture check; `--map` regenerates MODULES.md), `tools/snapshot.cjs` (interface before/after diff), `tools/finalize.cjs` (deliver already upgraded), `tests/unit.cjs` (16 checks), `tests/functional.cjs` (48 Chromium checks), `src/engine/NN-*.js` (modules in load order, each with a module card; layers CORE → SAFETY → DOCUMENT → FEATURE → SHELL → BOOT), `src/styles/` (tokens · paper.sop/qc + paper.common · print) and `src/styles/ui/NN-name.css` (one stylesheet per module), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
 - `docs/sophia-audit/` — audit of SOPHIA V74 and the V75 hand-off (Spanish):
   - `01_INFORME_AUDITORIA.md` findings by severity, with V75 status
   - `02_ARQUITECTURA_OBJETIVO.md` target architecture (engine + data, block model, integrity, agent proposals)
@@ -24,15 +24,19 @@ The SOPHIA HTML documents themselves (V74 base, V75–V78 deliveries) are **deli
 ## Commands
 
 ```bash
-# V77: build from any SOPHIA document, optionally finalize (already upgraded), then test
+# V79: architecture check, build from any SOPHIA document, finalize (already upgraded), then test
+python3 sophia/tools/lint.py                                # also runs inside build.py; --map regenerates MODULES.md
 python3 sophia/build.py <document.html> <out.html>
 node sophia/tools/finalize.cjs <out.html> <final.html>
-node sophia/tests/functional.cjs <final.html> [outDir]   # exit 1 on any FAIL
+node sophia/tests/unit.cjs <final.html>                     # 16 fast checks
+node sophia/tests/functional.cjs <final.html> [outDir]      # 48 checks, exit 1 on any FAIL
+node sophia/tools/snapshot.cjs <built.html> <out.json>      # when moving code: snapshot before/after,
+node sophia/tools/snapshot.cjs --diff before.json after.json  # must print IDENTICAL
 
 # Regenerate V75 from the V74 bases (aborts if hashes or anchors don't match)
 python3 docs/sophia-audit/tools/make_v75.py <SOP_V74.html> <QuickCard_V74.html> <out_dir>
 
-# V74–V76 browser regression check (targets the old toolbar; V77 uses functional.cjs)
+# V74–V76 browser regression check (targets the old toolbar; V77+ uses functional.cjs)
 node docs/sophia-audit/tests/sophia-regression.mjs <file.html> [more.html ...]
 
 # Validate example documents against the schema
@@ -41,6 +45,6 @@ python3 -c "import json,jsonschema;s=json.load(open('docs/sophia-audit/schemas/s
 
 ## Rules that matter when touching SOPHIA
 
-V77+: change the editor only in `sophia/src`, editing the module that owns the concern in place (no override/patch layers), then rebuild and run `functional.cjs`. Document content is changed only inside `main#document[data-sophia-zone=document]`, preferably through a `sophia.proposal/1` JSON (see `sophia/src/docs/agent-brief.md`). Keep `style[data-sophia="print"]` last; mark JS-created UI nodes `data-runtime`; route document mutations through `EditorTransactions.run`; never edit `#record` by hand; never print or copy the PID keys; inline module code must not contain a literal closing-script tag or HTML comment opener (build.py refuses it). Full contract: `sophia/src/docs/ui-contract.md`; standing rules for Copilot: `docs/sophia-audit/copilot-instructions.md`.
+V77+: change the editor only in `sophia/src`, editing the module that owns the concern in place (no override/patch layers) and keeping its module card true; lower layers never call the interface (use `SOPHIA.ask`); interface texts are English in code with translations in every `09-lang-xx`; then lint, rebuild and run `unit.cjs` + `functional.cjs` (and `snapshot.cjs` when moving code). Document content is changed only inside `main#document[data-sophia-zone=document]`, preferably through a `sophia.proposal/1` JSON (see `sophia/src/docs/agent-brief.md`). Keep `style[data-sophia="print"]` last; mark JS-created UI nodes `data-runtime`; route document mutations through `EditorTransactions.run`; never edit `#record` by hand; never print or copy the PID keys; inline module code must not contain a literal closing-script tag or HTML comment opener (build.py refuses it). Full contract: `sophia/src/docs/ui-contract.md`; standing rules for Copilot: `docs/sophia-audit/copilot-instructions.md`.
 
 V74–V76 files (legacy): edit only via exact, uniquely anchored substitutions and keep `sophia-v75-print-shell` as the last `<style>`.

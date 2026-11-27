@@ -1,5 +1,28 @@
 # SOPHIA changelog
 
+## V79 (2026-11-27) — code health, base version, six interface languages
+Same file format (`sophia/77`); documents saved with V77/V78 open unchanged.
+- **Compartmentalized source.** The 1,200-line shell became ten modules (command registry,
+  UI kit, command list, view, app bar, omnibox, main panel, edit panel, side panel, shell
+  assembly). The two big stylesheets became one stylesheet per module
+  (`styles/ui/NN-name.css`, same number and name as its module), each a labelled style block
+  in the file. One-line HTML templates were split so they can be read.
+- **Module cards.** Every module starts with a card: layer, purpose, what it owns, offers,
+  uses, events, rules, map and tests. `sophia/MODULES.md` is generated from them.
+- **Architecture check** (`tools/lint.py`, run by every build): hidden globals, layer rule
+  (lower layers ask the interface with `SOPHIA.ask`, never call it), unknown bus events or
+  command ids, network use, module stylesheets, language dictionaries.
+- **Safety net:** `tests/unit.cjs` (16 fast checks), `tests/functional.cjs` (48 checks,
+  renamed from v77-functional), `tools/snapshot.cjs` (42 interface states before/after a change).
+- **Base version** (owner decision Q): *Save draft ▾ › Set base version…* and the proposal
+  operation `setBaseVersion`, only before the first publish; recorded as an event. The agent
+  brief says what an agent does about the version when creating vs editing.
+- **Interface languages** (owner decision X): English (default), Español, Français, Italiano,
+  Deutsch, Português — language menu in the app bar; one dictionary module per language.
+- Fixes: discarding a session also drops its events (applied proposals, base version);
+  F1 shown for Keyboard shortcuts (duplicate registration removed); "About this file" shows the
+  real application version.
+
 ## V78 (2026-11-26) — owner review: studios, page planning, Word-like tools, Spanish
 Same file format (`sophia/77`).
 - **Studios, one family** (U): History, Print Studio, Layout Studio, Table Studio, Image Studio,

@@ -1,4 +1,4 @@
-# Instrucciones permanentes para la IA de desarrollo (Copilot) · Project SOPHIA · desde V77
+# Instrucciones permanentes para la IA de desarrollo (Copilot) · Project SOPHIA · desde V79
 
 > Pega este texto como instrucciones personalizadas del espacio o agente de Copilot. Si trabajas en un repositorio con GitHub Copilot, guárdalo como `.github/copilot-instructions.md`. Complementa el prompt maestro y el traspaso vigente (`HANDOFF_V77_PARA_COPILOT.md`). Si hay contradicción, manda la última decisión expresa de Javier.
 >
@@ -13,7 +13,7 @@ SOPHIA es un estudio documental offline. Cada SOP o Quick Card es **un único HT
 
 Funciona desde disco en Edge/Chromium sin red. Hay dos perfiles, `sop` y `quick-card`, con el mismo motor (`data-profile`).
 
-Desde V77, el editor se genera con `sophia/build.py` a partir de `sophia/src`: un módulo por tema y una hoja de estilos por capa.
+Desde V77, el editor se genera con `sophia/build.py` a partir de `sophia/src`. Desde V79: un módulo por tema (`src/engine/NN-nombre.js`), su aspecto en `src/styles/ui/NN-nombre.css` (mismo número y nombre), y cada módulo empieza con una **ficha** (capa, propósito, qué posee, qué ofrece, qué usa, eventos, reglas, mapa, pruebas). **Lee primero `sophia/ARCHITECTURE.md`** (capas, flujo de un cambio, red de seguridad y recetas) y la ficha del módulo que vas a tocar.
 
 ## Dos trabajos distintos
 1. **Contenido** (agente SOPHIA + skills): solo la zona del documento, y preferiblemente con una **propuesta JSON** `sophia.proposal/1` que una persona aplica con «Apply agent proposal…». Detalles en `#sophia-agent-brief`.
@@ -27,17 +27,19 @@ Nunca mezcles los dos en el mismo cambio.
 3. **Toda mutación del documento** pasa por `EditorTransactions.run(label, fn)`.
 4. **Lo que crea la interfaz** lleva `data-runtime` y vive fuera de `#document`.
 5. **Una única barra.** Para añadir una herramienta:
-   - regístrala en `SOPHIA.commands`;
-   - pon su id en `RIBBON` y/o `SHEET` (70-shell).
+   - regístrala en `72-command-list` (o desde su módulo con `SOPHIA.commands.register`);
+   - pon su id en `MAIN` (76-main-panel), `RIBBON` (77-edit-panel) y/o `SHEET` (75-omnibox);
+   - traduce su etiqueta en los cinco `09-lang-xx`.
 
    Full, Mini y Hide se mantienen; Mini enseña todas las herramientas.
-6. **CSS por capas:**
-   - `tokens` → `app` (solo interfaz, clases `sx-*`);
-   - `paper.*` (solo el folio);
-   - `dialogs`;
+6. **CSS por módulo:**
+   - `tokens` (colores, radios, cristal; variables `--sx-*`);
+   - `paper.*` (solo el folio impreso);
+   - `ui/NN-nombre.css` (la interfaz del módulo NN, nunca el contenido del folio);
+   - `ui/98-studio-family.css` (aspecto común de todos los estudios);
    - `print`, que es siempre el último.
-
-   Usa los tokens `--sx-*`.
+6 bis. **Capas.** CORE → SAFETY → DOCUMENT → FEATURE → SHELL → BOOT. Nada por debajo de SHELL toca la interfaz: pide con `SOPHIA.ask.panel(nombre)` / `SOPHIA.ask.leaveFocus()`. Cualquier global nueva se declara en la ficha (EXPORTS). El lint lo comprueba.
+6 ter. **Idiomas de la interfaz.** El código se escribe en inglés. Cada idioma (es, fr, it, de, pt) es un diccionario `09-lang-xx` con las MISMAS claves; los textos con números usan plantillas `{n}` / `{x}`. Nunca se traduce el documento, el firmware ni el registro.
 7. **Guardado:**
    - copia nueva → recibo → verificación **byte a byte** → «Confirm saved»;
    - el guardado reconstruye el archivo desde las piezas originales.
@@ -46,17 +48,21 @@ Nunca mezcles los dos en el mismo cambio.
    - Publish & save suma +0.01;
    - Big Validation pasa al siguiente mayor con .00.
 
-   La versión de la app (V77…) es independiente.
+   - Versión base (decisión Q): solo antes de la primera publicación, con «Save draft ▾ › Set base version…» o la operación `setBaseVersion` de una propuesta.
+
+   La versión de la app (V77, V78, V79…) es independiente.
 9. **Sin red ni dependencias:**
    - nada de CDN, `fetch`, fuentes remotas ni `eval`;
    - ningún secreto nuevo en el HTML;
    - no copies ni muestres las claves PID.
 10. **PID = autoría declarada**, no identidad verificada. Las claves quedan como están (decisión E pendiente).
-11. **Prueba siempre:**
-    - `python3 sophia/build.py <doc.html> <out.html>`;
-    - `node sophia/tests/functional.cjs <out.html>`, que debe dar **ALL PASS**.
+11. **Prueba siempre, en este orden:**
+    - `python3 sophia/tools/lint.py` (también lo ejecuta el build; con errores no construye);
+    - `python3 sophia/build.py <doc.html> <out.html>` y `node sophia/tools/finalize.cjs <out.html> <final.html>`;
+    - `node sophia/tests/unit.cjs <final.html>` y `node sophia/tests/functional.cjs <final.html>`, que deben dar **ALL PASS**;
+    - si mueves o divides código: `node sophia/tools/snapshot.cjs` antes y después, y `--diff` debe decir **IDENTICAL**.
 
-    Añade una comprobación por cada herramienta nueva.
+    Añade una comprobación por cada herramienta nueva y mantén la ficha del módulo al día (`python3 sophia/tools/lint.py --map` regenera `sophia/MODULES.md`).
 
 Entrega con este formato:
 - archivos y módulos tocados;
@@ -84,7 +90,7 @@ Entrega con este formato:
 - **Nunca inventes**:
   - owner, clasificación o responsables;
   - fechas de validación o aprobaciones;
-  - versiones ni reglas.
+  - versiones ni reglas (una versión que te dé la persona va en `setBaseVersion`; ver `#sophia-agent-brief` §5: al crear sí, al editar un documento publicado nunca).
 
   Lo desconocido va como `<span class="tbc">TO BE CONFIRMED</span>`, y la pregunta concreta en un `aside.warning` «Confirmation required:».
 - Usa solo la gramática de `#sophia-agent-brief` §3. Sin estilos en línea, sin base64 y sin reutilizar `data-block-id`.

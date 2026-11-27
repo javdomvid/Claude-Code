@@ -109,3 +109,26 @@ Mismo formato de archivo (`sophia/77`). Fuente en `sophia/src`; módulos nuevos 
 Pendiente de decisión del responsable (explicado en la conversación): **Q**, **R**, **W**, **E** (claves PID: cómo añadir una persona o cambiar una clave de forma fácil y segura, y cómo debe hacerlo Copilot), **F** (huella de integridad de las revisiones). No implementar sin su decisión.
 
 Nota: el análisis de accesibilidad marca el contraste de `.source-note` en Quick Card (color #70828c heredado de V76). Es estilo del documento; no cambiarlo sin el responsable.
+
+## 7. V79 — salud del código, versión base y seis idiomas (27 nov 2026)
+Mismo formato de archivo (`sophia/77`). **Empieza por `sophia/ARCHITECTURE.md`.**
+
+### Qué cambia para quien toca el código
+| Antes (V78) | Ahora (V79) |
+|---|---|
+| `70-shell.js`, 1.200 líneas con toda la interfaz | 10 módulos con una tarea cada uno: `70-command-registry`, `71-ui-kit`, `72-command-list`, `73-view`, `74-appbar`, `75-omnibox`, `76-main-panel`, `77-edit-panel`, `78-side-panel`, `79-shell` |
+| `dialogs.css` (103 KB) + `app.css` (38 KB) | `styles/ui/NN-nombre.css`: una hoja por módulo, con el mismo número y nombre que su JS; en el HTML, un bloque `<style data-sophia="ui:NN-nombre">` por hoja |
+| Cabeceras libres | **Ficha de módulo** obligatoria: capa, PURPOSE, OWNS, EXPORTS, USES, EMITS/LISTENS, DOM, RULES, MAP, TESTS. `sophia/MODULES.md` se genera a partir de ellas |
+| Nada comprobaba la arquitectura | `tools/lint.py` (lo ejecuta el build): globales ocultas, regla de capas, eventos y comandos inexistentes, red, hojas sin módulo, diccionarios de idioma |
+| Módulos bajos que llamaban a la interfaz (`window.side`, `SOPHIA.ui`) | Piden con `SOPHIA.ask.panel(...)` / `SOPHIA.ask.leaveFocus()`; responde `79-shell` |
+| Plantillas HTML de hasta 3.700 caracteres en una línea | Cortadas en trozos legibles (el texto resultante es idéntico) |
+| `tests/v77-functional.cjs` (46) | `tests/functional.cjs` (48) + `tests/unit.cjs` (16) + `tools/snapshot.cjs` (42 estados de la interfaz, antes/después) |
+
+Toda la reorganización se verificó con `snapshot.cjs`: **idéntico** en los 42 estados, en SOP y Quick Card, antes de añadir funciones nuevas.
+
+### Decisiones aplicadas
+- **Q · Versión base.** «Save draft ▾ › Set base version…» y la operación `setBaseVersion` de las propuestas. Solo antes de la primera publicación; queda como evento `base-version` y se guarda con el siguiente «Save draft». El firmware del agente (§5) explica qué hace al **crear** (pone la versión que le diga la persona) y al **editar** (nunca toca la versión; recomienda Save draft / Publish / Big Validation).
+- **X · Idiomas.** Inglés por defecto + español, francés, italiano, alemán y portugués (menú en la barra). Un módulo-diccionario por idioma (`09-lang-xx`), todos con las mismas 424 claves; el lint avisa si falta alguna. Para Copilot no cambia nada al programar: escribe en inglés y añade la traducción en los cinco diccionarios.
+
+### Pendiente de decisión
+**W** (ensayo del flujo del agente con tu Copilot), **E** (claves PID), **F** (huella de integridad), **R** (nuevo documento desde plantilla) y **V4** (modo sugerencias). No implementar sin decisión.

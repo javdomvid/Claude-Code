@@ -1,4 +1,4 @@
-# SOPHIA V78 · Agent brief (firmware)
+# SOPHIA V79 · Agent brief (firmware)
 
 You are working on ONE self-contained SOPHIA file (an SOP or a Quick Card). It is an
 offline HTML document that carries its own editor. This brief is embedded in every
@@ -11,12 +11,12 @@ file (script `#sophia-agent-brief`). Read it before changing anything.
 | **Document agent** (writes or revises SOP / Quick Card content) | the DOCUMENT ZONE only, ideally through a **proposal** (section 6) | styles, modules, record, PID registry, docs |
 | **Developer agent** (improves the editor itself) | the source in `sophia/src` (one module per concern) and then rebuild | the document zone of a real document |
 
-The application version (SOPHIA V77, V78…) is NOT the document version (V1, V1.01, V2.00…).
+The application version (SOPHIA V77, V78, V79…) is NOT the document version (V1, V1.01, V2.00…).
 
 ## 2. File map (top to bottom)
 
-1. `<html lang="en" data-profile="sop|quick-card" data-sophia="V78">`
-2. `<head>`: `<style data-sophia="fonts|tokens|paper|dialogs|app|print">` — print is always last.
+1. `<html lang="en" data-profile="sop|quick-card" data-sophia="V79">`
+2. `<head>`: `<style data-sophia="fonts|tokens|paper|ui:NN-name…|print">` — print is always last.
 3. Comment marker `SOPHIA DOCUMENT ZONE` → **`<main id="document" class="workspace" data-sophia-zone="document">` … `</main>`** → comment marker `END DOCUMENT ZONE`.
 4. `<script type="application/json" id="record">` — revisions, events, comments, assets, versions. Written ONLY by the editor's save.
 5. `<script type="application/json" id="sophia-pid-registry">` — local PID keys (declared authorship, not security). Never copy or print these keys.

@@ -1,103 +1,104 @@
-# SOPHIA V78 · Developer contract (firmware for Copilot / GPT)
+# SOPHIA V79 · Developer contract (firmware for Copilot / GPT)
 
 Use this when you change the EDITOR (not a document). It is embedded in every file
 (`#sophia-ui-contract`) and lives in the repository as `sophia/src/docs/ui-contract.md`.
+Repository extras: `sophia/ARCHITECTURE.md` (full guide with recipes) and `sophia/MODULES.md`
+(module map generated from the module cards).
 
 ## 0. Golden rules
-1. **Edit modules in place.** One concern = one file in `sophia/src/engine` (or one CSS file in
-   `sophia/src/styles`). Never add "override" scripts or styles at the end of the file, never
-   monkey-patch another module, never add a second toolbar. If a module is wrong, fix that module.
-2. **Rebuild, then test.** `python3 sophia/build.py <document.html> <out.html>` and
-   `node sophia/tests/functional.cjs <out.html>` (must print ALL PASS) +
-   `node docs/sophia-audit/tests/sophia-regression.mjs <out.html>`.
-3. **Never touch the document zone of a real document** while improving the editor. Content changes
+1. **Edit modules in place.** One concern = one file `src/engine/NN-name.js`, its look in
+   `src/styles/ui/NN-name.css` (same number and name). Never add "override" scripts or styles,
+   never monkey-patch another module, never add a second toolbar. If a module is wrong, fix it.
+2. **Read the module card first.** Every module starts with a card: layer, PURPOSE, OWNS,
+   EXPORTS, USES, EMITS/LISTENS, DOM, RULES, MAP, TESTS. Keep it true when you change the module.
+3. **Layers.** CORE → SAFETY → DOCUMENT → FEATURE → SHELL → BOOT. Nothing below SHELL touches the
+   interface: it asks with `SOPHIA.ask.panel(name)` / `SOPHIA.ask.leaveFocus()`.
+4. **Safety net, in order:** `python3 sophia/tools/lint.py` (also run by build.py; errors stop the
+   build) → `python3 sophia/build.py <doc.html> <out.html>` → `node sophia/tools/finalize.cjs
+   <out.html> <final.html>` → `node sophia/tests/unit.cjs <final.html>` →
+   `node sophia/tests/functional.cjs <final.html>` (ALL PASS). When you move or split code:
+   `node sophia/tools/snapshot.cjs` before/after and `--diff` must say IDENTICAL.
+5. **Never touch the document zone of a real document** while improving the editor. Content changes
    are the document agent's job (see `#sophia-agent-brief`).
-4. Everything the interface creates carries `data-runtime` and lives outside `#document`.
-5. Every document mutation goes through `EditorTransactions.run(label, fn)` (one undo step,
+6. Everything the interface creates carries `data-runtime` and lives outside `#document`.
+7. Every document mutation goes through `EditorTransactions.run(label, fn)` (one undo step,
    rollback on error). Pure layout recalculation runs with `muted = true`.
-6. The print style (`style[data-sophia="print"]`) is the last style element. Ctrl+P → Print Studio.
-7. No network, no CDN, no `eval`, no external fonts or images. The file must work from `file://`.
-8. Write UI strings in English inside the modules. The Spanish interface comes from ONE dictionary
-   (`08-i18n.js`): add `"English text": "Texto"` there. Never translate the document, the firmware or
-   the record; mark containers that show document text with `translate="no"`.
-9. Inline code must never contain the literal closing-script sequence or an HTML comment opener —
-   write `'\x3c/script>'` instead (build.py refuses such files).
+8. `style[data-sophia="print"]` is the last style element. Ctrl+P → Print Studio.
+9. No network, no CDN, no `eval`, no external fonts or images. The file must work from `file://`.
+10. Interface texts are written in English in the modules. Translations live in ONE dictionary per
+    language (`09-lang-es/fr/it/de/pt`), all with the same keys (lint E8). Texts with numbers use
+    templates: `"Page {n}": "Página {n}"`. A missing translation shows English. Never translate the
+    document, the firmware or the record; containers showing document text get `translate="no"`.
+11. Inline code must never contain the literal closing-script sequence or an HTML comment opener —
+    write `'\x3c/script>'` instead (build.py refuses such files).
 
-## 1. File assembly (sophia/build.py and 50-persist serializeFile produce the same shape)
-head styles: fonts (DM Sans, OFL) · tokens · paper (profile sheet + paper.common) · dialogs · app · print
+## 1. File assembly (build.py and 50-persist serializeFile produce the same shape)
+head styles: `fonts` (DM Sans, OFL) · `tokens` · `paper` (profile sheet + paper.common) ·
+one `ui:NN-name` per module stylesheet (name order) · `print` (last).
 body: zone markers + `main#document[data-sophia-zone=document]` · `#record` · `#sophia-pid-registry` ·
 `script[data-sophia-doc]` (agent-brief, ui-contract, changelog) · `script[data-sophia-module]` in name order.
 The saved file is rebuilt from these pristine parts (a quine): what you put in a module is what
 every saved copy carries.
 
-## 2. Modules (load order) and what they own
-| Module | Owns | Public API |
-|---|---|---|
-| 00-core | namespace, strings, utils, sanitizers (`html`, `blocks`), bus, toasts, asset codec, record → `data`, `area`, versions | `SOPHIA.util/sanitize/bus/assets/versions`, `toast()`, `normalizeBody()` |
-| 05-editor | metadata by label, editable regions, clean/canonical content (merged sheets, page-independent), undo journal + caret, observer, `modal()`, views, paste routing, core shortcuts | `SOPHIA.meta`, `SOPHIA.canonical`, `setEditable`, `cleanContent`, `mergeSheets`, `repaginate`, `capture`, `stepUndo`, `modal`, `setDocumentView` |
-| 08-i18n | interface language EN/ES (dictionary + patterns, translates only runtime UI) | `SOPHIA.i18n.{set, tr, lang}` |
-| 10-session | PID session, dirty state, local recovery (sanitized), discard; `edit()` dialog | `EditorSession.{start,saved,discard,recover,changed,rebase,get,panel,subscribe}` |
-| 12-transactions | atomic mutation + undo + rollback | `EditorTransactions.run` |
-| 14-commands | selection memory, execCommand adapter, paragraph/table dialogs | `EditorCommands.*` |
-| 16-media | images: import, placement, size, Image Layout Studio, side panel | `EditorMedia.*` |
-| 20-ids | block IDs `b-` + 10 chars, repair duplicates | `SOPHIA.ids.{ensure,find,blocks,VALID}` |
-| 21-structure | block structure inspector | `BlockIdentity.open` |
-| 22-history | History Studio, compare engine | `openHistoryStudio(i)`, `historyCompare(a,b)`, `enrichHistory(r)` |
-| 24-find | find & replace in the side panel (Highlight API; replace one / all in one transaction) | `SOPHIA.find.open(q, replace?)`, `openDocumentFind`, `replaceDialog` |
-| 28-tables / 40-table-resize / 42-table-flow | Table Studio, column resize, Table Flow (QC) | `TableStudio.open`, `TableFlow.open` |
-| 30-layout-engine / 32-layout-studio | A4 pagination by whole blocks / layout rules | `LayoutEngine.{reflow,merge}`, `LayoutStudio.open` |
-| 34-library | image alt text & captions in batches | `ImageLibrary.open` |
-| 36-checks | advisory checks (also feeds the pre-publish checklist) | `DocumentReview.open` |
-| 38-print | Print Studio (iframe + CSP), controlled footer, DRAFT watermark | `PrintStudio42.open`, `SOPHIA.print` |
-| 50-persist | header trace row, zone serialization (one block per line), assets, verified-save receipt, Draft / Publish / Big Validation, migration, upgrade from file | `SOPHIA.persist`, `exportPID(mode)`, `downloadCurrentCopy()` |
-| 55-review | comments (record), TBC marks, pre-publish checklist | `SOPHIA.comments/tbc/checklist` |
-| 57-numbering | automatic heading numbers (`data-num` + CSS) | `SOPHIA.numbering` |
-| 58-blocks | move block, style gallery, table of contents | `SOPHIA.blocks` |
-| 60-compare-proposals | compare two revisions; agent proposals; document map | `SOPHIA.compare`, `SOPHIA.proposals` |
-| 64-table-tools | contextual Table tab operations, size-grid picker, decision table | `SOPHIA.tables` |
-| 62-docx | offline .docx import (DecompressionStream) / export (stored ZIP) | `SOPHIA.docx` |
-| 70-shell | app bar, commands omnibox (commands + document search), main panel and edit panel (each Full/Mini/Hide), View panel, side panel, menus, status | `SOPHIA.commands`, `SOPHIA.ui`, `side(name)`, `Workbench` |
-| 75-flow | selection bar, context menu, "/" menu, structured paste, changes card, shortcuts help | `SophiaFlow`, `SophiaPaste` |
-| 80-profile-qc | Quick Card information cards | `SOPHIA.qc` |
-| 99-boot | start-up order | — |
+## 2. Modules (load order)
+CORE · `00-core` namespace, utils, sanitizers, bus, `SOPHIA.ask`, toasts, assets, record `data`,
+`area`, versions · `05-editor` editable regions, undo, canonical content, `modal()`, views ·
+`08-i18n` language engine · `09-lang-xx` one dictionary per language.
+SAFETY · `10-session` PID session, dirty, recovery, discard · `12-transactions` `EditorTransactions.run`.
+DOCUMENT · `14-editor-commands` `EditorCommands` (text/paragraph commands; not the registry) ·
+`20-ids` block IDs · `30-layout-engine` A4 pagination · `57-numbering` heading numbers ·
+`58-blocks` move, established styles (`STYLES`), contents · `64-table-tools` Table tab
+operations · `80-profile-qc` Quick Card cards.
+FEATURE · `16-media` images · `21-structure` · `22-history` History Studio · `24-find` find &
+replace panel · `28-tables` Table Studio · `32-layout-studio` · `34-library` · `36-checks` ·
+`38-print` Print Studio · `40-table-resize` · `42-table-flow` · `50-persist` saving, receipt,
+serializer, migration, base version · `55-review` comments, TBC, checklist ·
+`60-compare-proposals` compare, agent proposals, document map · `62-docx` Word in/out.
+SHELL · `70-command-registry` `SOPHIA.commands` · `71-ui-kit` buttons, icons, menus, prefs ·
+`72-command-list` core commands · `73-view` zoom, focus, canvas, View panel · `74-appbar` ·
+`75-omnibox` (SHEET) · `76-main-panel` (MAIN) · `77-edit-panel` (RIBBON) · `78-side-panel`
+(PANELS) · `79-shell` mount, refresh, layout, keyboard, bus wiring, studio × (STUDIOS) ·
+`85-flow` selection bar, context and "/" menus, paste, changes card.
+BOOT · `99-boot` start-up order.
 
 Legacy globals kept on purpose (reused modules read them): `data`, `area`, `toast`, `normalizeBody`,
 `muted`, `observer`, `capture`, `cleanContent`, `setEditable`, `refreshOutline`, `selectedImage`,
 `localPIDKeys`, `setDocumentView`, `continuationTemplate`, `stepUndo`, `modal`, `pidSession`, `side`.
 
 ## 3. Events (`SOPHIA.bus`)
-`session` (EditorSession snapshot) · `transaction` (label, after a committed EditorTransactions.run) · `content-changed` · `outline-changed` · `view-changed` · `lang-changed` ·
-`record-changed` (after a confirmed save) · `comments-changed` · `commands-changed` · `ready`.
+`session` · `transaction` (label, after a committed change) · `content-changed` · `outline-changed` ·
+`view-changed` · `record-changed` (after a confirmed save) · `comments-changed` · `commands-changed` ·
+`lang-changed` · `ready` · `ask:panel` / `ask:leave-focus` (requests to the shell via `SOPHIA.ask`).
 
 ## 4. Adding a tool (the only correct way)
-1. Implement it in the module that owns the concern (or a new `NN-name.js` if it is a new concern).
-2. Register it: `SOPHIA.commands.register(id, 'Label', 'Group', run, needsEditing, { icon, keys, when, why, profile })`
-   (70-shell registers the core list; a module may register its own at load time).
-3. Place its id in 70-shell: `MAIN` (main panel tile), `RIBBON` (edit panel tab + group) and/or
-   `SHEET` (omnibox bento by area). Mini modes show every tool of their panel automatically;
-   Full shows labels (and, in the edit panel, the selected tab).
-4. Add a check to `sophia/tests/functional.cjs`.
+1. Implement it in the module that owns the concern (or a new `NN-name.js` with its card).
+2. Register it: `R(id, 'Label', 'Group', 'icon', run, editingOnly, { keys, when, why, profile })` in
+   `72-command-list`, or `SOPHIA.commands.register(...)` from its module at load time.
+3. Show it: id in `MAIN` (76-main-panel), `RIBBON` (77-edit-panel) and/or `SHEET` (75-omnibox).
+4. Translate its label in every `09-lang-xx`. 5. Add a check to `tests/functional.cjs`.
+A new studio window also joins the family: selector in `STUDIOS` (79-shell) and in
+`styles/ui/98-studio-family.css`; its own stylesheet `styles/ui/NN-name.css`.
 
 ## 5. Styles
-Studio windows share the «studio family» section at the end of `dialogs.css` (glass frame, tonal
-header, × close added by 70-shell, tonal buttons, filled primary). A new studio joins it by adding its
-class to that section and to `STUDIOS` in 70-shell.
-The style gallery offers only the established styles of each profile (`SOPHIA.blocks.STYLES`); do not
-add free styles or colours.
-
-`tokens.css` (all app colours, radii, shadows; `--sx-*`) · `app.css` (interface, `sx-*` classes,
-never selects page content) · `paper.sop.css` / `paper.qc.css` + `paper.common.css` (the printed
-page; also used by Print Studio and history snapshots) · `dialogs.css` (reused studios) · `print.css`.
-Obsidian JAOM roles: teal = primary action, lavender = selection, amber = attention/unsaved,
-red = error/historical, glass only for bars/menus/sheet, bento tiles in the command sheet.
+`tokens.css` (colours, radii, shadows, glass; `--sx-*`) · `paper.sop.css` / `paper.qc.css` +
+`paper.common.css` (the printed page; also Print Studio and History snapshots) · `ui/NN-name.css`
+(interface of module NN, never page content) · `ui/98-studio-family.css` (one look for every
+studio) · `print.css`. Obsidian JAOM roles: teal = primary action, lavender = selection,
+amber = attention/unsaved, red = error/historical, glass for bars/menus/panels, tonal tiles by area.
+The style gallery offers only `SOPHIA.blocks.STYLES` of each profile: no free styles or colours.
 
 ## 6. Data
 Record (`#record`, format `sophia/77`): `id`, `status`, `documentVersion`, `revisions[]`
 (`version`, `draft`, `date`, `editorPID`, `mode`, `status`, `reason`, `engine`, `snapshot`),
-`events[]`, `comments[]` (`id`, `blockId`, `excerpt`, `pid`, `date`, `text`, `resolved`, `replies`),
-`settings.autoNumber`, `assets{KEY: dataURI}` (images stored once; snapshots use `sophia-asset:KEY`).
+`events[]` (session-start, proposal-applied, base-version, …), `comments[]`, `settings.autoNumber`,
+`assets{KEY: dataURI}` (images stored once; snapshots use `sophia-asset:KEY`).
 Never edit `#record` by hand; the save path writes it.
+Versions: Save draft keeps the number · Publish & save +0.01 · Big Validation next major .00 ·
+base version (`SOPHIA.persist.setBaseVersion`) only before the first publish.
 
 ## 7. Pending decisions (do not implement without the owner)
-- E: PID keys are a local convenience lock (visible in the file). Real authentication later.
-- F (integrity hash of revisions) — later version.
+- E: PID keys are a local convenience lock (visible in the file). How keys are stored, added
+  and changed is still to be decided.
+- F: integrity fingerprint of revisions (detect edits made outside SOPHIA).
+- W: rehearsal of the agent flow with the owner's Copilot (document map → proposal → apply).
+- V4 (suggestion mode / track changes) and R (new document from template) not decided.
