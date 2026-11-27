@@ -9,7 +9,7 @@
  *          targets()}
  * USES     SOPHIA.{ids, numbering, bus, util}, EditorTransactions, EditorCommands, area, modal,
  *          muted, observer, toast
- * LISTENS  content-changed, outline-changed, ready
+ * LISTENS  content-changed, outline-changed, transaction, view-changed, session, ready
  * DOM      inside the document: <a class="xref" data-xref="b-…" data-xref-format="full|num"
  *          href="#b-…">3.2 Create the order</a>
  * RULES    - The link text is DERIVED: never edit it by hand (the next update rewrites it);
@@ -17,6 +17,8 @@
  *          - Targets are headings (h2–h4) only. Formats: "full" (number + title, default),
  *            "num" (number only; the title when numbering is off).
  *          - Updates run muted (not an edit, not an undo step).
+ *          - Typing with the caret inside a reference writes AFTER it (before it when the
+ *            caret is at its start): the derived text is never edited by accident.
  *          - Look: paper.common.css (a.xref, .xref-broken); prints as plain text.
  * TESTS    tests/functional.cjs (cross-reference: insert, renumber, broken)
  * ========================================================================== */
@@ -81,6 +83,12 @@ SOPHIA.xref = (() => {
       a.href = '#' + targetId;
       a.textContent = textFor(h, a.dataset.xrefFormat);
       range.deleteContents();
+      /* "owner.3.2 …" reads badly: put a space before the reference when the text runs into it */
+      const prev = range.startContainer.nodeType === 3 ? range.startContainer.nodeValue.slice(0, range.startOffset) : '';
+      if (prev && !/[\s\u00a0(«“"]$/.test(prev)) {
+        range.insertNode(document.createTextNode(' '));
+        range.collapse(false);
+      }
       range.insertNode(a);
       const r = document.createRange();
       r.setStartAfter(a);
@@ -110,6 +118,26 @@ SOPHIA.xref = (() => {
     sel.setAttribute('translate', 'no');
     for (const t of list) sel.append(new Option(' '.repeat(t.level - 2) + t.label, t.id));
   }
+  /* Typing inside a reference: the characters go after it (or before it at its start). */
+  area.addEventListener('beforeinput', (e) => {
+    if (!/^insert(Text|ReplacementText)$/.test(e.inputType) || !e.data) return;
+    const s = getSelection();
+    if (!s.rangeCount || !s.isCollapsed) return;
+    const a = U.nodeOf(s.anchorNode)?.closest?.('a.xref[data-xref]');
+    if (!a || !area.contains(a)) return;
+    e.preventDefault();
+    const atStart = s.anchorOffset === 0 && (s.anchorNode === a || s.anchorNode === a.firstChild);
+    let t = atStart ? a.previousSibling : a.nextSibling;
+    if (!t || t.nodeType !== 3) { t = document.createTextNode(''); atStart ? a.before(t) : a.after(t); }
+    const at = atStart ? t.length : 0;
+    t.insertData(at, e.data);
+    const r = document.createRange();
+    r.setStart(t, at + e.data.length);
+    r.collapse(true);
+    s.removeAllRanges();
+    s.addRange(r);
+    area.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: e.inputType, data: e.data }));
+  });
   /* Reading: a click on a reference goes to its heading (the page has no element ids). */
   area.addEventListener('click', (e) => {
     const a = e.target.closest?.('a.xref[data-xref]');
@@ -121,6 +149,9 @@ SOPHIA.xref = (() => {
   const soon = () => { clearTimeout(timer); timer = setTimeout(update, 200); };
   SOPHIA.bus.on('content-changed', soon);
   SOPHIA.bus.on('outline-changed', soon);
+  SOPHIA.bus.on('transaction', soon);
+  SOPHIA.bus.on('view-changed', soon);
+  SOPHIA.bus.on('session', soon);
   SOPHIA.bus.on('ready', update);
   return { insert, insertAt, update, broken, targets };
 })();

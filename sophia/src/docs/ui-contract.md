@@ -1,4 +1,4 @@
-# SOPHIA V79 · Developer contract (firmware for Copilot / GPT)
+# SOPHIA V80 · Developer contract (firmware for Copilot / GPT)
 
 Use this when you change the EDITOR (not a document). It is embedded in every file
 (`#sophia-ui-contract`) and lives in the repository as `sophia/src/docs/ui-contract.md`.
@@ -16,8 +16,9 @@ Repository extras: `sophia/ARCHITECTURE.md` (full guide with recipes) and `sophi
 4. **Safety net, in order:** `python3 sophia/tools/lint.py` (also run by build.py; errors stop the
    build) → `python3 sophia/build.py <doc.html> <out.html>` → `node sophia/tools/finalize.cjs
    <out.html> <final.html>` → `node sophia/tests/unit.cjs <final.html>` →
-   `node sophia/tests/functional.cjs <final.html>` (ALL PASS). When you move or split code:
-   `node sophia/tools/snapshot.cjs` before/after and `--diff` must say IDENTICAL.
+   `node sophia/tests/functional.cjs <final.html>` (ALL PASS). All of it on the fictional samples
+   in one command: `bash sophia/tools/check.sh` (also run by GitHub on every change). When you
+   move or split code: `node sophia/tools/snapshot.cjs` before/after and `--diff` must say IDENTICAL.
 5. **Never touch the document zone of a real document** while improving the editor. Content changes
    are the document agent's job (see `#sophia-agent-brief`).
 6. Everything the interface creates carries `data-runtime` and lives outside `#document`.
@@ -47,10 +48,11 @@ CORE · `00-core` namespace, utils, sanitizers, bus, `SOPHIA.ask`, toasts, asset
 SAFETY · `10-session` PID session, dirty, recovery, discard · `12-transactions` `EditorTransactions.run`.
 DOCUMENT · `14-editor-commands` `EditorCommands` (text/paragraph commands; not the registry) ·
 `20-ids` block IDs · `30-layout-engine` A4 pagination · `57-numbering` heading numbers ·
-`58-blocks` move, established styles (`STYLES`), contents · `64-table-tools` Table tab
+`58-blocks` move, established styles (`STYLES`), contents · `59-xref` cross-references ·
+`64-table-tools` Table tab
 operations · `80-profile-qc` Quick Card cards.
 FEATURE · `16-media` images · `21-structure` · `22-history` History Studio · `24-find` find &
-replace panel · `28-tables` Table Studio · `32-layout-studio` · `34-library` · `36-checks` ·
+replace panel · `28-tables` Table Studio · `32-layout-studio` · `34-library` · `36-checks` · `37-writing` writing checks ·
 `38-print` Print Studio · `40-table-resize` · `42-table-flow` · `50-persist` saving, receipt,
 serializer, migration, base version · `55-review` comments, TBC, checklist ·
 `60-compare-proposals` compare, agent proposals, document map · `62-docx` Word in/out.

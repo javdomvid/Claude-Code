@@ -1,4 +1,4 @@
-# SOPHIA V79 — source
+# SOPHIA V80 — source
 
 The SOPHIA single-file editors (SOP and Quick Card) built from readable source.
 No patch layers: every concern is one module in `src/engine` (with its look in
@@ -6,7 +6,8 @@ No patch layers: every concern is one module in `src/engine` (with its look in
 them plus a document's content.
 
 > Real documents (with corporate content, logos and PID keys) are **not** stored here.
-> This folder holds only the engine, styles, fonts, docs, build, tools and tests.
+> This folder holds only the engine, styles, fonts, docs, build, tools, tests and two
+> **fictional** sample documents (`samples/`, demo PID that is not a secret).
 
 **Start here:** [`ARCHITECTURE.md`](ARCHITECTURE.md) (layers, how a change flows, safety net,
 recipes) · [`MODULES.md`](MODULES.md) (module map, generated from the module cards).
@@ -22,32 +23,44 @@ sophia/
                            offline rules, stylesheets, language dictionaries); build stops on errors
   tools/snapshot.cjs       records 42 interface states and diffs two builds (use when moving code)
   tools/finalize.cjs       opens a build headless and writes it already upgraded (Migration revision)
-  tests/unit.cjs           16 fast checks of the pure rules (versions, sanitizer, IDs, languages…)
-  tests/functional.cjs     48 end-to-end checks (Chromium): panels, editing, undo, comments, TBC,
-                           studios, proposals, save/verify/reopen, versions, base version,
-                           languages, .docx, print
+  tools/check.sh           the whole safety net on the fictional samples in one command (also CI)
+  tools/validate-proposal.cjs  checks an agent proposal against a document (schema + editor checks)
+  tests/unit.cjs           19 fast checks of the pure rules (versions, sanitizer, IDs, languages,
+                           writing checks…)
+  tests/functional.cjs     49 end-to-end checks (Chromium): panels, editing, undo, comments, TBC,
+                           studios, cross-references, proposals, save/verify/reopen, versions,
+                           base version, languages, .docx, print
+  tests/performance.cjs    long-document budgets (open, pagination, re-flow, refill, save)
+  samples/                 FICTIONAL SOP and Quick Card (Example Labs; demo PID, not a secret),
+                           make_samples.py, make_long.py (~40-page document for performance)
+  agent-kit/               for Copilot: request template, valid/invalid example proposals
+  package.json             pins Playwright for CI (local runs can use a global Playwright)
   src/
     engine/NN-name.js      modules in load order; each starts with its module card
     styles/                tokens · paper.sop / paper.qc + paper.common · print
     styles/ui/NN-name.css  the interface of module NN (98-studio-family = shared studio look)
     fonts/                 DM Sans variable (Latin) woff2 + OFL licence (embedded by build.py)
     docs/                  agent-brief.md (document agent firmware) · ui-contract.md (developer
-                           firmware) · changelog.md — all three are embedded in every file
+                           firmware) · changelog.md · proposal-schema.json — all embedded in every file
 ```
 
 ## Commands
 
 ```bash
+# Everything at once on the fictional samples (what GitHub runs)
+bash sophia/tools/check.sh            # add --quick to skip the functional and performance tests
+
 # Architecture check (also runs inside build.py)
 python3 sophia/tools/lint.py            # add --map to regenerate MODULES.md
 
-# Build from any SOPHIA document (V74–V79; SOP or Quick Card), then deliver it upgraded
+# Build from any SOPHIA document (V74–V80; SOP or Quick Card), then deliver it upgraded
 python3 sophia/build.py <document.html> <out.html>
 node sophia/tools/finalize.cjs <out.html> <final.html>
 
 # Test (Node 18+, Playwright with Chromium); exit code 1 on any FAIL
 node sophia/tests/unit.cjs <final.html>
 node sophia/tests/functional.cjs <final.html> [outDir]
+node sophia/tools/validate-proposal.cjs <final.html> <proposal.json>
 
 # When you move or split code: the interface must stay identical
 node sophia/tools/snapshot.cjs <before.html> before.json

@@ -132,3 +132,16 @@ Toda la reorganización se verificó con `snapshot.cjs`: **idéntico** en los 42
 
 ### Pendiente de decisión
 **W** (ensayo del flujo del agente con tu Copilot), **E** (claves PID), **F** (huella de integridad), **R** (nuevo documento desde plantilla) y **V4** (modo sugerencias). No implementar sin decisión.
+
+## 8. V80 — pruebas sin documentos reales, kit del agente, redacción, referencias cruzadas y documentos largos (27 nov 2026)
+Mismo formato de archivo (`sophia/77`).
+
+| Punto | Qué hay ahora |
+|---|---|
+| **1 · Documentos de ejemplo y pruebas automáticas** | `sophia/samples`: un SOP y una Quick Card **ficticios** («Example Labs», PID de demostración `DEMO`, que no es secreto). `bash sophia/tools/check.sh` pasa todo (lint, build, unitarias, propuestas de ejemplo, funcionales, rendimiento) y GitHub lo ejecuta solo en cada cambio de `sophia/` (`.github/workflows/sophia-checks.yml`). |
+| **2 · Kit de propuestas para Copilot** | `sophia/agent-kit`: plantilla de petición, 7 ejemplos de SOP y 3 de Quick Card (válidos e inválidos). Esquema JSON `sophia.proposal/1` dentro de cada archivo (`#sophia-proposal-schema`). `tools/validate-proposal.cjs` dice si una propuesta se puede aplicar y qué marcado quitaría el editor; usa las mismas comprobaciones que «Apply agent proposal…». |
+| **4 · Comprobaciones de redacción** | Módulo `37-writing`: pasos con varias acciones, etiquetas de la interfaz entre comillas, secciones vacías, títulos repetidos, frases muy largas, niveles de título saltados, numeración escrita a mano. Solo avisan (Comprobaciones y panel lateral); nunca bloquean la publicación. |
+| **5 · Referencias cruzadas** | Módulo `59-xref`: «Insertar › Referencia cruzada…». El texto («3.2 Create the order») sigue al título solo; si se borra la sección, se avisa antes de publicar. El agente puede escribir `<a class="xref" data-xref="b-…"></a>`. |
+| **7 · Documentos largos** | Tras borrar, las páginas medio vacías se rellenan solas (igual que ya se repaginaba al desbordar). Medido con un documento ficticio de 41 páginas y 41 imágenes: repaginar 61 ms; repaginación 1,3 s después de dejar de escribir; preparar el guardado 11 ms (`tests/performance.cjs`). |
+
+Pendiente de decisión del responsable: **W**, **E**, **F**, **R**, **V4** y los puntos **3** (historial de revisiones dentro del documento), **6** (anotar capturas) y **8** (seguir limpiando: CSS del Historial, módulo de imágenes, nombres de clase antiguos).

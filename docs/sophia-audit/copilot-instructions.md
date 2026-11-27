@@ -60,7 +60,8 @@ Nunca mezcles los dos en el mismo cambio.
     - `python3 sophia/tools/lint.py` (también lo ejecuta el build; con errores no construye);
     - `python3 sophia/build.py <doc.html> <out.html>` y `node sophia/tools/finalize.cjs <out.html> <final.html>`;
     - `node sophia/tests/unit.cjs <final.html>` y `node sophia/tests/functional.cjs <final.html>`, que deben dar **ALL PASS**;
-    - si mueves o divides código: `node sophia/tools/snapshot.cjs` antes y después, y `--diff` debe decir **IDENTICAL**.
+    - si mueves o divides código: `node sophia/tools/snapshot.cjs` antes y después, y `--diff` debe decir **IDENTICAL**;
+    - o todo de una vez sobre los documentos ficticios: `bash sophia/tools/check.sh` (lo mismo que ejecuta GitHub en cada cambio).
 
     Añade una comprobación por cada herramienta nueva y mantén la ficha del módulo al día (`python3 sophia/tools/lint.py --map` regenera `sophia/MODULES.md`).
 
@@ -94,4 +95,5 @@ Entrega con este formato:
 
   Lo desconocido va como `<span class="tbc">TO BE CONFIRMED</span>`, y la pregunta concreta en un `aside.warning` «Confirmation required:».
 - Usa solo la gramática de `#sophia-agent-brief` §3. Sin estilos en línea, sin base64 y sin reutilizar `data-block-id`.
-- Entrega una propuesta `sophia.proposal/1` con `expectedText`, basada en el «document map» exportado desde el editor.
+- Entrega una propuesta `sophia.proposal/1` con `expectedText`, basada en el «document map» exportado desde el editor. El contrato exacto va en cada archivo (`#sophia-proposal-schema`); la plantilla de petición y ejemplos válidos e inválidos están en `sophia/agent-kit`.
+- Para remitir a otro apartado usa una referencia cruzada `<a class="xref" data-xref="b-…"></a>` (el editor escribe y actualiza el texto), nunca «ver 3.2» escrito a mano.

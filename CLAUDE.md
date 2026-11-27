@@ -10,7 +10,7 @@ The SOPHIA HTML documents themselves (V74 base, V75–V78 deliveries) are **deli
 
 ## Layout
 
-- `sophia/` — **V79 source** (current): start with `sophia/ARCHITECTURE.md` (layers, change flow, safety net, recipes) and `sophia/MODULES.md` (generated module map). `build.py` (runs `tools/lint.py`, then source + any V74–V79 document → single HTML), `tools/lint.py` (architecture check; `--map` regenerates MODULES.md), `tools/snapshot.cjs` (interface before/after diff), `tools/finalize.cjs` (deliver already upgraded), `tests/unit.cjs` (16 checks), `tests/functional.cjs` (48 Chromium checks), `src/engine/NN-*.js` (modules in load order, each with a module card; layers CORE → SAFETY → DOCUMENT → FEATURE → SHELL → BOOT), `src/styles/` (tokens · paper.sop/qc + paper.common · print) and `src/styles/ui/NN-name.css` (one stylesheet per module), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
+- `sophia/` — **V80 source** (current): start with `sophia/ARCHITECTURE.md` (layers, change flow, safety net, recipes) and `sophia/MODULES.md` (generated module map). `build.py` (runs `tools/lint.py`, then source + any V74–V79 document → single HTML), `tools/lint.py` (architecture check; `--map` regenerates MODULES.md), `tools/snapshot.cjs` (interface before/after diff), `tools/finalize.cjs` (deliver already upgraded), `tools/check.sh` (whole safety net on the fictional samples; also the GitHub workflow `.github/workflows/sophia-checks.yml`), `tools/validate-proposal.cjs`, `tests/unit.cjs` (19 checks), `tests/functional.cjs` (49 Chromium checks), `tests/performance.cjs` (long-document budgets), `samples/` (fictional SOP + Quick Card with a demo PID — the only SOPHIA documents allowed in the repo; `make_long.py` for ~40 pages), `agent-kit/` (Copilot proposal kit), `src/engine/NN-*.js` (modules in load order, each with a module card; layers CORE → SAFETY → DOCUMENT → FEATURE → SHELL → BOOT), `src/styles/` (tokens · paper.sop/qc + paper.common · print) and `src/styles/ui/NN-name.css` (one stylesheet per module), `src/fonts/` (DM Sans, OFL), `src/docs/` (agent-brief = document-agent firmware, ui-contract = developer firmware, changelog; embedded in every built file)
 - `docs/sophia-audit/` — audit of SOPHIA V74 and the V75 hand-off (Spanish):
   - `01_INFORME_AUDITORIA.md` findings by severity, with V75 status
   - `02_ARQUITECTURA_OBJETIVO.md` target architecture (engine + data, block model, integrity, agent proposals)
@@ -24,12 +24,15 @@ The SOPHIA HTML documents themselves (V74 base, V75–V78 deliveries) are **deli
 ## Commands
 
 ```bash
-# V79: architecture check, build from any SOPHIA document, finalize (already upgraded), then test
+# V80: everything on the fictional samples (what CI runs)
+bash sophia/tools/check.sh                                   # --quick skips functional + performance
+
+# architecture check, build from any SOPHIA document, finalize (already upgraded), then test
 python3 sophia/tools/lint.py                                # also runs inside build.py; --map regenerates MODULES.md
 python3 sophia/build.py <document.html> <out.html>
 node sophia/tools/finalize.cjs <out.html> <final.html>
-node sophia/tests/unit.cjs <final.html>                     # 16 fast checks
-node sophia/tests/functional.cjs <final.html> [outDir]      # 48 checks, exit 1 on any FAIL
+node sophia/tests/unit.cjs <final.html>                     # 19 fast checks
+node sophia/tests/functional.cjs <final.html> [outDir]      # 49 checks, exit 1 on any FAIL
 node sophia/tools/snapshot.cjs <built.html> <out.json>      # when moving code: snapshot before/after,
 node sophia/tools/snapshot.cjs --diff before.json after.json  # must print IDENTICAL
 

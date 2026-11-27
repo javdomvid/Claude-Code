@@ -36,8 +36,8 @@ Modules load in file-name order. The number also tells the layer:
 |---|---|---|
 | **CORE** | `00-core`, `05-editor`, `08-i18n`, `09-lang-*` | namespace, utilities, sanitizers, bus, record, versions; editing surface, undo, views; interface languages |
 | **SAFETY** | `10-session`, `12-transactions` | who edits, dirty state, recovery; atomic changes with rollback |
-| **DOCUMENT** | `14-editor-commands`, `20-ids`, `30-layout-engine`, `57-numbering`, `58-blocks`, `64-table-tools`, `80-profile-qc` | operations on the document itself |
-| **FEATURE** | `16-media`, `21-structure`, `22-history`, `24-find`, `28-tables`, `32-layout-studio`, `34-library`, `36-checks`, `38-print`, `40-table-resize`, `42-table-flow`, `50-persist`, `55-review`, `60-compare-proposals`, `62-docx` | studios and services (each owns its window and its stylesheet) |
+| **DOCUMENT** | `14-editor-commands`, `20-ids`, `30-layout-engine`, `57-numbering`, `58-blocks`, `59-xref`, `64-table-tools`, `80-profile-qc` | operations on the document itself |
+| **FEATURE** | `16-media`, `21-structure`, `22-history`, `24-find`, `28-tables`, `32-layout-studio`, `34-library`, `36-checks`, `37-writing`, `38-print`, `40-table-resize`, `42-table-flow`, `50-persist`, `55-review`, `60-compare-proposals`, `62-docx` | studios and services (each owns its window and its stylesheet) |
 | **SHELL** | `70-command-registry` … `79-shell`, `85-flow` | the interface: commands, app bar, panels, omnibox, menus |
 | **BOOT** | `99-boot` | start-up order only |
 
@@ -114,11 +114,25 @@ Start-up: `99-boot` — migrate older files, numbering, header, view → `SOPHIA
 | the printed page | `styles/paper.sop.css` / `paper.qc.css` / `paper.common.css` |
 | colours, radii, glass | `styles/tokens.css` |
 | version rules | `SOPHIA.versions` in `00-core` (+ `setBaseVersion` in `50-persist`) |
-| what the document may contain | `SOPHIA.sanitize.blocks` in `00-core` + `src/docs/agent-brief.md` §3 |
+| what the document may contain | `SOPHIA.sanitize.blocks` in `00-core` + `src/docs/agent-brief.md` §3 + `src/docs/proposal-schema.json` |
+| agent proposals (kit, examples, validator) | `sophia/agent-kit`, `tools/validate-proposal.cjs`, `60-compare-proposals` |
+| writing checks | `37-writing` |
+| cross-references | `59-xref` (+ `paper.common.css` for the look) |
+| test documents | `sophia/samples` (fictional; `make_samples.py`, `make_long.py`) |
 | interface languages | `08-i18n` (engine) + `09-lang-xx` (one dictionary per language) |
 | the styles a profile offers | `SOPHIA.blocks.STYLES` in `58-blocks` |
 
 ## 5. The safety net — run these, in this order
+
+**One command for everything**, on the fictional documents in `sophia/samples` (no real document
+needed; GitHub runs the same on every change to `sophia/` — `.github/workflows/sophia-checks.yml`):
+
+```bash
+bash sophia/tools/check.sh          # lint, build, unit, agent-kit proposals, functional, performance
+bash sophia/tools/check.sh --quick  # lint, build, unit, proposals (about 30 s)
+```
+
+Step by step:
 
 | Step | Command | Catches |
 |---|---|---|
@@ -126,9 +140,11 @@ Start-up: `99-boot` — migrate older files, numbering, header, view → `SOPHIA
 | 2. Build | `python3 sophia/build.py <document.html> <out.html>` then `node sophia/tools/finalize.cjs <out.html> <final.html>` | broken assembly, forbidden text in modules |
 | 3. Unit checks | `node sophia/tests/unit.cjs <final.html>` (5 s) | versions, sanitizer, IDs, numbering, commands, languages |
 | 4. Functional test | `node sophia/tests/functional.cjs <final.html>` (2 min) | the whole editor: edit, undo, panels, studios, save, reopen, publish, print, .docx |
-| 5. Snapshot (when you MOVE code or CSS) | `node sophia/tools/snapshot.cjs before.html before.json` · same for after · `node sophia/tools/snapshot.cjs --diff before.json after.json` | any visual or textual change in 42 interface states (styles, sizes, labels) |
+| 5. Performance | `python3 sophia/samples/make_long.py long.html` · build it · `node sophia/tests/performance.cjs <long-built.html>` | slow pagination, re-flow or saving in a ~40-page document |
+| 6. Proposal examples | `node sophia/tools/validate-proposal.cjs <doc.html> <proposal.json>` | agent proposals that would be refused |
+| 7. Snapshot (when you MOVE code or CSS) | `node sophia/tools/snapshot.cjs before.html before.json` · same for after · `node sophia/tools/snapshot.cjs --diff before.json after.json` | any visual or textual change in 42 interface states (styles, sizes, labels) |
 
-A refactor (split, rename, move) must give **IDENTICAL** in step 5. A feature change must show
+A refactor (split, rename, move) must give **IDENTICAL** in step 7. A feature change must show
 only the differences you intended.
 
 ## 6. Recipes
@@ -160,6 +176,15 @@ only the differences you intended.
 - New language: copy `09-lang-es.js` to `09-lang-xx.js`, change the code and name, translate
   the values; add the code to `ORDER` in `08-i18n` for its place in the menu.
 - Containers that show document text get `translate="no"`.
+
+### Add a writing check
+One entry in `RULES` in `37-writing` (`id`, English `title`, `test(ctx)` returning `{ node, detail }`),
+its translation in every `09-lang-xx`, and an example in `tests/unit.cjs` that makes it fire.
+
+### Change what an agent may write
+`SOPHIA.sanitize.blocks` (00-core) decides what survives; keep `src/docs/agent-brief.md` §3,
+`src/docs/proposal-schema.json` and the examples in `sophia/agent-kit` in step, then run
+`bash sophia/tools/check.sh --quick` (it validates every example).
 
 ### Add a bus event
 Emit it with `SOPHIA.bus.emit('name', detail)` and list it in the module card (`EMITS`);

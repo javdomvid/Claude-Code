@@ -1,5 +1,24 @@
 # SOPHIA changelog
 
+## V80 (2026-11-27) — tests that run anywhere, agent kit, writing checks, cross-references, long documents
+Same file format (`sophia/77`).
+- **Fictional sample documents** (`sophia/samples`: an SOP and a Quick Card for "Example Labs",
+  demo PID that is not a secret) so every test runs without real documents; **one command**
+  `bash sophia/tools/check.sh` (lint, build, unit, agent-kit proposals, functional, performance)
+  and a **GitHub workflow** that runs it on every change to `sophia/`.
+- **Agent kit** (`sophia/agent-kit`): request template for Copilot, valid and invalid example
+  proposals, JSON Schema `sophia.proposal/1` embedded in every file (`#sophia-proposal-schema`),
+  `tools/validate-proposal.cjs` and `SOPHIA.proposals.validate()` (same checks as the editor).
+- **Writing checks** (`37-writing`): several actions in one step, interface labels in quotes,
+  empty sections, repeated headings, very long sentences, skipped heading levels, typed
+  numbering. Advisory: Document checks + side panel, never blocking.
+- **Cross-references** (`59-xref`): *Insert › Cross-reference…* to a heading; the text
+  ("3.2 Create the order") follows numbers and titles by itself; a reference to a deleted
+  section is flagged before publishing; agents may write `a.xref`.
+- **Long documents**: after deleting, half-empty pages are refilled automatically (as overflow
+  already was). Measured on a fictional 41-page document with 41 images: full pagination 61 ms,
+  re-flow 1.3 s after typing stops, save preparation 11 ms (`tests/performance.cjs`).
+
 ## V79 (2026-11-27) — code health, base version, six interface languages
 Same file format (`sophia/77`); documents saved with V77/V78 open unchanged.
 - **Compartmentalized source.** The 1,200-line shell became ten modules (command registry,
