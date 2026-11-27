@@ -131,7 +131,11 @@
   R('showMarks', 'Show paragraph marks', 'Review', 'marks', () => { document.body.classList.toggle('showmarks'); SOPHIA.ui.refresh(); }, false, { pressed: () => document.body.classList.contains('showmarks') });
   R('shortcuts', 'Keyboard shortcuts', 'Help', 'keyboard', () => SophiaFlow.openHelp(), false, { keys: 'F1' });
   R('about', 'About this file', 'Help', 'info', about);
-  R('language', 'Interface language: English / Español', 'View', 'lang', () => SOPHIA.i18n.set(SOPHIA.i18n.lang === 'es' ? 'en' : 'es'));
+  /* interface languages (owner decision X): one command per registered language; the
+     app-bar button opens them as a menu. Language names are shown in their own language. */
+  R('language', 'Interface language…', 'View', 'lang', () => SOPHIA.ui.appbar.languageMenu());
+  for (const [code, L] of Object.entries(SOPHIA.i18n.LANGS))
+    C.register('lang_' + code, L.name, 'Language', () => SOPHIA.i18n.set(code), false, { icon: 'lang', pressed: () => SOPHIA.i18n.lang === code });
 
   /* ---------- small actions ---------- */
   async function pastePlain() {

@@ -5,7 +5,8 @@
  *          (with its popover) · [omnibox slot] · History · Edit | Save draft ▾ ·
  *          Focus · View · Canvas · Language · Main panel · Sidebar · Edit panel.
  * OWNS     SOPHIA.ui.appbar and the elements above (not the omnibox: 75-omnibox).
- * EXPORTS  SOPHIA.ui.appbar.{el, ident, actions, refresh(session), statusPopover()}
+ * EXPORTS  SOPHIA.ui.appbar.{el, ident, actions, refresh(session), statusPopover(),
+ *          languageMenu()}
  * USES     SOPHIA.ui.kit, SOPHIA.commands, SOPHIA.{meta, versions, comments, tbc, stats,
  *          strings, i18n, migration}, EditorSession, data (record), side(),
  *          SOPHIA.ui.{view, mainPanel, editPanel} (late)
@@ -61,12 +62,15 @@ SOPHIA.ui.appbar = (() => {
   viewBtn.setAttribute('aria-haspopup', 'dialog');
   viewBtn.onclick = () => SOPHIA.ui.view.panel(viewBtn);
   const canvasBtn = button('canvas', { short: 'Canvas', cls: 'sx-btn-text' });
-  /* interface language (owner decision X): shows the language you switch TO */
+  /* interface language (owner decision X): shows the current language; click → menu */
   const langBtn = U.el('button', 'sx-btn sx-btn-text sx-lang');
   langBtn.type = 'button';
   langBtn.dataset.cmd = 'language';
   langBtn.setAttribute('translate', 'no');
-  langBtn.onclick = () => { C.run('language'); refreshSoon(); };
+  langBtn.setAttribute('aria-haspopup', 'menu');
+  langBtn.onclick = () => languageMenu();
+  /** Menu of the interface languages (English + every 09-lang-xx module). */
+  function languageMenu() { menu(langBtn, SOPHIA.i18n.codes().map((code) => 'lang_' + code)); }
   const sep = U.el('span', 'sx-sep');
   sep.setAttribute('aria-hidden', 'true');
   const mainBtn = U.el('button', 'sx-btn sx-btn-tonal sx-panel-toggle');
@@ -147,11 +151,10 @@ SOPHIA.ui.appbar = (() => {
     viewBtn.replaceChildren(icon(cont ? 'continuous' : 'a4'), U.el('span', 'sx-label', 'View: ' + (cont ? 'Continuous' : 'A4 pages')));
     viewBtn.title = 'Document layout: A4 pages, Continuous, zoom, Layout Studio';
     canvasBtn.querySelector('.sx-label').textContent = 'Canvas: ' + (document.body.hasAttribute('data-jaom-light') ? 'Light' : 'Dark');
-    const es = SOPHIA.i18n.lang === 'es';
-    langBtn.replaceChildren(icon('lang'), U.el('span', 'sx-label', es ? 'EN' : 'ES'));
-    langBtn.title = es ? 'Interface in English' : 'Interfaz en español';
-    langBtn.setAttribute('aria-label', langBtn.title);
+    langBtn.replaceChildren(icon('lang'), U.el('span', 'sx-label', SOPHIA.i18n.lang.toUpperCase()));
+    langBtn.title = 'Interface language';
+    langBtn.setAttribute('aria-label', 'Interface language');
   }
 
-  return { el: bar, ident, actions, refresh, statusPopover };
+  return { el: bar, ident, actions, refresh, statusPopover, languageMenu };
 })();

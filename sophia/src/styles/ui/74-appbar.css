@@ -85,8 +85,8 @@
   body.editing .sx-actions :is([data-cmd="viewPanel"], [data-cmd="sidebar"], [data-cmd="language"]) .sx-label { display: none; }
   body.editing .sx-actions .sx-panel-toggle .sx-label { font-size: 0; }
   body.editing .sx-actions .sx-panel-toggle .sx-label::after { content: attr(data-short); font-size: 12px; }
-  html[data-ui-lang="es"] .sx-actions .sx-panel-toggle .sx-label { font-size: 0; }
-  html[data-ui-lang="es"] .sx-actions .sx-panel-toggle .sx-label::after { content: attr(data-short); font-size: 12px; }
+  html:not([data-ui-lang="en"]) .sx-actions .sx-panel-toggle .sx-label { font-size: 0; }
+  html:not([data-ui-lang="en"]) .sx-actions .sx-panel-toggle .sx-label::after { content: attr(data-short); font-size: 12px; }
 }
 @media (max-width: 1500px) {
   .sx-actions :is([data-cmd="history"], [data-cmd="focus"], [data-cmd="canvas"]) .sx-label { display: none; }

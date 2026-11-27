@@ -84,15 +84,23 @@ async function save(p, mode, reason, verify = true) {
   await p.keyboard.press('Escape');
   ok(vp.length === 2 && vp.includes('true'), 'View panel with A4 / Continuous cards', vp);
 
-  // interface language (X): Spanish shell, document untouched, back to English
+  // interface languages (X): menu with English + 5 languages; shell translated, document untouched
   const canon0 = await p.evaluate(() => SOPHIA.canonical());
   await p.click('.sx-appbar [data-cmd=language]');
+  await p.waitForTimeout(150);
+  const langMenu = await p.evaluate(() => [...document.querySelectorAll('.sx-menu [role=menuitemcheckbox]')].map((b) => b.textContent.trim()));
+  await p.click('.sx-menu .sx-menu-item:nth-child(2)');
   await p.waitForTimeout(200);
-  const es = await p.evaluate(() => ({ edit: document.querySelector('.sx-appbar [data-cmd=edit] .sx-label').textContent, lang: document.documentElement.dataset.uiLang, same: SOPHIA.canonical() }));
+  const es = await p.evaluate(() => ({ edit: document.querySelector('.sx-appbar [data-cmd=edit] .sx-label').textContent, lang: document.documentElement.dataset.uiLang, same: SOPHIA.canonical(), foot: document.querySelector('.sx-side .sx-foot')?.textContent || '' }));
+  const all = await p.evaluate(() => Object.fromEntries(['fr', 'it', 'de', 'pt', 'es'].map((c) => { SOPHIA.i18n.set(c); return [c, document.querySelector('.sx-appbar [data-cmd=edit] .sx-label').textContent]; })));
   await p.click('.sx-appbar [data-cmd=language]');
+  await p.waitForTimeout(150);
+  await p.click('.sx-menu .sx-menu-item:nth-child(1)');
   await p.waitForTimeout(200);
   const en = await p.evaluate(() => document.querySelector('.sx-appbar [data-cmd=edit] .sx-label').textContent);
-  ok(es.lang === 'es' && es.edit === 'Modo edición' && es.same === canon0 && en === 'Edit mode', 'interface language EN ↔ ES (document untouched)', { es: es.edit, en });
+  ok(langMenu.join('|') === 'English|Español|Français|Italiano|Deutsch|Português' && es.lang === 'es' && es.edit === 'Modo edición' && (!es.foot || /palabras/.test(es.foot)) && es.same === canon0 &&
+    all.fr === 'Mode édition' && all.it === 'Modalità modifica' && all.de === 'Bearbeitungsmodus' && all.pt === 'Modo de edição' && en === 'Edit mode',
+    'interface languages EN · ES · FR · IT · DE · PT (document untouched)', { langMenu, es: es.edit, foot: es.foot, all, en });
 
   const pid = await startEditing(p);
   ok(await p.evaluate(() => document.querySelector('.sx-main').dataset.mode === 'mini'), 'entering edit mode switches the main panel to Mini');
