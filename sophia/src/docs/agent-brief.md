@@ -20,7 +20,7 @@ The application version (SOPHIA V77, V78, V79…) is NOT the document version (V
 3. Comment marker `SOPHIA DOCUMENT ZONE` → **`<main id="document" class="workspace" data-sophia-zone="document">` … `</main>`** → comment marker `END DOCUMENT ZONE`.
 4. `<script type="application/json" id="record">` — revisions, events, comments, assets, versions. Written ONLY by the editor's save.
 5. `<script type="application/json" id="sophia-pid-registry">` — local PID keys (declared authorship, not security). Never copy or print these keys.
-6. `<script type="text/plain" data-sophia-doc="…">` — this brief, the UI contract, the changelog.
+6. `<script type="text/plain" data-sophia-doc="…">` — this brief, the UI contract, the changelog, the proposal schema.
 7. `<script data-sophia-module="NN-name">` — the engine, in load order.
 
 Nothing else exists. The interface is drawn at start-up and is never saved.
@@ -126,6 +126,9 @@ recorded as event `proposal-applied`). Get the current block IDs and text from
 ```
 Operations: `replaceBlock`, `insertAfter`, `deleteBlock`, `updateMeta`, `setBaseVersion` (see §5;
 refused once the document was published; applied after the content operations).
+The exact JSON contract is embedded in this file as `#sophia-proposal-schema` (JSON Schema).
+Repository: `sophia/agent-kit` (request template, valid and invalid examples) and
+`sophia/tools/validate-proposal.cjs` (checks a proposal against a document without changing it).
 Rules: `expectedText` / `expectedValue` must equal the current text (whitespace-normalised),
 otherwise the operation is refused; `html` passes the document-grammar sanitizer (only the blocks, classes and attributes of section 3 survive);
 a `replaceBlock` keeps the target's ID on its first element; a proposal for another

@@ -1,0 +1,15 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-QC-2026-11-27-b",
+  "documentId": "SAMPLE-QC",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Add the receiving cards",
+  "operations": [
+    {
+      "op": "insertAfter",
+      "targetBlockId": "b-qcdelivtb1",
+      "html": "<div class=\"cards\"><section><h3>Check the delivery</h3><p>Compare the delivery note with your order.</p></section><section><h3>Missing items</h3><p>Report them in <b>My orders</b>.</p></section></div>"
+    }
+  ]
+}

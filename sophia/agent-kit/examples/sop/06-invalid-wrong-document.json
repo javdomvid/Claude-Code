@@ -1,0 +1,15 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "OTHER-DOC-2026-11-27-a",
+  "documentId": "OTHER-DOC",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Proposal made for another document",
+  "operations": [
+    {
+      "op": "deleteBlock",
+      "targetBlockId": "b-reviewpa01",
+      "expectedText": "Report errors in this instruction to the document owner."
+    }
+  ]
+}

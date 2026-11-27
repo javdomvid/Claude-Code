@@ -1,0 +1,16 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-SOP-2026-11-27-c",
+  "documentId": "SAMPLE-SOP",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Add the missing receiving step",
+  "operations": [
+    {
+      "op": "insertAfter",
+      "targetBlockId": "b-delivertb1",
+      "html": "<h3>Receive the delivery</h3><ol><li>Check the delivery note against your order.</li><li>Report missing items in <b>My orders</b> within <span class=\"tbc\">TO BE CONFIRMED</span> working days.</li></ol>",
+      "reason": "The procedure ended before the delivery was checked"
+    }
+  ]
+}

@@ -164,7 +164,8 @@ def build(input_path, output_path):
             fail(f"style {name} contains '</style'")
     docs = [("agent-brief", "sophia-agent-brief", "docs/agent-brief.md"),
             ("ui-contract", "sophia-ui-contract", "docs/ui-contract.md"),
-            ("changelog", "sophia-changelog", "docs/changelog.md")]
+            ("changelog", "sophia-changelog", "docs/changelog.md"),
+            ("proposal-schema", "sophia-proposal-schema", "docs/proposal-schema.json")]
     modules = sorted((SRC / "engine").glob("*.js"))
     label = "Quick Card" if profile == "quick-card" else "SOP"
     parts = [

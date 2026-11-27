@@ -1,0 +1,18 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-SOP-2026-11-27-a",
+  "documentId": "SAMPLE-SOP",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Make the order step clearer",
+  "operations": [
+    {
+      "op": "replaceBlock",
+      "targetBlockId": "b-orderpa001",
+      "expectedText": "Select New order, search the item by its catalogue number and enter the quantity in Quantity.",
+      "html": "<p>Select <b>New order</b>, type the catalogue number in <b>Search</b> and enter the number of units in <b>Quantity</b>.</p>",
+      "reason": "Name the search field and the unit",
+      "source": "SupplyDesk user guide p. 3"
+    }
+  ]
+}

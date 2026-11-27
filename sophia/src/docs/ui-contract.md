@@ -36,7 +36,7 @@ Repository extras: `sophia/ARCHITECTURE.md` (full guide with recipes) and `sophi
 head styles: `fonts` (DM Sans, OFL) · `tokens` · `paper` (profile sheet + paper.common) ·
 one `ui:NN-name` per module stylesheet (name order) · `print` (last).
 body: zone markers + `main#document[data-sophia-zone=document]` · `#record` · `#sophia-pid-registry` ·
-`script[data-sophia-doc]` (agent-brief, ui-contract, changelog) · `script[data-sophia-module]` in name order.
+`script[data-sophia-doc]` (agent-brief, ui-contract, changelog, proposal-schema) · `script[data-sophia-module]` in name order.
 The saved file is rebuilt from these pristine parts (a quine): what you put in a module is what
 every saved copy carries.
 

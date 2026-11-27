@@ -1,0 +1,16 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-SOP-2026-11-27-e",
+  "documentId": "SAMPLE-SOP",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Replace a block whose text changed since the map was exported",
+  "operations": [
+    {
+      "op": "replaceBlock",
+      "targetBlockId": "b-scopetext1",
+      "expectedText": "Describe how to order chemicals.",
+      "html": "<p>New scope text.</p>"
+    }
+  ]
+}

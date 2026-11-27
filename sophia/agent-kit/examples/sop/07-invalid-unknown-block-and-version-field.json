@@ -1,0 +1,20 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-SOP-2026-11-27-f",
+  "documentId": "SAMPLE-SOP",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Two mistakes: invented block ID and a field the editor writes itself",
+  "operations": [
+    {
+      "op": "deleteBlock",
+      "targetBlockId": "b-zzzzzzzzzz",
+      "expectedText": "Something"
+    },
+    {
+      "op": "updateMeta",
+      "field": "Document Version",
+      "value": "V2"
+    }
+  ]
+}

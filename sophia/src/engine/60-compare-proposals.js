@@ -6,7 +6,8 @@
  *          accepted/rejected one by one, applied in ONE transaction, recorded as an event.
  *          Also "Export document map" (block IDs + text for the agent).
  * OWNS     SOPHIA.compare, SOPHIA.proposals (style: styles/ui/60-compare-proposals.css).
- * EXPORTS  SOPHIA.compare {open}, SOPHIA.proposals {open, apply, validate, exportMap}
+ * EXPORTS  SOPHIA.compare {open}, SOPHIA.proposals {open, validate(proposal), check, documentMap,
+ *          exportMap}
  * USES     SOPHIA.{ids, meta, sanitize, versions, persist, recordDirty, lastProposal}, historyCompare,
  *          EditorSession, EditorTransactions, cleanContent, data, modal, toast
  * RULES    - Proposal schema: sophia.proposal/1 (see the agent brief §6). expectedText /
@@ -115,6 +116,21 @@ SOPHIA.proposals = (() => {
     res.target = target;
     return res;
   }
+  /** Check a whole proposal without changing anything. Used by "Apply agent proposal…" and by
+      tools/validate-proposal.cjs (agent kit).
+      → { error: '' | why it cannot be applied at all, warnings: [], operations: [check()…] } */
+  function validate(proposal) {
+    const out = { error: '', warnings: [], operations: [] };
+    if (!proposal || typeof proposal !== 'object' || Array.isArray(proposal)) { out.error = 'This is not a proposal object.'; return out; }
+    if (proposal.schema !== 'sophia.proposal/1') out.warnings.push('"schema" should be "sophia.proposal/1"');
+    if (!Array.isArray(proposal.operations) || !proposal.operations.length) { out.error = 'The proposal has no "operations" list.'; return out; }
+    if (proposal.documentId && proposal.documentId !== data.id) { out.error = 'Wrong document: the proposal was made for ' + proposal.documentId + ', this is ' + data.id + '.'; return out; }
+    if (!proposal.documentId) out.warnings.push('no "documentId": cannot check it is the right document');
+    if (proposal.baseDocumentVersion && String(proposal.baseDocumentVersion).replace(/^v/i, '') !== data.documentVersion)
+      out.warnings.push('based on V' + String(proposal.baseDocumentVersion).replace(/^v/i, '') + ', current is V' + data.documentVersion);
+    out.operations = proposal.operations.map((op) => check(proposal, op && typeof op === 'object' ? op : { op: String(op) }));
+    return out;
+  }
   function open() {
     if (!U.isEditing()) { toast('Start editing to review and apply a proposal.'); return; }
     if (U.dialogOpen()) { toast(SOPHIA.strings.finishDialogFirst); return; }
@@ -130,13 +146,11 @@ SOPHIA.proposals = (() => {
       err('');
       v.querySelector('[data-ops]').replaceChildren();
       try { proposal = JSON.parse(text); } catch { proposal = null; err('This is not valid JSON.'); return; }
-      if (!proposal || !Array.isArray(proposal.operations)) { err('The proposal has no "operations" list.'); return; }
-      const warn = [];
-      if (proposal.documentId && proposal.documentId !== data.id) warn.push('made for document ' + proposal.documentId + ', this is ' + data.id);
-      if (proposal.baseDocumentVersion && String(proposal.baseDocumentVersion) !== data.documentVersion) warn.push('based on V' + proposal.baseDocumentVersion + ', current is V' + data.documentVersion);
-      v.querySelector('[data-head]').textContent = (proposal.proposalId || 'Proposal') + ' · ' + (proposal.author || 'unknown author') + ' · ' + (proposal.intent || '') + (warn.length ? ' · ⚠ ' + warn.join('; ') : '');
-      if (proposal.documentId && proposal.documentId !== data.id) { err('Wrong document: the proposal cannot be applied here.'); return; }
-      checked = proposal.operations.map((op) => check(proposal, op));
+      const res = validate(proposal);
+      v.querySelector('[data-head]').textContent = (proposal?.proposalId || 'Proposal') + ' · ' + (proposal?.author || 'unknown author') + ' · ' +
+        (proposal?.intent || '') + (res.warnings.length ? ' · ⚠ ' + res.warnings.join('; ') : '');
+      if (res.error) { err(res.error); proposal = null; return; }
+      checked = res.operations;
       checked.forEach((c, i) => {
         const li = U.el('li', c.ok ? '' : 'is-invalid');
         const box = document.createElement('input');
@@ -191,5 +205,5 @@ SOPHIA.proposals = (() => {
       toast(chosen.length + ' operation(s) applied. Review the result, then save.' + (base ? baseNote : ' Ctrl+Z undoes them.'), { ms: base ? 7000 : undefined });
     }
   }
-  return { open, documentMap, exportMap, check };
+  return { open, validate, documentMap, exportMap, check };
 })();

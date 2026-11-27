@@ -1,0 +1,17 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-QC-2026-11-27-a",
+  "documentId": "SAMPLE-QC",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Confirm the frozen items rule",
+  "operations": [
+    {
+      "op": "replaceBlock",
+      "targetBlockId": "b-qccardtx04",
+      "expectedText": "Friday ordering rule to be confirmed.",
+      "html": "<p>Order frozen items from Monday to Thursday only. <span class=\"tbc\">TO BE CONFIRMED</span></p>",
+      "reason": "Rule received from Purchasing, waiting for written confirmation"
+    }
+  ]
+}

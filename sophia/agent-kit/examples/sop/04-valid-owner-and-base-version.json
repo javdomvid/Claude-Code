@@ -1,0 +1,22 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-SOP-2026-11-27-d",
+  "documentId": "SAMPLE-SOP",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Owner given by the person; this instruction was V3 in the quality system",
+  "operations": [
+    {
+      "op": "updateMeta",
+      "field": "Document Owner",
+      "expectedValue": "TO BE CONFIRMED",
+      "value": "Laboratory Operations Lead",
+      "reason": "Given by the person"
+    },
+    {
+      "op": "setBaseVersion",
+      "value": "3",
+      "reason": "The person said this instruction is V3 in the quality system"
+    }
+  ]
+}

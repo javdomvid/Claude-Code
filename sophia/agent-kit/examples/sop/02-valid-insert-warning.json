@@ -1,0 +1,17 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-SOP-2026-11-27-b",
+  "documentId": "SAMPLE-SOP",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "Add a safety warning to the scope",
+  "operations": [
+    {
+      "op": "insertAfter",
+      "targetBlockId": "b-scopetext1",
+      "html": "<aside class=\"warning\"><b>Warning:</b> Hazardous items are never delivered to a desk or to a home address.</aside>",
+      "reason": "Safety rule from the guide",
+      "source": "SupplyDesk user guide p. 7"
+    }
+  ]
+}

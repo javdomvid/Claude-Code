@@ -1,0 +1,15 @@
+{
+  "schema": "sophia.proposal/1",
+  "proposalId": "SAMPLE-SOP-2026-11-27-x",
+  "documentId": "SAMPLE-SOP",
+  "baseDocumentVersion": "1",
+  "author": "SOPHIA agent (Copilot)",
+  "intent": "A SOP proposal sent to the Quick Card",
+  "operations": [
+    {
+      "op": "deleteBlock",
+      "targetBlockId": "b-qcreport01",
+      "expectedText": "Report errors to the document owner."
+    }
+  ]
+}
