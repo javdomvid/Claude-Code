@@ -2,10 +2,11 @@
  * SOPHIA · 30-layout-engine                            layer: DOCUMENT
  * ----------------------------------------------------------------------------
  * PURPOSE  A4 pagination: moves WHOLE blocks between sheets so nothing is split, honours
- *          page-break rules (data-layout-before / data-layout-keep), detects overflow and
- *          re-flows automatically while typing (caret kept).
+ *          page-break rules (data-layout-before / data-layout-keep) and re-flows by itself
+ *          when typing pauses (caret kept): when a page overflows, and when deleting leaves
+ *          room on a page for the first block of the next one.
  * OWNS     LayoutEngine; body.sx-measuring while measuring.
- * EXPORTS  LayoutEngine {reflow, merge, calculate, autoReflow, overflowing}
+ * EXPORTS  LayoutEngine {reflow, merge, calculate, autoReflow, overflowing, underfull}
  * USES     SOPHIA.{meta, bus}, area, continuationTemplate, muted, observer, refreshOutline,
  *          setEditable, toast, EditorCommands, EditorMedia
  * LISTENS  transaction
@@ -334,10 +335,44 @@ window.LayoutEngine = (() => {
       document.body.classList.remove("sx-measuring");
     }
   }
+  /** True when a page (not the last) has room for the first block of the next page — after
+      deleting text — so pulling blocks back would close the gap. Blocks that must start a new
+      page (data-layout-before="page") are left alone. */
+  function underfull() {
+    document.body.classList.add("sx-measuring");
+    try {
+      const list = pages(area);
+      for (let i = 0; i < list.length - 1; i++) {
+        const pc = direct(list[i], ".pagecontent"), foot = direct(list[i], ".pagefoot");
+        const next = direct(list[i + 1], ".pagecontent")?.firstElementChild;
+        if (!pc || !foot || !next || next.dataset.layoutBefore === "page") continue;
+        const last = pc.lastElementChild;
+        const used = last ? last.getBoundingClientRect().bottom + parseFloat(getComputedStyle(last).marginBottom || 0) : pc.getBoundingClientRect().top;
+        /* the footer sits either at the bottom of the sheet (flex) or right after the content:
+           the free room is the gap above it or the gap below it, whichever exists */
+        const cs = getComputedStyle(list[i]), fr = foot.getBoundingClientRect();
+        const below = list[i].getBoundingClientRect().bottom - parseFloat(cs.paddingBottom || 0) - parseFloat(cs.borderBottomWidth || 0) - fr.bottom;
+        const free = Math.max(fr.top - parseFloat(getComputedStyle(foot).marginTop || 0) - used, below);
+        /* the paginator moves GROUPS: a heading (or a "keep with next" block) travels with
+           what follows it, so the room needed is the height of that whole group */
+        const outer = (n) => { const c = getComputedStyle(n); return n.getBoundingClientRect().height + parseFloat(c.marginTop || 0) + parseFloat(c.marginBottom || 0); };
+        let need = 0;
+        for (let n = next; n; n = n.nextElementSibling) {
+          need += outer(n);
+          const keep = n.dataset.layoutKeep === "next" || (n.dataset.layoutKeep !== "none" && heading(n));
+          if (!keep || n.nextElementSibling?.dataset.layoutBefore === "page") break;
+        }
+        if (free > need + 8) return true;
+      }
+      return false;
+    } finally {
+      document.body.classList.remove("sx-measuring");
+    }
+  }
   let composing = false, autoTimer = 0;
   function autoReflow() {
     if (!document.body.classList.contains("editing") || document.body.classList.contains("continuous-view")) return;
-    if (composing || document.querySelector("dialog[open]") || !overflowing()) return;
+    if (composing || document.querySelector("dialog[open]") || !(overflowing() || underfull())) return;
     const m = caretMark(), oldMuted = muted;
     muted = true;
     try {
@@ -357,5 +392,5 @@ window.LayoutEngine = (() => {
   area.addEventListener("compositionend", () => { composing = false; scheduleAuto(); });
   area.addEventListener("input", scheduleAuto);
   SOPHIA.bus.on("transaction", scheduleAuto); /* not "session": recovery writes would keep postponing it */
-  return Object.freeze({ calculate, reflow, merge, elements, signature, autoReflow, overflowing });
+  return Object.freeze({ calculate, reflow, merge, elements, signature, autoReflow, overflowing, underfull });
 })();

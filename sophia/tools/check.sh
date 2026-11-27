@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SOPHIA · run the whole safety net on the FICTIONAL sample documents.
 #
-#   bash sophia/tools/check.sh            lint + build + finalize + unit + functional (+ proposals)
+#   bash sophia/tools/check.sh            lint + build + finalize + unit + proposals + functional + performance
 #   bash sophia/tools/check.sh --quick    lint + build + finalize + unit only (about 30 s)
 #
 # Needs Python 3 and Node 18+ with Playwright (Chromium). Outputs go to a temporary folder
@@ -38,6 +38,13 @@ for doc in sop quick-card; do
     grep -E '^(FAIL|ALL PASS|[0-9]+ FAIL)' "$OUT/functional-$doc.log" || true
   fi
 done
+
+if [ "$QUICK" != "--quick" ]; then
+  step "performance · fictional long document (~40 A4 pages)"
+  python3 sophia/samples/make_long.py "$OUT/long-src.html" --repeat 40 | sed -n 1p
+  python3 sophia/build.py "$OUT/long-src.html" "$OUT/long.html" | sed -n '$p'
+  node sophia/tests/performance.cjs "$OUT/long.html" || fail=1
+fi
 
 step "result"
 if [ "$fail" = 0 ]; then echo "ALL CHECKS PASSED · outputs in $OUT"; else echo "SOME CHECKS FAILED · outputs in $OUT"; exit 1; fi
