@@ -1,0 +1,13 @@
+{
+  "name": "sophia-tools",
+  "private": true,
+  "description": "Test tooling for the SOPHIA single-file editors (Playwright + Chromium). Not part of the built files.",
+  "scripts": {
+    "check": "bash tools/check.sh",
+    "check:quick": "bash tools/check.sh --quick",
+    "lint": "python3 tools/lint.py"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
