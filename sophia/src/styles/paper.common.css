@@ -60,3 +60,7 @@
   body.editing #document [contenteditable="true"]:hover { outline-color: #c6d3e3; }
   body.editing #document [contenteditable="true"]:focus { outline: 1px solid #b9a6e3; }
 }
+/* cross-references (59-xref): read like text, quiet dotted underline on screen, plain in print */
+.pagecontent a.xref { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; cursor: pointer; }
+@media screen { .pagecontent a.xref.xref-broken { background: #ffe3e8; border-bottom-color: #c0394f; } }
+@media print { .pagecontent a.xref { border-bottom: 0; } }

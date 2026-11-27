@@ -449,5 +449,19 @@ SOPHIA.i18n.add('fr', 'Français', /*DICT*/{
   "Typed numbering or bullet: use a list": "Numérotation ou puce tapée : utilisez une liste",
   "Writing": "Rédaction",
   "Next": "Suivant",
-  "{n} words": "{n} mots"
+  "{n} words": "{n} mots",
+  "Cross-reference…": "Renvoi…",
+  "Cross-ref.": "Renvoi",
+  "Insert cross-reference": "Insérer un renvoi",
+  "Refer to": "Renvoyer à",
+  "Show": "Afficher",
+  "Number and title": "Numéro et titre",
+  "Number only": "Numéro seul",
+  "The text follows the heading: it changes by itself when numbers or titles change.": "Le texte suit le titre : il change tout seul quand les numéros ou les titres changent.",
+  "Cross-reference inserted.": "Renvoi inséré.",
+  "Cross-reference to a missing section": "Renvoi vers une section disparue",
+  "{n} cross-reference(s) to a section that no longer exists.": "{n} renvoi(s) vers une section qui n’existe plus.",
+  "This reference points to a section that no longer exists.": "Ce renvoi pointe vers une section qui n’existe plus.",
+  "Place the cursor in a paragraph, list or table first.": "Placez d’abord le curseur dans un paragraphe, une liste ou un tableau.",
+  "The document has no headings to refer to.": "Le document n’a pas de titres à référencer."
 }/*END*/);

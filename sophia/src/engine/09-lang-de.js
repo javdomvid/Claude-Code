@@ -449,5 +449,19 @@ SOPHIA.i18n.add('de', 'Deutsch', /*DICT*/{
   "Typed numbering or bullet: use a list": "Getippte Nummer oder Aufzählungszeichen: Liste verwenden",
   "Writing": "Schreibstil",
   "Next": "Weiter",
-  "{n} words": "{n} Wörter"
+  "{n} words": "{n} Wörter",
+  "Cross-reference…": "Querverweis…",
+  "Cross-ref.": "Querverweis",
+  "Insert cross-reference": "Querverweis einfügen",
+  "Refer to": "Verweis auf",
+  "Show": "Anzeigen",
+  "Number and title": "Nummer und Titel",
+  "Number only": "Nur Nummer",
+  "The text follows the heading: it changes by itself when numbers or titles change.": "Der Text folgt der Überschrift: Er ändert sich von selbst, wenn sich Nummern oder Titel ändern.",
+  "Cross-reference inserted.": "Querverweis eingefügt.",
+  "Cross-reference to a missing section": "Querverweis auf einen fehlenden Abschnitt",
+  "{n} cross-reference(s) to a section that no longer exists.": "{n} Querverweis(e) auf nicht mehr vorhandene Abschnitte.",
+  "This reference points to a section that no longer exists.": "Dieser Verweis zeigt auf einen Abschnitt, den es nicht mehr gibt.",
+  "Place the cursor in a paragraph, list or table first.": "Setzen Sie den Cursor zuerst in einen Absatz, eine Liste oder eine Tabelle.",
+  "The document has no headings to refer to.": "Das Dokument hat keine Überschriften für einen Verweis."
 }/*END*/);

@@ -163,6 +163,29 @@ async function save(p, mode, reason, verify = true) {
   ok(mv.afterDown === mv.before + 1 && mv.back === mv.before, 'move block down/up', mv);
   const toc = await p.evaluate(() => { const h = document.querySelector('#document .pagecontent h2'); const r = document.createRange(); r.selectNodeContents(h); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r); SOPHIA.blocks.insertToc(); const nav = document.querySelector('nav[data-sophia-toc]'); return { items: nav?.querySelectorAll('li').length, first: nav?.querySelector('li')?.textContent, nums: [...document.querySelectorAll('#document [data-num]')].length }; });
   ok(toc.items > 0 && toc.nums > 0, 'table of contents + automatic numbers', toc);
+  // cross-reference (59-xref): insert, follows a renamed heading, flags a missing target
+  const xr = await p.evaluate(async () => {
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const h = [...document.querySelectorAll('#document .pagecontent h3, #document .pagecontent h2')].pop();
+    const para = document.querySelector('#document .pagecontent > p:not(.source-note)');
+    const r = document.createRange(); r.selectNodeContents(para); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r);
+    EditorCommands.remember();
+    const inserted = SOPHIA.xref.insertAt(h.dataset.blockId, 'full');
+    const a = para.querySelector('a.xref');
+    const first = a?.textContent, expect1 = SOPHIA.numbering.label(h);
+    EditorTransactions.run('rename heading', () => h.append(' XR'));
+    SOPHIA.bus.emit('content-changed');
+    await wait(450);
+    const renamed = a?.textContent;
+    EditorTransactions.run('rename heading back', () => { h.lastChild.nodeValue = h.lastChild.nodeValue.replace(/ XR$/, ''); });
+    muted = true; a.dataset.xref = 'b-zzzzzzzzzz'; muted = false;
+    SOPHIA.xref.update();
+    const broken = a.classList.contains('xref-broken') && SOPHIA.checklist.collect().some((i) => /cross-reference/.test(i.text));
+    muted = true; a.dataset.xref = h.dataset.blockId; muted = false;
+    SOPHIA.xref.update();
+    return { inserted, first, expect1, renamed, broken, fixed: !a.classList.contains('xref-broken'), clean: SOPHIA.canonical().includes('XREF') };
+  });
+  ok(xr.inserted && xr.first === xr.expect1 && /XR$/.test(xr.renamed) && xr.broken && xr.fixed && xr.clean, 'cross-reference: inserted, follows the heading, missing target flagged', xr);
 
   // style gallery (profile styles only)
   await p.click('.sx-ribbon .sx-tab >> nth=0');

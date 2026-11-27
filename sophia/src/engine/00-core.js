@@ -135,7 +135,13 @@ SOPHIA.sanitize = (() => {
       if (tag === 'ASIDE') el.className = 'warning';
       else if (cls.length) el.className = cls.join(' ');
       if (tag === 'SPAN') el.title = 'To Be Confirmed';
-      if (tag === 'A') {
+      if (tag === 'A' && /^b-[a-z0-9]{10}$/.test(node.getAttribute('data-xref') || '')) {
+        /* cross-reference to a heading (59-xref); its text is rewritten by the editor */
+        el.className = 'xref';
+        el.dataset.xref = node.getAttribute('data-xref');
+        el.dataset.xrefFormat = node.getAttribute('data-xref-format') === 'num' ? 'num' : 'full';
+        el.setAttribute('href', '#' + el.dataset.xref);
+      } else if (tag === 'A') {
         const href = (node.getAttribute('href') || '').trim();
         if (!/^(https?:|mailto:)/i.test(href)) { node.childNodes.forEach((c) => copy(c, parent)); return; }
         el.href = href;

@@ -38,7 +38,7 @@ SOPHIA.ui.editPanel = (() => {
     { tab: 'Insert', groups: [
       { name: 'Objects', items: ['insertTable', 'insertImage', 'insertLink', 'slashMenu'] },
       { name: 'Blocks', items: ['calloutWarning', 'calloutConfirm', 'insertHr', 'pageBreak', 'insertCard', 'cardPending', 'decisionTable'] },
-      { name: 'Generated', items: ['insertToc', 'insertDate', 'symbols'] },
+      { name: 'Generated', items: ['insertToc', 'insertXref', 'insertDate', 'symbols'] },
       { name: 'Bring in', items: ['importDocx', 'applyProposal'] }
     ] },
     { tab: 'Layout', groups: [
@@ -73,7 +73,7 @@ SOPHIA.ui.editPanel = (() => {
     clearFormat: 'Clear', paragraphSettings: 'Paragraph', insertTable: 'Table', insertImage: 'Image',
     insertLink: 'Link', slashMenu: 'Blocks /', calloutWarning: 'Warning', calloutConfirm: 'Confirm',
     insertHr: 'Line', pageBreak: 'Page break', insertCard: 'Card', cardPending: 'Pending',
-    insertToc: 'Contents', insertDate: 'Date', symbols: 'Symbol', importDocx: 'Word .docx',
+    insertToc: 'Contents', insertXref: 'Cross-ref.', insertDate: 'Date', symbols: 'Symbol', importDocx: 'Word .docx',
     applyProposal: 'Proposal', viewA4: 'A4', viewContinuous: 'Continuous', zoomFit: 'Fit',
     zoomOut: 'Zoom −', zoomIn: 'Zoom +', reflow: 'Reflow', layoutStudio: 'Layout', autoNumber: 'Auto 1.2',
     moveUp: 'Up', moveDown: 'Down', tableStudio: 'Table Studio', tableFlow: 'Table Flow',

@@ -5,7 +5,7 @@
  *          without alt text, oversized blocks, structure… Also feeds the pre-publish checklist.
  * OWNS     DocumentReview; dialog.review-workspace-v22 (style: styles/ui/36-checks.css).
  * EXPORTS  DocumentReview {open, collect}
- * USES     SOPHIA.{blocks, ids, writing}, EditorSession, area, data, toast
+ * USES     SOPHIA.{blocks, ids, writing, xref}, EditorSession, area, data, toast
  * RULES    Read-only: checks never change the document.
  * TESTS    tools/snapshot.cjs studio-checks
  * ========================================================================== */
@@ -92,6 +92,7 @@ window.DocumentReview = (() => {
     area.querySelectorAll(".pagecontent table:not(.identity) td, .pagecontent table:not(.identity) th").forEach((n) => {
       if (!n.textContent.trim() && !n.querySelector("img")) add("Content", "Empty table cell", "Row " + ((n.parentElement?.rowIndex ?? 0) + 1) + ", column " + (n.cellIndex + 1), n);
     });
+    for (const a of SOPHIA.xref ? SOPHIA.xref.broken() : []) add("Content", "Cross-reference to a missing section", a.textContent.trim() || a.dataset.xref, a);
     /* writing checks (37-writing): advisory */
     for (const f of SOPHIA.writing ? SOPHIA.writing.check() : []) add("Writing", f.title, f.detail, f.node);
     const toc = area.querySelector("nav[data-sophia-toc]");

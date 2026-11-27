@@ -94,6 +94,7 @@ SOPHIA.canonical = function canonical(root = area) {
   const c = normalizeBody(root.cloneNode(true));
   c.querySelectorAll('[data-trace]').forEach((n) => n.remove());
   c.querySelectorAll('[data-version-cell]').forEach((n) => (n.textContent = 'VERSION'));
+  c.querySelectorAll('a.xref[data-xref]').forEach((n) => { n.textContent = 'XREF'; n.classList.remove('xref-broken'); n.removeAttribute('title'); });
   c.querySelectorAll('[contenteditable],[data-block-id],[spellcheck],[data-num]').forEach((n) => {
     n.removeAttribute('contenteditable');
     n.removeAttribute('data-block-id');

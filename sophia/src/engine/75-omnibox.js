@@ -41,7 +41,7 @@ SOPHIA.ui.omnibox = (() => {
     { name: 'Save & publish', tone: 'save', items: ['edit', 'saveDraft', 'publish', 'bigValidation', 'baseVersion', 'recover', 'discard'] },
     { name: 'Review', tone: 'review', items: ['history', 'versions', 'compare', 'comments', 'addComment', 'markTbc', 'checks', 'structure'] },
     { name: 'Navigate', tone: 'navigate', items: ['outline', 'find', 'replace', 'wordCount'] },
-    { name: 'Insert', tone: 'assets', items: ['insertTable', 'insertImage', 'insertLink', 'insertToc', 'insertCard', 'importDocx', 'imageLibrary', 'tableStudio', 'tableFlow', 'imageStudio'] },
+    { name: 'Insert', tone: 'assets', items: ['insertTable', 'insertImage', 'insertLink', 'insertToc', 'insertXref', 'insertCard', 'importDocx', 'imageLibrary', 'tableStudio', 'tableFlow', 'imageStudio'] },
     { name: 'Output', tone: 'output', items: ['print', 'downloadCopy', 'exportDocx', 'upgrade'] },
     { name: 'Agent (SOPHIA)', tone: 'agent', items: ['brief', 'exportMap', 'applyProposal'] },
     { name: 'View', tone: 'navigate', items: ['viewA4', 'viewContinuous', 'zoomFit', 'focus', 'canvas', 'sidebar', 'mainMode', 'ribbonMode', 'layoutStudio', 'autoNumber', 'showMarks'] },

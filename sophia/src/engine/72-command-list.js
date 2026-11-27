@@ -9,7 +9,7 @@
  *          74-appbar (bar buttons, save menu).
  * EXPORTS  nothing (registers into SOPHIA.commands)
  * USES     EditorCommands, EditorSession, EditorMedia, SOPHIA.{tables, blocks, qc, docx,
- *          proposals, compare, comments, tbc, find, numbering, persist, versions, stats},
+ *          proposals, compare, comments, tbc, find, numbering, persist, versions, stats, xref},
  *          PrintStudio42, LayoutStudio, TableFlow, ImageLibrary, DocumentReview,
  *          BlockIdentity, SophiaFlow, openHistoryStudio, exportPID, downloadCurrentCopy,
  *          setDocumentView, modal, side, SOPHIA.i18n, SOPHIA.ui.{view, sidePanel, editPanel,
@@ -91,6 +91,7 @@
   R('pageBreak', 'Start on a new page', 'Insert', 'pagebreak', pageBreak, true);
   R('slashMenu', 'Insert block menu (/)', 'Insert', 'slash', () => SophiaFlow.openSlash(), true, { keys: '/' });
   R('insertToc', 'Table of contents', 'Insert', 'toc', () => SOPHIA.blocks.insertToc(), true);
+  R('insertXref', 'Cross-reference…', 'Insert', 'xref', () => SOPHIA.xref.insert(), true);
   R('insertDate', "Today's date", 'Insert', 'date', () => EditorCommands.command('insertText', new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })), true);
   R('insertCard', 'Information card', 'Insert', 'card', () => SOPHIA.qc.insertCard(), true, { profile: 'quick-card' });
   R('cardPending', 'Card pending / confirmed', 'Insert', 'pending', () => SOPHIA.qc.togglePending(), true, { profile: 'quick-card' });

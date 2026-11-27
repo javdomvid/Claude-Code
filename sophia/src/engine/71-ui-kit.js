@@ -61,6 +61,7 @@ SOPHIA.ui.kit = (() => {
     outline: 'M4 6h16M8 12h12M12 18h8', lang: 'M3 5h12M9 3v2M5 5c1 4 4 7 8 8M13 5c-1 4-4 7-8 8M12 21l5-10 5 10M14 17h6', chevron: 'M6 9l6 6 6-6', close: 'M6 6l12 12M18 6 6 18', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01',
     brief: 'M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-5a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h6z', card: 'M3 6h18v12H3zM7 10h6M7 14h10', pending: 'M3 6h18v12H3zM12 9v3M12 15h.01',
     marks: 'M13 4v16M17 4v16M19 4H9.5a4.5 4.5 0 0 0 0 9H13',
+    xref: 'M4 7h9M4 12h6M4 17h9M15 9l4 3-4 3M19 12h-7',
     rowAbove: 'M3 12h18v8H3zM3 16h18M12 3v6M9 6h6', rowBelow: 'M3 4h18v8H3zM3 8h18M12 15v6M9 18h6', colLeft: 'M12 3h8v18h-8zM16 3v18M3 12h6M6 9v6', colRight: 'M4 3h8v18H4zM8 3v18M15 12h6M18 9v6',
     deleteRow: 'M3 8h18v8H3zM9 12h6', deleteCol: 'M8 3h8v18H8zM12 9v6', headerRow: 'M3 5h18v14H3zM3 10h18M7 7.5h10', equalCols: 'M3 5h18v14H3zM9 5v14M15 5v14M5 12h2M17 12h2',
     shade: 'M3 5h18v14H3zM3 5l18 14M9 5l12 9M3 11l9 8', more: 'M5 12h.01M12 12h.01M19 12h.01', move: 'M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4'

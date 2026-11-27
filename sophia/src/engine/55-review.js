@@ -7,7 +7,7 @@
  *          (style: styles/ui/55-review.css).
  * EXPORTS  SOPHIA.comments {add, render, paint, openCount, …}, SOPHIA.tbc {toggle, count,
  *          nodes}, SOPHIA.checklist {collect, confirm}
- * USES     SOPHIA.{ask, blocks, find, ids, recordDirty, bus, writing}, EditorSession,
+ * USES     SOPHIA.{ask, blocks, find, ids, recordDirty, bus, writing, xref}, EditorSession,
  *          EditorTransactions, ImageLibrary, area, data, modal, toast
  * EMITS    comments-changed
  * LISTENS  content-changed, record-changed
@@ -190,6 +190,8 @@ SOPHIA.checklist = (() => {
     if (noAlt) add('warn', noAlt + ' image(s) without alternative text.', area.querySelector('.pagecontent img:not([alt]), .pagecontent img[alt=""]'), { label: 'Image library', run: () => ImageLibrary.open() });
     const emptyCells = [...area.querySelectorAll('.pagecontent table:not(.identity) :is(td,th)')].filter((c) => !c.textContent.trim() && !c.querySelector('img'));
     if (emptyCells.length) add('info', emptyCells.length + ' empty table cell(s).', emptyCells[0]);
+    const badRefs = SOPHIA.xref ? SOPHIA.xref.broken() : [];
+    if (badRefs.length) add('warn', badRefs.length + ' cross-reference(s) to a section that no longer exists.', badRefs[0]);
     /* writing checks (37-writing): information only, one line per rule, never in the publish gate */
     for (const s of SOPHIA.writing ? SOPHIA.writing.summary(SOPHIA.writing.check()) : []) {
       let k = -1;

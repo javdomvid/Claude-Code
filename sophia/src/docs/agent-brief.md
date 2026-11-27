@@ -50,7 +50,7 @@ The saved file always has ONE `section.sheet`; A4 pages are recalculated on scre
 | Block | Markup | Notes |
 |---|---|---|
 | Heading 1 / 2 / 3 | `h2` / `h3` / `h4` | **Do not type numbers.** The engine numbers them (SOP `3.`, `3.1`, `3.1.2`; Quick Card `01 ·` on h2). `class="nonum"` opts out. |
-| Paragraph | `p` | Inline: `b`, `i`, `u`, `s`, `sup`, `sub`, `a href="https://…"`, `br`, `span.tbc` |
+| Paragraph | `p` | Inline: `b`, `i`, `u`, `s`, `sup`, `sub`, `a href="https://…"`, `a.xref` (cross-reference), `br`, `span.tbc` |
 | Lists | `ul`/`ol` > `li` | Steps of a procedure are `ol > li`. |
 | Table | `table > tbody > tr > th/td` | First row of `th` = header. No `.identity` class. |
 | Callout | `aside.warning` with `<b>Warning:</b>` or `<b>Confirmation required:</b>` first | Also used for the draft banner. |
@@ -60,6 +60,7 @@ The saved file always has ONE `section.sheet`; A4 pages are recalculated on scre
 | Line | `hr` | |
 | Quick Card cards | `div.cards > section(.pending) > h3 + p/ul` | `.pending` = must be confirmed before use. |
 | Source note | `p.source-note` | Last block: where the content comes from. |
+| Cross-reference | `<a class="xref" data-xref="b-…">…</a>` inside a paragraph, list item or cell | Points to a heading by its block ID (from the document map). The editor writes the text ("3.2 Create the order") and keeps it up to date; `data-xref-format="num"` shows the number only. |
 | Decision table (Quick Card) | `table` with header row `Situation` · `Next action` | One decision per row. |
 | Page break | attribute `data-layout-before="page"` on any block | |
 
