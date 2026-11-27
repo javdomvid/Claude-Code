@@ -439,5 +439,15 @@ SOPHIA.i18n.add('pt', 'Português', /*DICT*/{
   "Document V{x} · {y} (application SOPHIA {z}). Open versions.": "Documento V{x} · {y} (aplicação SOPHIA {z}). Abrir versões.",
   "Status: {x}, {y}. Show details": "Estado: {x}, {y}. Ver detalhes",
   "Save draft (Ctrl+S) — keeps V{x}": "Guardar rascunho (Ctrl+S) — mantém V{x}",
-  "No changes to save as a draft": "Não há alterações para guardar como rascunho"
+  "No changes to save as a draft": "Não há alterações para guardar como rascunho",
+  "Step may contain more than one action": "O passo pode conter mais de uma ação",
+  "Interface label in quotes: use bold": "Etiqueta da interface entre aspas: use negrito",
+  "Section has no content": "A secção não tem conteúdo",
+  "Heading repeated": "Título repetido",
+  "Very long sentence": "Frase muito longa",
+  "Heading level skipped": "Nível de título saltado",
+  "Typed numbering or bullet: use a list": "Numeração ou marca escrita à mão: use uma lista",
+  "Writing": "Redação",
+  "Next": "Seguinte",
+  "{n} words": "{n} palavras"
 }/*END*/);

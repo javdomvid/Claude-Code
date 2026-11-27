@@ -439,5 +439,15 @@ SOPHIA.i18n.add('de', 'Deutsch', /*DICT*/{
   "Document V{x} · {y} (application SOPHIA {z}). Open versions.": "Dokument V{x} · {y} (Anwendung SOPHIA {z}). Versionen öffnen.",
   "Status: {x}, {y}. Show details": "Status: {x}, {y}. Details anzeigen",
   "Save draft (Ctrl+S) — keeps V{x}": "Entwurf speichern (Strg+S) — behält V{x}",
-  "No changes to save as a draft": "Keine Änderungen zum Speichern als Entwurf"
+  "No changes to save as a draft": "Keine Änderungen zum Speichern als Entwurf",
+  "Step may contain more than one action": "Schritt enthält vielleicht mehrere Aktionen",
+  "Interface label in quotes: use bold": "Oberflächenbezeichnung in Anführungszeichen: fett verwenden",
+  "Section has no content": "Abschnitt hat keinen Inhalt",
+  "Heading repeated": "Überschrift wiederholt",
+  "Very long sentence": "Sehr langer Satz",
+  "Heading level skipped": "Überschriftenebene übersprungen",
+  "Typed numbering or bullet: use a list": "Getippte Nummer oder Aufzählungszeichen: Liste verwenden",
+  "Writing": "Schreibstil",
+  "Next": "Weiter",
+  "{n} words": "{n} Wörter"
 }/*END*/);

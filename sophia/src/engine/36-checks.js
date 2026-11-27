@@ -5,7 +5,7 @@
  *          without alt text, oversized blocks, structure… Also feeds the pre-publish checklist.
  * OWNS     DocumentReview; dialog.review-workspace-v22 (style: styles/ui/36-checks.css).
  * EXPORTS  DocumentReview {open, collect}
- * USES     SOPHIA.{blocks, ids}, EditorSession, area, data, toast
+ * USES     SOPHIA.{blocks, ids, writing}, EditorSession, area, data, toast
  * RULES    Read-only: checks never change the document.
  * TESTS    tools/snapshot.cjs studio-checks
  * ========================================================================== */
@@ -92,6 +92,8 @@ window.DocumentReview = (() => {
     area.querySelectorAll(".pagecontent table:not(.identity) td, .pagecontent table:not(.identity) th").forEach((n) => {
       if (!n.textContent.trim() && !n.querySelector("img")) add("Content", "Empty table cell", "Row " + ((n.parentElement?.rowIndex ?? 0) + 1) + ", column " + (n.cellIndex + 1), n);
     });
+    /* writing checks (37-writing): advisory */
+    for (const f of SOPHIA.writing ? SOPHIA.writing.check() : []) add("Writing", f.title, f.detail, f.node);
     const toc = area.querySelector("nav[data-sophia-toc]");
     if (toc && SOPHIA.blocks && !SOPHIA.blocks.tocIsCurrent()) add("Content", "Table of contents is out of date", "Use Update table of contents.", toc);
     return {
@@ -120,7 +122,7 @@ window.DocumentReview = (() => {
       '<header><small>DOCUMENT REVIEW</small><h2>Check before sharing</h2><p>Read-only checks of the current document, including unsaved edits. No content is changed.</p>' +
         '</header><section><div data-summary class="review-summary"></div><p data-scope></p><label>Show findings<select data-filter>' +
         '<option value="">All findings</option><option>Review</option><option>Accessibility</option><option>Portability</option>' +
-        '<option>Resource</option><option>Link</option><option>Layout</option><option>Content</option></select>' +
+        '<option>Resource</option><option>Link</option><option>Layout</option><option>Content</option><option>Writing</option></select>' +
         '</label><p data-count role="status" aria-live="polite"></p><div data-findings></div></section><footer>' +
         '<button type="button" data-refresh>Run checks again</button><button type="button" data-close>Close review</button>' +
         '</footer>';

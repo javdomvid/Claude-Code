@@ -49,6 +49,15 @@ const file = path.resolve(process.argv[2] || '');
     L.set('en');
     check('languages: templates, shortcut suffix, safe fallback', t1 === 'Seite 3' && t2 === '12 Wörter · 2 A4-Seiten' && t3 === 'Suchen (Ctrl+F)' && t4 === 'Not a known text', { t1, t2, t3, t4 });
     check('languages: back to English restores the interface', document.querySelector('.sx-appbar [data-cmd=edit] .sx-label').textContent === 'Edit mode');
+    // writing checks (37-writing) on a test fragment (never on the document)
+    const frag = document.createElement('div');
+    frag.innerHTML = '<div class="pagecontent"><h2>Alpha</h2><h4>Deep</h4><h2>Alpha</h2><ol><li>Open the file. Then save it and close the window.</li></ol>' +
+      '<p>Click “Save changes” to continue.</p><p>1. Do this first</p><p>' + Array(40).fill('word').join(' ') + ' end.</p><h3>Empty</h3></div>';
+    const found = new Set(SOPHIA.writing.check(frag).map((f) => f.rule));
+    const rules = ['step-actions', 'quoted-label', 'empty-section', 'duplicate-heading', 'long-sentence', 'level-jump', 'typed-list'];
+    check('writing checks: every rule fires on its example', rules.every((r) => found.has(r)), [...found]);
+    check('writing checks: summary groups by rule', SOPHIA.writing.summary(SOPHIA.writing.check(frag)).every((x) => x.count >= 1 && x.nodes.length === x.count));
+    check('writing checks: run on the live document without error', Array.isArray(SOPHIA.writing.check()));
     // layers: lower layers ask the interface through SOPHIA.ask
     check('layers: SOPHIA.ask available', typeof SOPHIA.ask.panel === 'function' && typeof SOPHIA.ask.leaveFocus === 'function');
     // nothing runtime inside the document zone

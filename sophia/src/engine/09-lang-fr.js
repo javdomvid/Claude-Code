@@ -439,5 +439,15 @@ SOPHIA.i18n.add('fr', 'Français', /*DICT*/{
   "Document V{x} · {y} (application SOPHIA {z}). Open versions.": "Document V{x} · {y} (application SOPHIA {z}). Ouvrir les versions.",
   "Status: {x}, {y}. Show details": "État : {x}, {y}. Voir les détails",
   "Save draft (Ctrl+S) — keeps V{x}": "Enregistrer le brouillon (Ctrl+S) — garde V{x}",
-  "No changes to save as a draft": "Aucune modification à enregistrer comme brouillon"
+  "No changes to save as a draft": "Aucune modification à enregistrer comme brouillon",
+  "Step may contain more than one action": "L’étape contient peut-être plusieurs actions",
+  "Interface label in quotes: use bold": "Libellé d’interface entre guillemets : utilisez le gras",
+  "Section has no content": "La section n’a pas de contenu",
+  "Heading repeated": "Titre répété",
+  "Very long sentence": "Phrase très longue",
+  "Heading level skipped": "Niveau de titre sauté",
+  "Typed numbering or bullet: use a list": "Numérotation ou puce tapée : utilisez une liste",
+  "Writing": "Rédaction",
+  "Next": "Suivant",
+  "{n} words": "{n} mots"
 }/*END*/);

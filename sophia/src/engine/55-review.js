@@ -7,7 +7,7 @@
  *          (style: styles/ui/55-review.css).
  * EXPORTS  SOPHIA.comments {add, render, paint, openCount, …}, SOPHIA.tbc {toggle, count,
  *          nodes}, SOPHIA.checklist {collect, confirm}
- * USES     SOPHIA.{ask, blocks, find, ids, recordDirty, bus}, EditorSession,
+ * USES     SOPHIA.{ask, blocks, find, ids, recordDirty, bus, writing}, EditorSession,
  *          EditorTransactions, ImageLibrary, area, data, modal, toast
  * EMITS    comments-changed
  * LISTENS  content-changed, record-changed
@@ -190,6 +190,12 @@ SOPHIA.checklist = (() => {
     if (noAlt) add('warn', noAlt + ' image(s) without alternative text.', area.querySelector('.pagecontent img:not([alt]), .pagecontent img[alt=""]'), { label: 'Image library', run: () => ImageLibrary.open() });
     const emptyCells = [...area.querySelectorAll('.pagecontent table:not(.identity) :is(td,th)')].filter((c) => !c.textContent.trim() && !c.querySelector('img'));
     if (emptyCells.length) add('info', emptyCells.length + ' empty table cell(s).', emptyCells[0]);
+    /* writing checks (37-writing): information only, one line per rule, never in the publish gate */
+    for (const s of SOPHIA.writing ? SOPHIA.writing.summary(SOPHIA.writing.check()) : []) {
+      let k = -1;
+      const next = () => { k = (k + 1) % s.nodes.length; s.nodes[k].scrollIntoView({ block: 'center', behavior: 'smooth' }); s.nodes[k].animate?.([{ outline: '3px solid #7b55c4' }, { outline: '3px solid transparent' }], { duration: 1400 }); };
+      items.push({ tone: 'info', text: s.title + ' (' + s.count + ')', node: null, action: { label: 'Next', run: next }, writing: true });
+    }
     if (SOPHIA.blocks && area.querySelector('nav[data-sophia-toc]') && !SOPHIA.blocks.tocIsCurrent())
       add('info', 'The table of contents is out of date.', area.querySelector('nav[data-sophia-toc]'), { label: 'Update contents', run: () => { if (!U.isEditing()) { toast(SOPHIA.strings.startEditingFirst); return; } SOPHIA.blocks.refreshToc(true); toast('Contents updated.'); SOPHIA.ask.panel('checks'); } });
     return items;
@@ -198,7 +204,7 @@ SOPHIA.checklist = (() => {
     const items = collect();
     const warns = items.filter((i) => i.tone === 'warn');
     if (!warns.length) { proceed(); return; }
-    const list = items.map((i) => '<li class="sx-check-' + i.tone + '">' + U.escapeHTML(i.text) + '</li>').join('');
+    const list = items.filter((i) => !i.writing).map((i) => '<li class="sx-check-' + i.tone + '">' + U.escapeHTML(i.text) + '</li>').join('');
     modal(mode === 'Big Validation' ? 'Before Big Validation' : 'Before publishing',
       '<p>These items are usually resolved before ' + (mode === 'Big Validation' ? 'a Big Validation' : 'publishing') +
         '. You can go back and fix them, or continue and record your reason in the next step.</p><ul class="sx-checklist">' + list + '</ul>' +
