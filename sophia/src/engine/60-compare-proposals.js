@@ -7,7 +7,7 @@
  *          Also "Export document map" (block IDs + text for the agent).
  * OWNS     SOPHIA.compare, SOPHIA.proposals (style: styles/ui/60-compare-proposals.css).
  * EXPORTS  SOPHIA.compare {open}, SOPHIA.proposals {open, apply, validate, exportMap}
- * USES     SOPHIA.{ids, meta, sanitize, versions, recordDirty, lastProposal}, historyCompare,
+ * USES     SOPHIA.{ids, meta, sanitize, versions, persist, recordDirty, lastProposal}, historyCompare,
  *          EditorSession, EditorTransactions, cleanContent, data, modal, toast
  * RULES    - Proposal schema: sophia.proposal/1 (see the agent brief §6). expectedText /
  *            expectedValue must match; html passes SOPHIA.sanitize.blocks.
@@ -102,6 +102,15 @@ SOPHIA.proposals = (() => {
       if (op.expectedValue !== undefined && norm(op.expectedValue) !== res.before) return { ...res, ok: false, note: 'The field value changed since the proposal was made.' };
       res.after = norm(op.value);
       res.cell = cell;
+    } else if (op.op === 'setBaseVersion') {
+      /* Only for a document that was never published (owner decision Q); applied after the
+         content operations, recorded as a "base-version" event. */
+      if (SOPHIA.versions.everPublished(data)) return { ...res, ok: false, note: 'This document was already published: an agent cannot change its version.' };
+      if (!SOPHIA.versions.valid(op.value)) return { ...res, ok: false, note: 'Version “' + op.value + '” is not valid (use 3 or 3.05).' };
+      if (!String(op.reason || '').trim()) return { ...res, ok: false, note: 'A setBaseVersion operation needs a reason.' };
+      res.before = 'V' + data.documentVersion;
+      res.after = 'V' + SOPHIA.versions.normalize(op.value);
+      if (res.before === res.after) return { ...res, ok: false, note: 'The document is already ' + res.after + '.' };
     } else if (op.op !== 'deleteBlock') return { ...res, ok: false, note: 'Unknown operation “' + op.op + '”.' };
     res.target = target;
     return res;
@@ -151,8 +160,10 @@ SOPHIA.proposals = (() => {
       if (!proposal) { err('Load a proposal first.'); return; }
       const chosen = [...dlg.querySelectorAll('[data-ops] input:checked')].map((b) => checked[Number(b.dataset.i)]).filter((c) => c.ok);
       if (!chosen.length) { err('Select at least one valid operation.'); return; }
+      const base = chosen.find((c) => c.op.op === 'setBaseVersion');
       const ok = EditorTransactions.run('Apply proposal ' + (proposal.proposalId || ''), () => {
         for (const c of chosen) {
+          if (c.op.op === 'setBaseVersion') continue; // record change, applied after the transaction
           /* Re-resolve by ID: an earlier operation may have replaced this block (the
              replacement keeps the ID), so several operations can target one block. */
           if (c.op.targetBlockId) c.target = SOPHIA.ids.find(c.op.targetBlockId) || c.target;
@@ -170,9 +181,14 @@ SOPHIA.proposals = (() => {
       data.events.push({ type: 'proposal-applied', proposalId: proposal.proposalId || null, author: proposal.author || null, pid: EditorSession.get().pid, date: new Date().toISOString(), applied: chosen.length, rejected: proposal.operations.length - chosen.length });
       SOPHIA.lastProposal = proposal;
       SOPHIA.recordDirty = true;
+      let baseNote = '';
+      if (base) {
+        const r = SOPHIA.persist.setBaseVersion(base.op.value, base.op.reason, 'proposal ' + (proposal.proposalId || ''));
+        baseNote = r.ok ? ' Base version V' + r.from + ' → V' + r.to + ' (the undo history starts again here).' : ' Base version not set: ' + r.error;
+      }
       EditorSession.changed();
       dlg.remove();
-      toast(chosen.length + ' operation(s) applied. Review the result, then save. Ctrl+Z undoes them.');
+      toast(chosen.length + ' operation(s) applied. Review the result, then save.' + (base ? baseNote : ' Ctrl+Z undoes them.'), { ms: base ? 7000 : undefined });
     }
   }
   return { open, documentMap, exportMap, check };

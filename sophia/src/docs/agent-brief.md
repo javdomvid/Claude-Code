@@ -67,7 +67,7 @@ The saved file always has ONE `section.sheet`; A4 pages are recalculated on scre
 - remove or change `data-block-id` of an existing block; never reuse an ID for a new block (leave new blocks without an ID — the editor assigns `b-` + 10 chars);
 - edit `table.identity` rows marked `data-trace`, or the cell `data-version-cell` (the editor writes them);
 - add `style`, `script`, `iframe`, event attributes (`on…`), external images or fonts;
-- write version numbers, dates of approval or names of approvers that a person did not give you;
+- write version numbers, dates of approval or names of approvers that a person did not give you (a version a person gave you goes in `setBaseVersion`, never in the text);
 - invent facts. Unknown → write `TO BE CONFIRMED` inside `<span class="tbc">…</span>`.
 
 ### Established styles
@@ -81,11 +81,23 @@ Change fields by their **label**, never by position: Level, Organization, Docume
 Document Owner, Title, Classification (SOP line above the table). In a proposal use
 `updateMeta` with `field` = the label text.
 
-## 5. Versions (owner rule, 2026-11-26)
+## 5. Versions (owner rules D and Q)
 - Save draft: number unchanged; revision "Draft n · based on Vx".
 - Publish & save: always **+0.01** (V1 → V1.01 → V1.02…), even without content changes.
 - Big Validation: next major with `.00` (V2.28 → V3.00); requires the phrase and the tool key.
-- An agent never sets the version. When a finished template is first published, a person sets the base version (for example V3) through the editor.
+- **Base version** (only while the document has NEVER been published): a document can start at
+  the version it already had elsewhere (for example V3 in the quality system).
+
+### What you do about the version
+| Situation | What you do |
+|---|---|
+| **Creating** a new SOP / Quick Card from a template, and the person told you its version (e.g. "this SOP is V3") | Add `{"op": "setBaseVersion", "value": "3", "reason": "…as the person said"}` to your proposal. Never guess the number: no number given → no operation (the document stays V1). |
+| **Creating**, no version given | Nothing. Say in your answer that the person can use *Save draft ▾ › Set base version…* later. |
+| **Editing** a document that was already published (it shows V1.01, V2.00, V3.04…) | Never touch the version: `setBaseVersion` is refused for published documents. In your answer, recommend how to save: wording / small corrections → **Publish & save** (+0.01); a substantive procedure change that was validated → **Big Validation** (next major); work in progress → **Save draft**. The person decides. |
+| **Editing** a draft that was never published | Same as editing; use `setBaseVersion` only if the person asks to set its starting version. |
+
+Never write a version, approval date or approver into the text or the identity table yourself;
+the editor writes the `Document Version` cell and the trace row.
 
 ## 6. Proposals — the safe way for an agent to change a document
 The agent does not rewrite the file. It returns a small JSON that a person loads with
@@ -107,10 +119,13 @@ recorded as event `proposal-applied`). Get the current block IDs and text from
     { "op": "insertAfter", "targetBlockId": "b-ai3m7rtybm",
       "html": "<p>Check the supplier name before continuing. <span class=\"tbc\">TO BE CONFIRMED</span></p>" },
     { "op": "deleteBlock", "targetBlockId": "b-xxxxxxxxxx", "expectedText": "Old sentence." },
-    { "op": "updateMeta", "field": "Document Owner", "expectedValue": "TO BE CONFIRMED", "value": "Quality team" }
+    { "op": "updateMeta", "field": "Document Owner", "expectedValue": "TO BE CONFIRMED", "value": "Quality team" },
+    { "op": "setBaseVersion", "value": "3", "reason": "The person said this SOP is V3 in the quality system" }
   ]
 }
 ```
+Operations: `replaceBlock`, `insertAfter`, `deleteBlock`, `updateMeta`, `setBaseVersion` (see §5;
+refused once the document was published; applied after the content operations).
 Rules: `expectedText` / `expectedValue` must equal the current text (whitespace-normalised),
 otherwise the operation is refused; `html` passes the document-grammar sanitizer (only the blocks, classes and attributes of section 3 survive);
 a `replaceBlock` keeps the target's ID on its first element; a proposal for another

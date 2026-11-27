@@ -38,7 +38,7 @@ SOPHIA.ui.omnibox = (() => {
 
   /* ---------- commands omnibox panel (commands by area + matches in the document) ---------- */
   const SHEET = [
-    { name: 'Save & publish', tone: 'save', items: ['edit', 'saveDraft', 'publish', 'bigValidation', 'recover', 'discard'] },
+    { name: 'Save & publish', tone: 'save', items: ['edit', 'saveDraft', 'publish', 'bigValidation', 'baseVersion', 'recover', 'discard'] },
     { name: 'Review', tone: 'review', items: ['history', 'versions', 'compare', 'comments', 'addComment', 'markTbc', 'checks', 'structure'] },
     { name: 'Navigate', tone: 'navigate', items: ['outline', 'find', 'replace', 'wordCount'] },
     { name: 'Insert', tone: 'assets', items: ['insertTable', 'insertImage', 'insertLink', 'insertToc', 'insertCard', 'importDocx', 'imageLibrary', 'tableStudio', 'tableFlow', 'imageStudio'] },

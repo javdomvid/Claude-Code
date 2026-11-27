@@ -25,7 +25,7 @@ window.EditorSession = (() => {
   'use strict';
   let state = { pid: null, dirty: false, recovery: 'idle', recoveryAt: null, panel: 'outline', phase: 'read' };
   let baseline = SOPHIA.canonical();
-  let sessionHTML = null, sessionComments = null, sessionStatus = null, timer = 0;
+  let sessionHTML = null, sessionComments = null, sessionStatus = null, sessionVersion = null, sessionEvents = 0, timer = 0;
   const listeners = new Set();
   const key = () => 'document-recovery:v11:' + data.id;
   const snapshot = () => Object.freeze({ ...state });
@@ -83,6 +83,8 @@ window.EditorSession = (() => {
     update({ pid, phase: 'editing', dirty: computeDirty(), recovery: 'idle' });
     setEditable();
     data.events.push({ type: 'session-start', pid, date: new Date().toISOString(), version: data.documentVersion });
+    sessionVersion = data.documentVersion;
+    sessionEvents = data.events.length;
     return true;
   }
   function end() {
@@ -113,6 +115,9 @@ window.EditorSession = (() => {
         repaginate();
         data.comments = JSON.parse(sessionComments || '[]');
         data.status = sessionStatus;
+        /* events of the discarded session (proposal applied, base version set) go too */
+        if (sessionVersion !== null) data.documentVersion = sessionVersion;
+        if (sessionEvents) data.events.length = Math.min(data.events.length, sessionEvents);
         SOPHIA.recordDirty = false;
         end();
         undoStates.splice(0);

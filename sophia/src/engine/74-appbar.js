@@ -52,7 +52,7 @@ SOPHIA.ui.appbar = (() => {
   saveMore.setAttribute('aria-label', 'More save options');
   saveMore.setAttribute('aria-haspopup', 'menu');
   saveMore.append(icon('chevron'));
-  saveMore.onclick = () => menu(saveMore, ['publish', 'bigValidation', '-', 'downloadCopy', 'recover', 'discard']);
+  saveMore.onclick = () => menu(saveMore, ['publish', 'bigValidation', '-', 'baseVersion', 'downloadCopy', 'recover', 'discard']);
   saveSplit.append(saveMain, saveMore);
   const focusBtn = button('focus', { short: 'Focus', cls: 'sx-btn-text' });
   const viewBtn = U.el('button', 'sx-btn sx-btn-text');

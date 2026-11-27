@@ -8,7 +8,8 @@
  *          assets, record, versions}; the legacy globals data, area, toast, normalizeBody.
  * EXPORTS  SOPHIA, SOPHIA.engine, SOPHIA.profile, SOPHIA.strings, SOPHIA.util, SOPHIA.sanitize
  *          {html, blocks}, SOPHIA.bus {on, emit}, SOPHIA.ask {panel, leaveFocus},
- *          SOPHIA.assets, SOPHIA.record, SOPHIA.versions {nextPublish, nextMajor, label, …},
+ *          SOPHIA.assets, SOPHIA.record, SOPHIA.versions {nextPublish, nextMajor, label, valid,
+ *          normalize, everPublished, …},
  *          data (the record object), area (main#document), toast(text, opts), normalizeBody()
  * USES     nothing (loads first)
  * EMITS    ask:panel, ask:leave-focus (through SOPHIA.ask)
@@ -16,7 +17,8 @@
  *          - SOPHIA.ask is how lower layers request something from the interface
  *            (79-shell answers); never call SOPHIA.ui from CORE/SAFETY/DOCUMENT/FEATURE.
  *          - Version rules (owner decision D): Save draft keeps the number; Publish & save
- *            +0.01; Big Validation → next major .00. Change them only here.
+ *            +0.01; Big Validation → next major .00. A base version (owner decision Q) can
+ *            be set only while the document was never published. Change these rules only here.
  * NOTE     LEGACY CONTRACT: reused modules expect the top-level globals data, area, toast(),
  *          normalizeBody(); keep their names.
  * TESTS    tests/functional.cjs (versions, sanitizer via proposals and paste)
@@ -24,7 +26,7 @@
 'use strict';
 
 const SOPHIA = (window.SOPHIA = window.SOPHIA || {});
-SOPHIA.engine = 'V78';
+SOPHIA.engine = 'V79';
 SOPHIA.profile =
   document.documentElement.dataset.profile ||
   (document.querySelector('#document .qc-hero') ? 'quick-card' : 'sop');
@@ -321,6 +323,23 @@ SOPHIA.versions = {
       else break;
     }
     return n;
+  },
+  /** A version a person may type: "3", "3.0", "3.05", "V3.05" (major 1–999, minor 0–99). */
+  valid(v) {
+    return /^v?\d{1,3}(\.\d{1,2})?$/i.test(String(v || '').trim());
+  },
+  /** "V3" → "3" · "3.5" → "3.05" · "3.05" → "3.05" (a bare major stays bare, like the first "1"). */
+  normalize(v) {
+    const s = String(v).trim().replace(/^v/i, '');
+    if (!s.includes('.')) return String(Number(s));
+    const { major, minor } = this.parse(s);
+    return this.format(major, minor);
+  },
+  /** True once the document has ever been published (Publish & save or Big Validation). After that
+      the version only moves through those two actions (owner decision D). */
+  everPublished(record = data) {
+    return !!(record.lastEdition || record.bigValidation || /^published/i.test(record.status || '') ||
+      (record.revisions || []).some((r) => r.mode === 'Publish & save' || r.mode === 'Big Validation' || /^published/i.test(r.status || '')));
   },
   label(rev) {
     if (!rev) return '';

@@ -7,10 +7,11 @@
  * OWNS     SOPHIA.persist, SOPHIA.migration, the header trace row; dialog.save-receipt
  *          (style: styles/ui/50-persist.css).
  * EXPORTS  SOPHIA.persist {serializeFile, offer, applyHeader, runMigrationTransforms,
- *          upgradeFromFile, …}, SOPHIA.migration {pending}, exportPID(mode),
- *          downloadCurrentCopy(), closeRevision()
+ *          upgradeFromFile, setBaseVersion(value, reason, source), baseVersionDialog(), …},
+ *          SOPHIA.migration {pending}, exportPID(mode), downloadCurrentCopy(), closeRevision()
  * USES     SOPHIA.{assets, canonical, checklist, ids, meta, numbering, sanitize, versions,
- *          bus}, EditorSession, LayoutEngine, area, cleanContent, mergeSheets, data,
+ *          bus, recordDirty}, EditorSession, LayoutEngine, area, cleanContent, mergeSheets, data,
+ *          observer,
  *          localPIDKeys, modal, muted, normalizeBody, refreshOutline, toast, undoStates,
  *          undoPosition
  * EMITS    record-changed (after a confirmed save)
@@ -18,6 +19,7 @@
  *            pristine parts (a quine): styles, document zone (one block per line), #record,
  *            #sophia-pid-registry, firmware docs, engine modules.
  *          - Never overwrite the original file; downloads create a new file.
+ *          - The base version (setBaseVersion) works only before the first publish.
  *          - Write '\x3c/script>' for a closing script tag inside code.
  * NOTE     head = charset + viewport + title + every <style data-sophia>; body = document
  *          zone + #record + #sophia-pid-registry + script[data-sophia-doc] +
@@ -335,6 +337,50 @@ SOPHIA.persist = (() => {
     );
     v.querySelector('#v2summary').textContent = summary;
   }
+  /* ---------- base version (owner decision Q) ----------
+     A template finished by an agent may belong to a document that already had a version in the
+     corporate system (for example V3). Before the FIRST publish, a person can set that base
+     version. It is recorded as an event and saved with the next Save draft. After the first
+     publish only Publish & save (+0.01) and Big Validation (next major) move the version. */
+  const PUBLISHED_ALREADY = 'This document was already published: its version moves only with Publish & save or Big Validation.';
+  function setBaseVersion(value, reason, source = 'person') {
+    if (!EditorSession.get().pid) return { ok: false, error: SOPHIA.strings.startEditingFirst };
+    if (SOPHIA.versions.everPublished(data)) return { ok: false, error: PUBLISHED_ALREADY };
+    if (!SOPHIA.versions.valid(value)) return { ok: false, error: 'Write a version like 3 or 3.05.' };
+    if (!String(reason || '').trim()) return { ok: false, error: 'Give the reason (for example: the document was V3 in the quality system).' };
+    const from = data.documentVersion, to = SOPHIA.versions.normalize(value);
+    if (to === from) return { ok: false, error: 'The document is already V' + to + '.' };
+    data.documentVersion = to;
+    data.events.push({ type: 'base-version', from, to, reason: String(reason).trim(), source, pid: EditorSession.get().pid, date: new Date().toISOString() });
+    const old = muted;
+    muted = true;
+    try { applyHeader(area, data); } finally { observer.takeRecords(); muted = old; }
+    /* The undo journal keeps page content with the old version cell: start it again here so
+       Ctrl+Z can never show a version the record does not have. */
+    undoStates.splice(0, undoStates.length, cleanContent());
+    undoPosition = 0;
+    SOPHIA.recordDirty = true;
+    EditorSession.changed();
+    return { ok: true, from, to };
+  }
+  function baseVersionDialog() {
+    if (!EditorSession.get().pid) { toast(SOPHIA.strings.startEditingFirst); return; }
+    if (SOPHIA.versions.everPublished(data)) { toast(PUBLISHED_ALREADY); return; }
+    const v = modal('Set base version',
+      '<p>Use this once, before the first publish, when this document already had a version elsewhere ' +
+        '(for example V3 in the quality system). Current: <b data-cur></b>.</p>' +
+        '<label>Base version<input id="bvValue" autocomplete="off" placeholder="3 or 3.05"></label>' +
+        '<label>Reason<textarea id="bvReason"></textarea></label>' +
+        '<p class="muted">Saved with your next Save draft. The undo history of this session starts again from here.</p>' +
+        '<p id="bvErr" role="alert"></p>',
+      (dlg) => {
+        const res = setBaseVersion(dlg.querySelector('#bvValue').value, dlg.querySelector('#bvReason').value);
+        if (!res.ok) { dlg.querySelector('#bvErr').textContent = res.error; return; }
+        dlg.remove();
+        toast('Base version set: V' + res.from + ' → V' + res.to + '. Save draft to keep it.');
+      }, 'Set version');
+    v.querySelector('[data-cur]').textContent = 'V' + data.documentVersion;
+  }
   function downloadCurrentCopy() {
     if (EditorSession.get().pid && EditorSession.get().dirty) { toast('Save your changes before downloading a copy.'); return; }
     offer(JSON.parse(JSON.stringify(data)), data.id + '_V' + data.documentVersion + '_copy.html', false);
@@ -400,7 +446,7 @@ SOPHIA.persist = (() => {
     input.click();
   }
 
-  return { applyHeader, contentClone, serializeFile, zoneMarkup, offer, exportPID, downloadCurrentCopy, runMigrationTransforms, upgradeFromFile };
+  return { applyHeader, contentClone, serializeFile, zoneMarkup, offer, exportPID, downloadCurrentCopy, runMigrationTransforms, upgradeFromFile, setBaseVersion, baseVersionDialog };
 })();
 
 SOPHIA.migration = { pending: null };

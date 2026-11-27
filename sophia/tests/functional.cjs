@@ -335,6 +335,25 @@ async function save(p, mode, reason, verify = true) {
   await p.evaluate(() => window.dispatchEvent(new Event('afterprint')));
   ok(p.errors.length === 0, 'no errors in reopened copy', p.errors);
 
+  // base version (owner decision Q): refused once published, works before the first publish
+  const bvPub = await p.evaluate(() => { EditorSession.start(Object.keys(localPIDKeys)[0]); const r = SOPHIA.persist.setBaseVersion('5', 'test'); const avail = SOPHIA.commands.available(SOPHIA.commands.get('baseVersion')); EditorSession.saved(); return { ok: r.ok, avail, v: data.documentVersion }; });
+  ok(!bvPub.ok && !bvPub.avail && bvPub.v === '2.01', 'base version refused after the first publish', bvPub);
+  const q = await open(ctx, file);
+  await startEditing(q);
+  const bv = await q.evaluate(() => {
+    const bad = SOPHIA.persist.setBaseVersion('three', 'x');
+    const r = SOPHIA.persist.setBaseVersion('3', 'The SOP was V3 in the quality system');
+    return { bad: bad.ok, ok: r.ok, v: data.documentVersion, cell: document.querySelector('#document [data-version-cell]')?.textContent, chip: document.querySelector('.sx-chip-version b')?.textContent, ev: data.events.at(-1).type, dirty: EditorSession.get().dirty };
+  });
+  await q.waitForTimeout(150);
+  const chip = await q.evaluate(() => document.querySelector('.sx-chip-version b')?.textContent);
+  const bvProp = await q.evaluate(() => {
+    SOPHIA.persist.setBaseVersion('1', 'back');
+    return { next: SOPHIA.versions.nextPublish('3'), norm: SOPHIA.versions.normalize('v3.5') };
+  });
+  ok(!bv.bad && bv.ok && bv.v === '3' && bv.cell === 'V3' && chip === 'V3' && bv.ev === 'base-version' && bv.dirty && bvProp.next === '3.01' && bvProp.norm === '3.05', 'base version before the first publish: V1 → V3, recorded, next publish V3.01', { ...bv, chip, ...bvProp });
+  await q.close();
+
   console.log(fails ? fails + ' FAIL' : 'ALL PASS', '· outputs in', out);
   await b.close();
   process.exit(fails ? 1 : 0);

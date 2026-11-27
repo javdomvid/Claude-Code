@@ -32,6 +32,8 @@
   R('saveDraft', 'Save draft', 'Document', 'save', () => exportPID('Draft'), true, { keys: 'Ctrl+S' });
   R('publish', 'Publish & save (+0.01)', 'Document', 'publish', () => exportPID('Published'), true);
   R('bigValidation', 'Big Validation (next major)', 'Document', 'big', () => exportPID('Big Validation'), true);
+  R('baseVersion', 'Set base version…', 'Document', 'upgrade', () => SOPHIA.persist.baseVersionDialog(), true,
+    { when: () => !SOPHIA.versions.everPublished(data), why: 'The base version can only be set before the first publish.' });
   R('downloadCopy', 'Download a copy', 'Document', 'download', () => downloadCurrentCopy());
   R('recover', 'Recover local draft', 'Document', 'recover', () => EditorSession.recover(), true);
   R('discard', 'Discard session changes', 'Document', 'discard', () => EditorSession.discard(), true);
